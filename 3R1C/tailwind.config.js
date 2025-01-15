@@ -20,7 +20,33 @@ module.exports = {
         'S-ThinItalic': ['Signifier-ThinItalic', 'sans-serif'],
       },
       colors:{
-        
+        'white':{
+          'almond':'#fdfdfb',
+          DEFAULT:'#ffffff',
+          'dark':'#f7f6f4'
+        },
+        'sand':{
+          
+          DEFAULT:'#fdfdfb',
+          'dark':'#eeebe6',
+          'darker':'#dfd5cb',
+          'deep':'#776E65'
+        },
+        'oat':{
+          DEFAULT:'#e6e1db',
+          'dark':'#e8d9c6',
+          'darker':'#d8c6b8'
+        },
+        'beige':{
+          DEFAULT:'#d1bfb1',
+          'dark':'#cdb199',
+          'darker':'#a5998d'
+        },
+        'grey':{
+          DEFAULT:'#f2f2f2',
+          'dark':'#efefef',
+          'darker':'#dadedf'
+        }
       }
     },
   },

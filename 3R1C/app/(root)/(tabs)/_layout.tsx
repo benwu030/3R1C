@@ -1,25 +1,22 @@
 import { Tabs } from "expo-router";
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { ImageSourcePropType } from "react-native";
-import { View,Text } from "react-native";
+import { View,Text,ImageSourcePropType } from "react-native";
 import icons from "@/constants/icons";
 import { Image } from 'expo-image';
 const TabIcon = ({focused,icon,title}:{focused:boolean; icon:ImageSourcePropType; title:string} )=>{
     return(
-    <View className="flex-1 mt-3 flex flex-col items-center">
+    <View className="flex-1 mt-3 flex-col items-center">
         <Image
           source={icon}
-          tintColor={focused ? "#0061FF" : "#666876"}
-          className="size-5"
+          tintColor={focused ? "#776E65" : "#ffffff"}
+          className="size-8"
         />
-        {/* <Text
+        <Text
           className={`${
             focused
-              ? "text-primary-300 font-rubik-medium"
-              : "text-black-200 font-rubik"
-          } text-xs w-full text-center mt-1`}
-        > */}
-        <Text className="text-xs font-S-Light color-white">
+              ? "text-sand-deep font-S-Bold"
+              : "text-white font-S-Regular"
+          } text-xs w-full text-center mt-1 whitespace-nowrap`}
+        >
           {title}
         </Text>
       </View>)
@@ -33,11 +30,11 @@ export default function TabsLayout() {
         tabBarShowLabel: false,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "black",
+          backgroundColor: "#dfd5cb",
           position: "absolute",
-          borderTopColor: "#0061FF1A",
+          borderTopColor: "#ffffff",
           borderTopWidth: 1,
-          minHeight: 70,
+          minHeight: 80,
         },
       }}>
     <Tabs.Screen name="index" options={{ title: 'Closet', tabBarIcon:({focused}) =>(
@@ -48,7 +45,7 @@ export default function TabsLayout() {
         options={{
           title: "OutfitPlanning",
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={icons.mirror} title="OutfitPlanning" />
+            <TabIcon focused={focused} icon={icons.sketchbook} title="Planning" />
           ),
         }}
       />
@@ -66,7 +63,7 @@ export default function TabsLayout() {
         options={{
           title: "SpendingLimit",
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={icons.profile} title="SpendingLimit" />
+            <TabIcon focused={focused} icon={icons.budget} title="Spending" />
           ),
         }}
       />

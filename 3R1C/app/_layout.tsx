@@ -26,13 +26,13 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontLoaded) {
+    if (fontLoaded || error) {
       SplashScreen.hideAsync();
     }
   }, [fontLoaded]);
 
-  if (!fontLoaded) {
+  if (!fontLoaded && !error) {
     return null;
   }
-  return <Stack />;
+  return <Stack screenOptions={{headerShown: false}}/>;
 }
