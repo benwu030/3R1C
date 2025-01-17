@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from "react";
 import { cssInterop } from "nativewind";
 import { Image } from "expo-image";
+import GlobalProvider from "@/lib/globalProvider";
 cssInterop(Image, { className: "style" });
 SplashScreen.preventAutoHideAsync();
 
@@ -34,5 +35,6 @@ export default function RootLayout() {
   if (!fontLoaded && !error) {
     return null;
   }
-  return <Stack screenOptions={{headerShown: false}}/>;
+  return   <GlobalProvider><Stack screenOptions={{headerShown:false}} /></GlobalProvider>
+  ;
 }

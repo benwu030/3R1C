@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { View,Text,ImageSourcePropType } from "react-native";
+import { View,Text,ImageSourcePropType, Touchable, TouchableOpacity } from "react-native";
 import icons from "@/constants/icons";
 import { Image } from 'expo-image';
 const TabIcon = ({focused,icon,title}:{focused:boolean; icon:ImageSourcePropType; title:string} )=>{

@@ -1,5 +1,5 @@
 import { View, Text, FlatList, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Image } from 'expo-image'
 import icons from '@/constants/icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -9,12 +9,20 @@ import { useState } from 'react'
 import SearchBar from '@/components/SearchBar'
 import Filters from '@/components/Filters'
 import CategoriesFilter from '@/components/CategoriesFilter'
+import { useLocalSearchParams } from 'expo-router'
+import { useAppwrite } from '@/lib/useAppWrite'
+import { getClothesWithFilter } from '@/lib/AppWrite'
 //columnwraooer -> row
 //contentContainer over content area
 const totalNumberClothes = "4000"
 const index = () => {
-
-  const [isSearch, setisSearch] = useState(false)
+  const params = useLocalSearchParams<{filter?:string}>()
+  const {data:clothes,loading,refetch} = useAppwrite({fn:getClothesWithFilter})
+  
+  useEffect(()=>{
+    console.log(params.filter)
+    refetch({filter:params.filter})
+  },[params.filter])
   return (
 
     <SafeAreaView className='bg-sand-dark flex-1'>
@@ -35,7 +43,7 @@ const index = () => {
         <CategoriesFilter/>
       </View>
 
-        <FlatList data={[CLOTHES[0],CLOTHES[0],CLOTHES[0],CLOTHES[0],CLOTHES[0],CLOTHES[0],CLOTHES[0]]} renderItem={({item})=>( 
+        <FlatList data={clothes} renderItem={({item})=>( 
             <View className='w-1/2 px-2'>
               <ClothesCard item={item}></ClothesCard>
             </View>

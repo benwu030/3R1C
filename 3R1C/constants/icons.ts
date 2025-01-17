@@ -7,6 +7,9 @@ import sketchbook from "@/assets/icons/sketchbook.svg"
 import budget from "@/assets/icons/budget.svg"
 import headerUnderline from "@/assets/icons/headerUnderline.svg"
 import sortByTime from '@/assets/icons/sortByTime.svg'
+import google from '@/assets/icons/google.png'
+import rightArrow from '@/assets/icons/rightArrow.svg'
+import logout from '@/assets/icons/logout.svg'
 export default{
     plus,
     mirror,
@@ -16,6 +19,9 @@ export default{
     sketchbook,
     budget,
     headerUnderline,
-    sortByTime
+    sortByTime,
+    google,
+    rightArrow,
+    logout
 }
 
