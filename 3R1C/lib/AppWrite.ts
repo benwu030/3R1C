@@ -1,14 +1,16 @@
 import { createURL, getLinkingURL } from "expo-linking";
 import { openAuthSessionAsync } from "expo-web-browser";
-import { Account, Avatars, Client, Databases, OAuthProvider, Query } from "react-native-appwrite"
+import { Platform } from 'react-native';
+import { Account, Avatars, Client, Databases, OAuthProvider, Permission, Query,Role,Storage } from "react-native-appwrite"
 import { makeRedirectUri } from 'expo-auth-session'
-import { CLOTHES } from "@/constants/clothes";
+import { Clothe, CLOTHES } from "@/constants/clothes";
 export const config = {
     platform: process.env.EXPO_PUBLIC_APPWRITE_PLATFORM,
     endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOIINT,
     projectid: process.env.EXPO_PUBLIC_APPWRITE_ID,
     databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID,
     clothesCollectionId: process.env.EXPO_PUBLIC_APPWRITE_CLOTHES_COLLECTION_ID,
+    clothesImgStorageId: process.env.EXPO_PUBLIC_APPWRITE_CLOTHES_STORAGE_ID
 }
 
 export const client = new Client();
@@ -21,9 +23,40 @@ export const avatar = new Avatars(client);
 const account = new Account(client);
 
 
-
-
+export const storage = new Storage(client);
 export const databases = new Databases(client)
+
+export async function createClothe(clothe: Clothe,userID:string) {
+    try {
+        const response = await databases.createDocument(
+            config.databaseId!,
+            config.clothesCollectionId!,
+            'unique()', // Auto-generate ID
+            clothe,
+            [Permission.read(Role.user(userID)), Permission.delete(Role.user(userID)), Permission.update(Role.user(userID))]
+        );
+        return response;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+export async function uploadFile(file:any) {
+   try{
+    const response = storage.createFile(
+        config.clothesImgStorageId!,
+        'unique()', // Auto-generate ID
+        file
+    );
+    return response
+   
+   } catch(error){
+       console.error(error)
+       return null
+   }
+}
+
 export async function login (){
     try{
          // Create a deep link that works across Expo environments
@@ -41,18 +74,18 @@ export async function login (){
         );
         if(!loginUrl) throw new Error('failed to create response from loginURL')
             
-
-        const browserResult = await openAuthSessionAsync(loginUrl.toString(),scheme) 
-        if (browserResult.type !== 'success' ) throw new Error('failed to login(google)')
-
-        //extract credentails from the OAUTH redirect URL
-        const url = new URL(browserResult.url)
+           
+                const browserResult = await openAuthSessionAsync(loginUrl.toString(), scheme);
+                console.log(browserResult)
+                if (browserResult.type !== 'success') throw new Error('Failed to login (Google)');
+                //extract credentails from the OAUTH redirect URL
+        const url =new URL(browserResult.url)
         const secret = url.searchParams.get('secret')?.toString()
         const userID = url.searchParams.get('userId')?.toString()
-
         if(!secret || !userID) throw new Error('failed to find secret/userID')
-        const session  = await account.createSession(userID,secret)
+            const session  = await account.createSession(userID,secret)
         if(!session) throw new Error('fail to create session')
+        
         return true
     }catch (error){
         console.error(error);
@@ -71,7 +104,6 @@ export async function logout(){
 }
 
 export async function getUser(){
-
     try{
         const response = await account.get()
         if(response.$id){
@@ -82,6 +114,7 @@ export async function getUser(){
                 avatar: userAvatar.toString(),
             }
         }
+        console.log(response)
         return response
     }catch(err){
         console.log(err)
@@ -115,10 +148,10 @@ export async function getAllClothes(): Promise<CLOTHES> {
     }
 }
 
-export async function getClothesWithFilter({query,filter,limit}:{query?:string,filter?:string,limit?:number}): Promise<CLOTHES> {
+export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{query?:string,mainCategoryfilter:string,limit?:number}): Promise<CLOTHES> {
     try {
         const buildQuery = [Query.orderDesc('$createdAt')]
-        if(filter && filter !=='All') buildQuery.push(Query.equal('maincategory',filter))
+        if(mainCategoryfilter && mainCategoryfilter !=='All') buildQuery.push(Query.equal('maincategory',mainCategoryfilter))
         const result = await databases.listDocuments(
             config.databaseId!,
             config.clothesCollectionId!,

@@ -8,29 +8,39 @@ import { CLOTHES } from '@/constants/data'
 import { useState } from 'react'
 import SearchBar from '@/components/SearchBar'
 import Filters from '@/components/Filters'
-import CategoriesFilter from '@/components/CategoriesFilter'
 import { useLocalSearchParams } from 'expo-router'
 import { useAppwrite } from '@/lib/useAppWrite'
 import { getClothesWithFilter } from '@/lib/AppWrite'
+import CreateClothesModal from '@/components/CreateClothesModal'
+import { useGlobalContext } from '@/lib/globalProvider'
+import { Link } from 'expo-router'
+import MainCategoriesFilter from '@/components/MainCategoriesFilter'
 //columnwraooer -> row
 //contentContainer over content area
 const totalNumberClothes = "4000"
 const index = () => {
-  const params = useLocalSearchParams<{filter?:string}>()
+  const params = useLocalSearchParams<{mainCategoryfilter?:string}>()
   const {data:clothes,loading,refetch} = useAppwrite({fn:getClothesWithFilter})
-  
+  const [toggleCreateClothesModal,setToggleCreateClothesModal] = useState(false)
   useEffect(()=>{
-    console.log(params.filter)
-    refetch({filter:params.filter})
-  },[params.filter])
+    console.log(params.mainCategoryfilter)
+    refetch({mainCategoryfilter: params.mainCategoryfilter || ''})
+  },[params.mainCategoryfilter])
+    const {user} = useGlobalContext()
   return (
 
     <SafeAreaView className='bg-sand-dark flex-1'>
 
-      <View className='justify-center items-center py-2 px-5'>
+      <View className='flex-row justify-center items-center py-2 px-5'>
+        <Text className=' mr-auto'></Text>
         <View className='flex-col  justify-center items-center'>
           <Text className='font-S-ExtraLightItalic text-4xl w-full'>Your Closet</Text>
-          <Image source={icons.headerUnderline} className='w-full h-0.5 py-2' />
+          <Image source={icons.headerUnderline} className='w-full h-4' />
+        </View>
+        <View className='ml-auto'>
+          <Link href="/AddClothes">
+          <Image source={icons.plus} className='size-8' />
+          </Link>
         </View>
       </View>
 
@@ -40,7 +50,7 @@ const index = () => {
       </View>
 
       <View className='px-5'>
-        <CategoriesFilter/>
+        <MainCategoriesFilter/>
       </View>
 
         <FlatList data={clothes} renderItem={({item})=>( 

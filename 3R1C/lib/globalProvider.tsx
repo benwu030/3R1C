@@ -2,12 +2,14 @@ import React, { createContext, useContext, ReactNode } from "react";
 
 import { getUser } from "./AppWrite";
 import { useAppwrite } from "./useAppWrite";
-
+import { useState } from "react";
 interface GlobalContextType {
   isLoggedIn: boolean;
   user: User | null;
   loading: boolean;
   refetch: () => void;
+  isOfflineMode: boolean;
+  setIsOfflineMode: (isOfflineMode: boolean) => void;
 }
 
 interface User {
@@ -31,15 +33,17 @@ export const GlobalProvider = ({ children }: GlobalProviderProps) => {
   } = useAppwrite({
     fn: getUser,
   });
-
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+  
   const isLoggedIn = !!user;
-
   return (
     <GlobalContext.Provider
       value={{isLoggedIn,
         user,
         loading,
-        refetch
+        refetch,
+        isOfflineMode,
+        setIsOfflineMode
       }}>
       {children}
     </GlobalContext.Provider>

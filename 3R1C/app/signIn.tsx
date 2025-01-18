@@ -8,8 +8,8 @@ import { login } from '@/lib/AppWrite'
 import { Redirect, router } from 'expo-router'
 import { useGlobalContext } from '@/lib/globalProvider'
 const signIn = () => {
-  const {refetch, loading, isLoggedIn} = useGlobalContext()
-  if(!loading && isLoggedIn) return <Redirect href='/'/>
+  const {refetch, loading, isLoggedIn,setIsOfflineMode,isOfflineMode} = useGlobalContext()
+  if(!loading && isLoggedIn || isOfflineMode) return <Redirect href='/'/>
   const handleLogin = async() =>{
     const result = await login()
     if(result) {
@@ -36,7 +36,13 @@ const signIn = () => {
             </View>
 
           </TouchableOpacity>
+            <TouchableOpacity className='mt-5' onPress={() => {
+             setIsOfflineMode(true)
+            }}>
+              <Text className='text-lg font-S-Medium text-black-300'>Skip for now</Text>
+            </TouchableOpacity>
         </View>
+        
       </ScrollView>
     </SafeAreaView>
   )

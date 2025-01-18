@@ -25,7 +25,10 @@ const SettingItems = ({icon,title,onPress,textStyle,showArrow = true}:settingIte
     </TouchableOpacity>
 )
 const Profile = () => {
+    const {user,refetch,isOfflineMode,setIsOfflineMode} = useGlobalContext()
+
     const handleLogout = async () =>{
+        if(isOfflineMode){setIsOfflineMode(false);refetch();return}
         const result = await logout()
         if(result){
             Alert.alert('logout succesfully')
@@ -35,7 +38,6 @@ const Profile = () => {
             Alert.alert('Logout failed')
         }
     }
-    const {user,refetch} = useGlobalContext()
   return (
     <SafeAreaView className='h-full bg-white'>
       <ScrollView showsVerticalScrollIndicator = {false} contentContainerClassName='pb-32 px-7'>
