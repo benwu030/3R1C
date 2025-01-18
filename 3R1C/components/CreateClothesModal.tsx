@@ -52,7 +52,7 @@ const CreateClothesModal = ({userID }: {userID:string }) => {
   return (
     
         <ScrollView contentContainerClassName='pb-32' showsHorizontalScrollIndicator={true} >
-        <View className="p-5 flex-col ">
+        <View className="p-5 flex-col h-[80rem]">
          <Text className="text-xl font-bold mb-4">Create New Clothe</Text>
           <TextInput
             placeholder="Title"

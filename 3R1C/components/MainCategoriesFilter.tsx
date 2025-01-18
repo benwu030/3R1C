@@ -19,13 +19,13 @@ const MainCategoriesFilter = () => {
       setSelectedCategory(category)
       router.setParams({ mainCategoryfilter: category })
     }
-    
+  
   }
   return (
-   <ScrollView horizontal showsHorizontalScrollIndicator={false} className=' my-2'>
+   <ScrollView horizontal showsHorizontalScrollIndicator={false} className='grow-0 '>
     {CATEGORIES.map((category,index)=>(
         <TouchableOpacity key = {index} 
-        className={`flex-row flex items-center mr-4 px-4 py-2 rounded-full ${selectedCategory=== category? 'bg-sand-deep' : ' border border-sand-deep'}`}
+        className={`flex-row items-center mr-4 px-4 py-2 rounded-full ${selectedCategory=== category? 'bg-sand-deep' : ' border border-sand-deep'}`}
          onPress={() => handleCategoryPress(category)}>
       <Text className={`text-sm  ${selectedCategory=== category? 'text-white font-S-Bold ': ' font-S-Regular '}`}>
         {category}

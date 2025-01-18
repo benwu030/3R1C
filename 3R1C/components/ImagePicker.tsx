@@ -24,7 +24,7 @@ export default function CustomImagePicker() {
   return (
     <View className='flex-col items-center justify-center'> 
       <Button title="Pick an image from camera roll" onPress={pickImage} />
-      {image && <Image source={{ uri: image }} className='w-full h-full'/>}
+      {image && <Image source={{ uri: image }} className='w-full aspect-[4/3]' resizeMode='contain'/>}
     </View>
   );
 }

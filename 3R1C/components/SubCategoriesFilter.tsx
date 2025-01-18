@@ -26,7 +26,7 @@ const SubCategoriesFilter = () => {
     router.setParams({ subCategoryfilter: newCategories.join(',') })
   }
   return (
-   <ScrollView horizontal showsHorizontalScrollIndicator={false} className=' my-2'>
+   <ScrollView horizontal showsHorizontalScrollIndicator={false} className=' my-2 grow-0 '>
     {CATEGORIES.map((category,index)=>(
         <TouchableOpacity key = {index} 
         className={`flex-row flex items-center mr-4 px-4 py-2 rounded-full ${selectedCategories.includes(category)? 'bg-sand-deep' : 'border border-sand-deep'}`}
