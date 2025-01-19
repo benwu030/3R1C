@@ -1,44 +1,56 @@
 import React, { useEffect, useState } from 'react'
 import {Modal,View, Text, TextInput, Button, Alert,ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { createClothe } from '@/lib/AppWrite';
+import { createClothe, uploadImage } from '@/lib/AppWrite';
 import { SetStateAction } from 'react';
-import ImagePickerExample from './ImagePicker';
+import ImagePickerExample from './CustomImagePicker';
 import { ImageSource } from 'expo-image';
 import { Picker } from '@react-native-picker/picker';
 import { Category } from '@/constants/category';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Link } from 'expo-router';
-import CustomImagePicker from './ImagePicker';
+import { router } from 'expo-router';
+import CustomImagePicker from './CustomImagePicker';
 import MainCategoriesFilter from './MainCategoriesFilter';
 import SubCategoriesFilter from './SubCategoriesFilter';
 import { useLocalSearchParams } from 'expo-router';
+import { ImagePickerAsset } from 'expo-image-picker';
 const CreateClothesModal = ({userID }: {userID:string }) => {
   const params = useLocalSearchParams<{mainCategoryfilter?:string;subCategoryfilter?:string}>()
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [remark, setRemark] = useState('');
-  const [mainCategory, setMainCategory] = useState<Category>(Category.JACKET);
-  const [subCategories, setSubCategories] = useState<Category[]>([]);
+  const [imageFile, setImageFile] = useState<ImagePickerAsset | null>(null);
+
   const [colors, setColors] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const handleSubmit = async () => {
+    if (!imageFile) {
+      Alert.alert('Error', 'Please select an image');
+      return;
+    }
+    const mainCategoryfilter = params.mainCategoryfilter as Category;
+    const subCategoryfilter = params.subCategoryfilter ? 
+      (params.subCategoryfilter as string).split(',') as Category[] : 
+      [];
+    if (!title || !price || !mainCategoryfilter) {
+      Alert.alert('Error', 'Please fill all the required fields');}
     const newClothe = {
-      $id: 'unique()', // This will be auto-generated
+      userid: userID,
     title,
     price: parseFloat(price),
     remark,
-    mainCategory,
-    subCategories: subCategories,
+    maincategory:mainCategoryfilter,
+    subcategories: subCategoryfilter,
     colors,
-    purchaseDate: new Date(purchaseDate),
-    createdAt: new Date(),
-    image: '' as ImageSource, // Initialize as empty array of ImageSourceType
+    purchasedate: new Date(purchaseDate),
+    image: imageFile.uri,
     };
     
-    const result = await createClothe(newClothe,userID);
+
+    const result = await createClothe(newClothe, userID,imageFile);
     if (result) {
       Alert.alert('Success', 'Clothe created successfully');
+      router.back();
     } else {
       Alert.alert('Error', 'Failed to create clothe');
     }
@@ -101,7 +113,7 @@ const CreateClothesModal = ({userID }: {userID:string }) => {
             )}
           </View>
 
-          <CustomImagePicker/>
+          <CustomImagePicker imageFile={imageFile} setImageFile={setImageFile}/>
           <Button title="Submit" onPress={handleSubmit} />
           </View>
           </ScrollView>

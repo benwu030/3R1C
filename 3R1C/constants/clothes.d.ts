@@ -1,16 +1,19 @@
 import { Category } from './category';
 import { ImageSource } from 'expo-image';
+import { ImagePickerAsset } from 'expo-image-picker';
 export interface Clothe{
-    $id: string;
+    $id?: string| null;
+    userid: string;
     title: string;
     price: number;
-    image: ImageSource;
+    imageFile?: ImagePickerAsset;
+    image: string;
     remark: string;
-    mainCategory: Category;
-    subCategories: Category[];
+    maincategory: Category;
+    subcategories: Category[];
     colors: string;
-    purchaseDate: Date;
-    createdAt: Date;
+    purchasedate: Date;
+    createdAt?: Date;
 }
 
 export type CLOTHES = Clothe[];

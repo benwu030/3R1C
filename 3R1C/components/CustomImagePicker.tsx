@@ -1,23 +1,24 @@
 import { useState } from 'react';
 import { Button, Image, View, StyleSheet } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-
-export default function CustomImagePicker() {
+import {ImagePickerAsset,launchImageLibraryAsync} from 'expo-image-picker';
+export default function CustomImagePicker({imageFile, setImageFile}: {imageFile: ImagePickerAsset| null, setImageFile: (image: ImagePickerAsset | null) => void}) {
   const [image, setImage] = useState<string | null>(null);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
+    let result = await launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
 
-    console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      setImageFile(result.assets[0]);
+      console.log(result.assets[0],'from image picker');
+
     }
   };
 

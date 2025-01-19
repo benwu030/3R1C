@@ -1,9 +1,10 @@
 import { createURL, getLinkingURL } from "expo-linking";
 import { openAuthSessionAsync } from "expo-web-browser";
 import { Platform } from 'react-native';
-import { Account, Avatars, Client, Databases, OAuthProvider, Permission, Query,Role,Storage } from "react-native-appwrite"
+import { Account, Avatars, Client, Databases, OAuthProvider, Permission, Query,Role,Storage,ID } from "react-native-appwrite"
 import { makeRedirectUri } from 'expo-auth-session'
 import { Clothe, CLOTHES } from "@/constants/clothes";
+import { ImagePickerAsset } from "expo-image-picker";
 export const config = {
     platform: process.env.EXPO_PUBLIC_APPWRITE_PLATFORM,
     endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOIINT,
@@ -26,29 +27,43 @@ const account = new Account(client);
 export const storage = new Storage(client);
 export const databases = new Databases(client)
 
-export async function createClothe(clothe: Clothe,userID:string) {
+export async function createClothe(clothe: Clothe,userID:string,imageFile:ImagePickerAsset){
     try {
+
+        const uploadImageResponse = await uploadImage(imageFile!)
+        if(!uploadImageResponse) throw new Error('failed to upload image')
         const response = await databases.createDocument(
             config.databaseId!,
             config.clothesCollectionId!,
-            'unique()', // Auto-generate ID
+            ID.unique(), // Auto-generate ID
             clothe,
             [Permission.read(Role.user(userID)), Permission.delete(Role.user(userID)), Permission.update(Role.user(userID))]
         );
         return response;
     } catch (error) {
         console.error(error);
+        //delete the uploaded image if the clothe creation fails
+        
         return null;
     }
 }
 
-export async function uploadFile(file:any) {
+export async function uploadImage(file:ImagePickerAsset){
    try{
-    const response = storage.createFile(
+    const response = await storage.createFile(
         config.clothesImgStorageId!,
-        'unique()', // Auto-generate ID
-        file
+        ID.unique(), // Auto-generate ID
+        {
+            
+            name: file.fileName!,
+            type: file.type!,
+            size: file.fileSize!,
+            uri: file.uri},
+            
+        
     );
+    console.log(response,'from uploadImage');
+
     return response
    
    } catch(error){
@@ -131,16 +146,17 @@ export async function getAllClothes(): Promise<CLOTHES> {
         )
         return result.documents.map(doc => ({
             $id: doc.$id,
+            userid: doc.userid,
             title: doc.title,
             price: doc.price,
             image: doc.image,
             remark: doc.remark,
             createdAt: new Date(doc.$createdAt),
             category: doc.category,
-            mainCategory: doc.mainCategory,
-            subCategories: doc.subCategories,
+            maincategory: doc.maincategory,
+            subcategories: doc.subcategories,
             colors: doc.colors,
-            purchaseDate: doc.purchaseDate
+            purchasedate: doc.purchasedate
         })) as CLOTHES
     } catch (error) {
         console.log(error)
@@ -159,51 +175,20 @@ export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{que
         )
         return result.documents.map(doc => ({
             $id: doc.$id,
+            userid: doc.userid,
             title: doc.title,
             price: doc.price,
             image: doc.image,
             remark: doc.remark,
             createdAt: new Date(doc.$createdAt),
             category: doc.category,
-            mainCategory: doc.mainCategory,
-            subCategories: doc.subCategories,
+            maincategory: doc.maincategory,
+            subcategories: doc.subcategories,
             colors: doc.colors,
-            purchaseDate: doc.purchaseDate
+            purchasedate: doc.purchasedate
         })) as CLOTHES
     } catch (error) {
         console.log(error)
         return []
     }
 }
-// export async function getProperties({filter,query,limit}:{filter:string,query:string,limit?:number}){
-//     try {
-//         const buildQuery = [Query.orderDesc('$createdAt')]
-//         if(filter && filter !=='All') buildQuery.push(Query.equal('type',filter))
-//         if(query) buildQuery.push(Query.or([Query.search('name',query),Query.search('address',query),Query.search('type',query)]))
-//         if(limit)buildQuery.push(Query.limit(limit))
-
-//             const result = await databases.listDocuments(
-//                 config.databaseId!,
-//                 config.propertiesCollectionId!,
-//                 buildQuery
-//             )
-//             return result.documents
-//     } catch (error) {
-//         console.log(error)
-//         return []
-//     }
-// }
-
-// export async function getPropertyById({ id }: { id: string }) {
-//     try {
-//       const result = await databases.getDocument(
-//         config.databaseId!,
-//         config.propertiesCollectionId!,
-//         id,
-//       );
-//       return result;
-//     } catch (error) {
-//       console.error(error);
-//       return null;
-//     }
-//   }
