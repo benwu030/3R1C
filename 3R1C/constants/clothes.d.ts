@@ -7,12 +7,13 @@ export interface Clothe{
     title: string;
     price: number;
     imageFile?: ImagePickerAsset;
+    imagefileid?: string;
     image: string;
-    remark: string;
+    remark?: string;
     maincategory: Category;
-    subcategories: Category[];
-    colors: string;
-    purchasedate: Date;
+    subcategories?: Category[];
+    colors?: string;
+    purchasedate?: Date;
     createdAt?: Date;
 }
 

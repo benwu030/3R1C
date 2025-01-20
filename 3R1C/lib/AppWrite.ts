@@ -21,7 +21,6 @@ client.setEndpoint(config.endpoint!)
 
 
 export const avatar = new Avatars(client);
-const account = new Account(client);
 
 
 export const storage = new Storage(client);
@@ -31,6 +30,7 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
     try {
 
         const uploadImageResponse = await uploadImage(imageFile!)
+        clothe.imagefileid = uploadImageResponse!.$id;
         if(!uploadImageResponse) throw new Error('failed to upload image')
         const response = await databases.createDocument(
             config.databaseId!,
@@ -71,6 +71,7 @@ export async function uploadImage(file:ImagePickerAsset){
        return null
    }
 }
+const account = new Account(client);
 
 export async function login (){
     try{
@@ -80,6 +81,7 @@ export async function login (){
         if (!deepLink.hostname) {
             deepLink.hostname = 'localhost';
         }
+        
         // console.log(deepLink)
         const scheme = `${deepLink.protocol}//`;
         const loginUrl = await account.createOAuth2Token(
@@ -90,17 +92,53 @@ export async function login (){
         if(!loginUrl) throw new Error('failed to create response from loginURL')
             
            
-                const browserResult = await openAuthSessionAsync(loginUrl.toString(), scheme);
-                console.log(browserResult)
-                if (browserResult.type !== 'success') throw new Error('Failed to login (Google)');
-                //extract credentails from the OAUTH redirect URL
+        const browserResult = await openAuthSessionAsync(loginUrl.toString(), scheme);
+        console.log(browserResult)
+        if (browserResult.type !== 'success') throw new Error('Failed to login (Google)');
+        //extract credentails from the OAUTH redirect URL
         const url =new URL(browserResult.url)
         const secret = url.searchParams.get('secret')?.toString()
         const userID = url.searchParams.get('userId')?.toString()
         if(!secret || !userID) throw new Error('failed to find secret/userID')
             const session  = await account.createSession(userID,secret)
         if(!session) throw new Error('fail to create session')
-        
+        // if (Platform.OS === 'web') {
+        //     window.location.href = loginUrl.toString();
+        //     return new Promise((resolve, reject) => {
+        //         window.addEventListener('message', async (event) => {
+        //             if (event.origin !== window.location.origin) return;
+        //             const { url } = event.data;
+        //             if (url) {
+        //                 try {
+        //                     const urlObj = new URL(url);
+        //                     const secret = urlObj.searchParams.get('secret')?.toString();
+        //                     const userID = urlObj.searchParams.get('userId')?.toString();
+
+        //                     if (!secret || !userID) throw new Error('Failed to find secret/userID');
+        //                     const session = await account.createSession(userID, secret);
+        //                     if (!session) throw new Error('Failed to create session');
+        //                     resolve(true);
+        //                 } catch (error) {
+        //                     console.error(error);
+        //                     reject(false);
+        //                 }
+        //             }
+        //         });
+        //     });
+        // } else {
+        //     const browserResult = await openAuthSessionAsync(loginUrl.toString(), scheme);
+        //     if (browserResult.type !== 'success') throw new Error('Failed to login (Google)');
+
+        //     // Extract credentials from the OAuth redirect URL
+        //     const url = new URL(browserResult.url);
+        //     const secret = url.searchParams.get('secret')?.toString();
+        //     const userID = url.searchParams.get('userId')?.toString();
+
+        //     if (!secret || !userID) throw new Error('Failed to find secret/userID');
+        //     const session = await account.createSession(userID, secret);
+        //     if (!session) throw new Error('Failed to create session');
+        //     return true;
+        // }
         return true
     }catch (error){
         console.error(error);
@@ -129,7 +167,7 @@ export async function getUser(){
                 avatar: userAvatar.toString(),
             }
         }
-        console.log(response)
+        // console.log(response)
         return response
     }catch(err){
         console.log(err)
@@ -192,3 +230,46 @@ export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{que
         return []
     }
 }
+
+export async function getClotheById({ id }: { id: string }) {
+    try {
+      const result = await databases.getDocument(
+        config.databaseId!,
+        config.clothesCollectionId!,
+        id,
+      );
+      return result;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  export async function deleteClotheById({ id }: { id: string },imagefileid:string) {
+    try {
+        const result2 = await deleteImageById({fileId:imagefileid});
+
+      const result = await databases.deleteDocument(
+        config.databaseId!,
+        config.clothesCollectionId!,
+        id,
+      );
+    return result && result2;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  export async function deleteImageById({ fileId }: { fileId: string }) {
+    try {
+      const result = await storage.deleteFile(
+        config.clothesImgStorageId!,
+        fileId,
+      );
+      return result;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }

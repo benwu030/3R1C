@@ -8,13 +8,14 @@ import { CLOTHES } from '@/constants/data'
 import { useState } from 'react'
 import SearchBar from '@/components/SearchBar'
 import Filters from '@/components/Filters'
-import { useLocalSearchParams } from 'expo-router'
+import { useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useAppwrite } from '@/lib/useAppWrite'
 import { getClothesWithFilter } from '@/lib/AppWrite'
 import CreateClothesModal from '@/components/CreateClothesModal'
 import { useGlobalContext } from '@/lib/globalProvider'
 import { Link } from 'expo-router'
 import MainCategoriesFilter from '@/components/MainCategoriesFilter'
+import { router } from 'expo-router'
 //columnwraooer -> row
 //contentContainer over content area
 const totalNumberClothes = "4000"
@@ -22,8 +23,13 @@ const index = () => {
   const params = useLocalSearchParams<{mainCategoryfilter?:string}>()
   const {data:clothes,loading,refetch} = useAppwrite({fn:getClothesWithFilter})
   const [toggleCreateClothesModal,setToggleCreateClothesModal] = useState(false)
+  const handleCardPressed = (id:string)=>{
+    console.log('card pressed',id)
+    router.push(`/details/${id}`)
+  }
+  useFocusEffect(()=>{refetch()})
   useEffect(()=>{
-    console.log(params.mainCategoryfilter)
+    console.log('main Cate filter',params.mainCategoryfilter)
     refetch({mainCategoryfilter: params.mainCategoryfilter || ''})
   },[params.mainCategoryfilter])
     const {user} = useGlobalContext()
@@ -55,7 +61,7 @@ const index = () => {
 
         <FlatList data={clothes} renderItem={({item})=>( 
             <View className='w-1/2 px-2'>
-              <ClothesCard item={item}></ClothesCard>
+              <ClothesCard key={item.$id} item={item} onPress={() => handleCardPressed(item.$id!)}></ClothesCard>
             </View>
             
        )} 

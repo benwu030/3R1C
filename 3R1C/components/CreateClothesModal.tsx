@@ -33,7 +33,9 @@ const CreateClothesModal = ({userID }: {userID:string }) => {
       (params.subCategoryfilter as string).split(',') as Category[] : 
       [];
     if (!title || !price || !mainCategoryfilter) {
-      Alert.alert('Error', 'Please fill all the required fields');}
+      Alert.alert('Error', 'Please fill all the required fields');
+      return;
+    }
     const newClothe = {
       userid: userID,
     title,

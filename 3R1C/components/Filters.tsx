@@ -16,7 +16,7 @@ const Filters = () => {
        
         
          <TouchableOpacity className='w-16 justify-center items-end' onPress={()=>setIsSortByTime(prev => !prev)}>
-            <Image source = {icons.sortByTime} className='size-6'/>
+            <Image source = {icons.sortByTime} className='size-6' tintColor={'black'}/>
          </TouchableOpacity>
 
 

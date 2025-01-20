@@ -10,6 +10,8 @@ import sortByTime from '@/assets/icons/sortByTime.svg'
 import google from '@/assets/icons/google.png'
 import rightArrow from '@/assets/icons/rightArrow.svg'
 import logout from '@/assets/icons/logout.svg'
+import edit from '@/assets/icons/edit.svg'
+import deleteIcon from '@/assets/icons/delete.svg'
 export default{
     plus,
     mirror,
@@ -22,6 +24,8 @@ export default{
     sortByTime,
     google,
     rightArrow,
-    logout
+    logout,
+    deleteIcon,
+    edit
 }
 
