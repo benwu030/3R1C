@@ -1,9 +1,16 @@
-import { Stack,Slot } from 'expo-router';
+import { Stack } from 'expo-router';
+import ModalTitle from '@/components/ModalTitle';
 
-export default function Layout() {
+const HeaderTitleComponent = (props: any) => <ModalTitle {...props} />;
+
+export default function ModalsLayout() {
   return (
-
-    
-<Stack/>
+    <Stack screenOptions={{
+      title: 'New Item',
+      headerStyle: {
+        backgroundColor: '#776E65',
+      },
+      headerTitle: HeaderTitleComponent
+    }}/>
   );
 }

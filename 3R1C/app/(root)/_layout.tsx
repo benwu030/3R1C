@@ -1,7 +1,6 @@
 import { useGlobalContext } from "@/lib/globalProvider";
-import { Redirect, Slot,Stack } from "expo-router";
-import { ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Redirect,Stack } from "expo-router";
+
 import LoadingScreen from "@/components/LoadingScreen";
 export default function AppLayout(){
     const {isLoggedIn,loading,isOfflineMode} = useGlobalContext()
@@ -12,6 +11,8 @@ export default function AppLayout(){
     }
     return(
     <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
           <Stack.Screen
         name="(modals)"
         options={{
@@ -19,7 +20,6 @@ export default function AppLayout(){
           headerShown: false,
         }}
       />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         
         </Stack>
         )

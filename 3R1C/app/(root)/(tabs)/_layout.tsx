@@ -1,5 +1,5 @@
-import { Tabs,Stack } from "expo-router";
-import { View,Text,ImageSourcePropType, Touchable, TouchableOpacity } from "react-native";
+import { Tabs } from "expo-router";
+import { View,Text,ImageSourcePropType} from "react-native";
 import icons from "@/constants/icons";
 import { Image } from 'expo-image';
 const TabIcon = ({focused,icon,title}:{focused:boolean; icon:ImageSourcePropType; title:string} )=>{
@@ -21,62 +21,53 @@ const TabIcon = ({focused,icon,title}:{focused:boolean; icon:ImageSourcePropType
         </Text>
       </View>)
 }
+const PlanningIcon = ({ focused }: { focused: boolean }) => (
+  <TabIcon focused={focused} icon={icons.sketchbook} title="Planning" />
+);
 
+const TryOnIcon = ({ focused }: { focused: boolean }) => (
+  <TabIcon focused={focused} icon={icons.mirror} title="Try On" />
+);
 
-export default function TabsLayout() {
-  return (    
+const SpendingIcon = ({ focused }: { focused: boolean }) => (
+  <TabIcon focused={focused} icon={icons.budget} title="Spending" />
+);
 
-  <Tabs  
-    screenOptions={{
-        tabBarShowLabel: false,
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: "#dfd5cb",
-          position: "absolute",
-          borderTopColor: "#ffffff",
-          borderTopWidth: 1,
-          minHeight: 80,
-        },
-      }}>
-    <Tabs.Screen name="index" options={{ title: 'Closet', tabBarIcon:({focused}) =>(
-        <TabIcon focused = {focused} icon = {icons.closet} title="Closet"/>
-  )}} />
+const ProfileIcon = ({ focused }: { focused: boolean }) => (
+  <TabIcon focused={focused} icon={icons.profile} title="Profile" />);
+export default function TabLayout() {
+return (
+  
+      <Tabs>
         <Tabs.Screen
         name="OutfitPlanning"
         options={{
           title: "OutfitPlanning",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={icons.sketchbook} title="Planning" />
-          ),
+          tabBarIcon: PlanningIcon,
         }}
       />
       <Tabs.Screen
         name="TryOn"
         options={{
           title: "Try On",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={icons.mirror} title="Try On" />
-          ),
+          tabBarIcon: TryOnIcon,
         }}
       />
       <Tabs.Screen
         name="SpendingLimit"
         options={{
           title: "SpendingLimit",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={icons.budget} title="Spending" />
-          ),
+          tabBarIcon: SpendingIcon,
         }}
       />
       <Tabs.Screen
         name="Profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={icons.profile} title="Profile" />
-          ),
+          tabBarIcon: ProfileIcon,
         }}
       />
+     
        <Tabs.Screen
         name="details/[id]"
         options={{

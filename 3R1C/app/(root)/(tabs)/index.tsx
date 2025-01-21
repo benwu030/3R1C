@@ -1,38 +1,37 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useCallback } from 'react'
+import { View, Text, FlatList, ActivityIndicator } from 'react-native'
 import { Image } from 'expo-image'
-import icons from '@/constants/icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useFocusEffect, useLocalSearchParams, Link, router } from 'expo-router'
+import icons from '@/constants/icons'
 import ClothesCard from '@/components/ClothesCard'
-import { CLOTHES } from '@/constants/data'
-import { useState } from 'react'
-import SearchBar from '@/components/SearchBar'
 import Filters from '@/components/Filters'
-import { useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useAppwrite } from '@/lib/useAppWrite'
 import { getClothesWithFilter } from '@/lib/AppWrite'
-import CreateClothesModal from '@/components/CreateClothesModal'
-import { useGlobalContext } from '@/lib/globalProvider'
-import { Link } from 'expo-router'
-import MainCategoriesFilter from '@/components/MainCategoriesFilter'
-import { router } from 'expo-router'
+import { MainCategoriesFilter } from '@/components/CategoriesFilter'
+import { CATEGORIES } from '@/constants/data'
 //columnwraooer -> row
 //contentContainer over content area
 const totalNumberClothes = "4000"
-const index = () => {
+const Closet = () => {
   const params = useLocalSearchParams<{mainCategoryfilter?:string}>()
   const {data:clothes,loading,refetch} = useAppwrite({fn:getClothesWithFilter})
-  const [toggleCreateClothesModal,setToggleCreateClothesModal] = useState(false)
   const handleCardPressed = (id:string)=>{
     console.log('card pressed',id)
     router.push(`/details/${id}`)
   }
-  useFocusEffect(()=>{refetch()})
+  useFocusEffect(
+    useCallback(() => {
+      // Invoked whenever the route is focused.
+      refetch()      
+    }, []));
+  
   useEffect(()=>{
     console.log('main Cate filter',params.mainCategoryfilter)
-    refetch({mainCategoryfilter: params.mainCategoryfilter || ''})
+    refetch({mainCategoryfilter: params.mainCategoryfilter ?? ''})
   },[params.mainCategoryfilter])
-    const {user} = useGlobalContext()
+   
+  
   return (
 
     <SafeAreaView className='bg-sand-dark flex-1'>
@@ -56,8 +55,10 @@ const index = () => {
       </View>
 
       <View className='px-5'>
-        <MainCategoriesFilter/>
+        <MainCategoriesFilter Categories = {CATEGORIES}/>
+
       </View>
+      {loading && <ActivityIndicator className='text-beige-darker mt-[16rem]' size='large' />}
 
         <FlatList data={clothes} renderItem={({item})=>( 
             <View className='w-1/2 px-2'>
@@ -72,9 +73,9 @@ const index = () => {
               showsVerticalScrollIndicator={false}
               horizontal={false}
         />
-       
+
     </SafeAreaView>
   )
 }
 
-export default index
+export default Closet

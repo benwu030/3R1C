@@ -1,6 +1,4 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { TouchableOpacity } from 'react-native'
+import { View, TouchableOpacity} from 'react-native'
 import { Image } from 'expo-image'
 import icons from '@/constants/icons'
 import { useState } from 'react'
@@ -9,8 +7,6 @@ const Filters = () => {
     const params = useLocalSearchParams<{category?:string;sortByTime?:string;keywords?:string}>()
     const [isSortByTime, setIsSortByTime] = useState(params.sortByTime === 'true')
     const [isSearch, setIsSearch] = useState(params.keywords)
-    const [selectedCategory, setSelectedCategory] = useState(params.category)
-    const handleCategoryPressed = ()=>{}
   return (
     <View className='flex-row justify-between items-center px-5 py-2'>
        
