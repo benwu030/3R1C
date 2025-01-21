@@ -12,8 +12,8 @@ import { MainCategoriesFilter } from '@/components/CategoriesFilter'
 import { CATEGORIES } from '@/constants/data'
 //columnwraooer -> row
 //contentContainer over content area
-const totalNumberClothes = "4000"
-const Closet = () => {
+const totalNumberClothes = "3"
+const index = () => {
   const params = useLocalSearchParams<{mainCategoryfilter?:string}>()
   const {data:clothes,loading,refetch} = useAppwrite({fn:getClothesWithFilter})
   const handleCardPressed = (id:string)=>{
@@ -78,4 +78,4 @@ const Closet = () => {
   )
 }
 
-export default Closet
+export default index

@@ -41,7 +41,7 @@ const CreateClothesModal = ({userID }: {userID:string }) => {
     remark,
     maincategory:mainCategoryfilter,
     subcategories: subCategoryfilter,
-    color,
+    colors:color,
     purchasedate: new Date(purchaseDate),
     image: imageFile.uri,
     };

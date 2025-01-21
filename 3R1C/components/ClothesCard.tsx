@@ -22,7 +22,7 @@ const ClothesCard = ({item:{image,title,price,purchasedate,$id},onPress}:Props) 
 
       <View className='flex-col items-center justify-center mt-2'>
         <Text className='font-S-Regular text-black text-xl'>{title}</Text>
-        <Text className='font-S-Medium text-beige-darker text-sm'>{purchasedate?.toLocaleString('en-GB')}</Text>
+        <Text className='font-S-Medium text-beige-darker text-sm'>{purchasedate?.toString().split('T')[0]??''}</Text>
       </View>
     </View>
     </TouchableOpacity>

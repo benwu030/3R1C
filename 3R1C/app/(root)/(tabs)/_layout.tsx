@@ -21,6 +21,9 @@ const TabIcon = ({focused,icon,title}:{focused:boolean; icon:ImageSourcePropType
         </Text>
       </View>)
 }
+const ClosetIcon = ({ focused }: { focused: boolean }) => (
+  <TabIcon focused={focused} icon={icons.closet} title="Closet" />
+);
 const PlanningIcon = ({ focused }: { focused: boolean }) => (
   <TabIcon focused={focused} icon={icons.sketchbook} title="Planning" />
 );
@@ -38,7 +41,22 @@ const ProfileIcon = ({ focused }: { focused: boolean }) => (
 export default function TabLayout() {
 return (
   
-      <Tabs>
+      <Tabs screenOptions={{       
+        tabBarShowLabel: false,
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "#dfd5cb",
+          position: "absolute",
+          minHeight: 80,
+        }}}>
+        <Tabs.Screen
+        name="index"
+        
+        options={{
+          title: "Closet",
+          tabBarIcon: ClosetIcon,
+        }}
+      />
         <Tabs.Screen
         name="OutfitPlanning"
         options={{
