@@ -37,12 +37,12 @@ const index = () => {
     <SafeAreaView className='bg-sand-dark flex-1'>
 
       <View className='flex-row justify-center items-center py-2 px-5'>
-        <Text className=' mr-auto'></Text>
-        <View className='flex-col  justify-center items-center'>
-          <Text className='font-S-ExtraLightItalic text-4xl w-full'>Your Closet</Text>
+        <Text className=' flex-1 '></Text>
+        <View className='flex-col flex-1 justify-center items-center'>
+          <Text className='font-S-ExtraLightItalic text-3xl'>Your Closet</Text>
           <Image source={icons.headerUnderline} className='w-full h-4' />
         </View>
-        <View className='ml-auto'>
+        <View className='flex-1 justify-end items-end'>
           <Link href="/AddClothes">
           <Image source={icons.plus} className='size-8' />
           </Link>
@@ -58,21 +58,25 @@ const index = () => {
         <MainCategoriesFilter Categories = {CATEGORIES}/>
 
       </View>
-      {loading && <ActivityIndicator className='text-beige-darker mt-[16rem]' size='large' />}
-
-        <FlatList data={clothes} renderItem={({item})=>( 
+      {loading ? (
+        <ActivityIndicator className='text-beige-darker mt-[16rem]' size='large' />
+      ) : (
+        <FlatList
+          data={clothes}
+          renderItem={({item}: {item: any}) => (
             <View className='w-1/2 px-2'>
-              <ClothesCard key={item.$id} item={item} onPress={() => handleCardPressed(item.$id!)}></ClothesCard>
+              <ClothesCard key={item.$id} item={item} onPress={() => handleCardPressed(item.$id!)} />
             </View>
-            
-       )} 
-              numColumns={2}
-
-              contentContainerClassName=""
-              columnWrapperClassName="mx-5 flex-row"
-              showsVerticalScrollIndicator={false}
-              horizontal={false}
+          )}
+          numColumns={2}
+          contentContainerStyle={{}}
+          columnWrapperStyle={{marginHorizontal: 20, flexDirection: 'row'}}
+          showsVerticalScrollIndicator={false}
+          horizontal={false}
         />
+      )}
+
+        
 
     </SafeAreaView>
   )
