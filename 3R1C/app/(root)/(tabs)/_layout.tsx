@@ -2,6 +2,14 @@ import { Tabs } from "expo-router";
 import { View,Text,ImageSourcePropType} from "react-native";
 import icons from "@/constants/icons";
 import { Image } from 'expo-image';
+import React,{createContext,useContext} from 'react'
+//TODO 
+// interface TabBarLayoutProps{
+//   width:number
+//   height:number
+// }
+// const TabBarLayoutContext = createContext<TabBarLayoutProps>({width:0,height:0})
+// export const useTabBarLayoutContext = () => useContext(TabBarLayoutContext)
 const TabIcon = ({focused,icon,title}:{focused:boolean; icon:ImageSourcePropType; title:string} )=>{
     return(
     <View className="flex-1 mt-3 flex-col items-center">
