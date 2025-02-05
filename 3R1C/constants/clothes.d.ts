@@ -7,8 +7,8 @@ export interface Clothe{
     title: string;
     price: number;
     imageFile?: ImagePickerAsset;
-    imagefileid?: string;
-    image: string;
+    imagefileid?: string; // this is the id of the image file in the appwrite storage
+    image: string; // this is the local url of the image file
     remark?: string;
     maincategory: Category;
     subcategories?: Category[];

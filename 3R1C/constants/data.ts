@@ -12,4 +12,4 @@ export const CLOTHES = [
       },
 ]
 
-export const CATEGORIES = ['All','Jacket','Shirt','Pants','Shoes','Accessories']
+export const CATEGORIES = ['All','Jacket','Shirt','Pants','Shorts','Shoes','Accessories']

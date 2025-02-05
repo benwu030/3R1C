@@ -5,6 +5,7 @@ import { Account, Avatars, Client, Databases, OAuthProvider, Permission, Query,R
 import { makeRedirectUri } from 'expo-auth-session'
 import { Clothe, CLOTHES } from "@/constants/clothes";
 import { ImagePickerAsset } from "expo-image-picker";
+import * as FileSystem from 'expo-file-system';
 export const config = {
     platform: process.env.EXPO_PUBLIC_APPWRITE_PLATFORM,
     endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOIINT,
@@ -28,6 +29,40 @@ export const databases = new Databases(client)
 
 export async function createClothe(clothe: Clothe,userID:string,imageFile:ImagePickerAsset){
     try {
+        let existingData = [];
+        const fileUri = `${FileSystem.documentDirectory}clotheData/clothe.json`;
+        const uid = ID.unique();
+
+        clothe.$id = uid;
+        try {
+            const existingContent = await FileSystem.readAsStringAsync(fileUri);
+            existingData = JSON.parse(existingContent);
+        } catch (error) {
+            // File doesn't exist yet or is empty, start with empty array
+            existingData = [];
+
+        }
+
+        //save the image to local
+        const localImageUri = `${FileSystem.documentDirectory}clotheData/Images/${clothe.$id}.jpg`;
+       try{ await FileSystem.copyAsync({
+        from: imageFile.uri,
+        to: localImageUri
+    });}catch(error){
+        console.error(error)
+    }
+       
+        clothe.image = localImageUri;
+   
+        existingData.push(clothe);
+
+        const jsonData = JSON.stringify(existingData);
+
+        // console.log(jsonData);
+        
+        await FileSystem.writeAsStringAsync(fileUri, jsonData, {
+            encoding: FileSystem.EncodingType.UTF8
+        });
 
         const uploadImageResponse = await uploadImage(imageFile!)
         clothe.imagefileid = uploadImageResponse!.$id;
@@ -35,7 +70,7 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
         const response = await databases.createDocument(
             config.databaseId!,
             config.clothesCollectionId!,
-            ID.unique(), // Auto-generate ID
+            uid, // Auto-generate ID
             clothe,
             [Permission.read(Role.user(userID)), Permission.delete(Role.user(userID)), Permission.update(Role.user(userID))]
         );
@@ -158,6 +193,22 @@ export async function logout(){
 
 export async function getUser(){
     try{
+
+        try {
+            const dirInfo = await FileSystem.getInfoAsync(`${FileSystem.documentDirectory}clotheData`);
+            if (!dirInfo.exists) {
+            await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}clotheData`, { intermediates: true });
+            }
+
+            const dirInfo2 = await FileSystem.getInfoAsync(`${FileSystem.documentDirectory}clotheData/Images`);
+            if (!dirInfo2.exists) {
+            await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}clotheData/Images`, { intermediates: true });
+            }
+        } catch (error) {
+            console.error('Error checking/creating directory:', error);
+        }
+
+
         const response = await account.get()
         if(response.$id){
             const userAvatar = avatar.getInitials(response.name)
@@ -170,8 +221,10 @@ export async function getUser(){
         // console.log(response)
         return response
     }catch(err){
-        console.log(err)
-        return null
+      
+     
+       console.log(err);
+     return null;
     }
 }
 
@@ -204,27 +257,45 @@ export async function getAllClothes(): Promise<CLOTHES> {
 
 export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{query?:string,mainCategoryfilter:string,limit?:number}): Promise<CLOTHES> {
     try {
-        const buildQuery = [Query.orderDesc('$createdAt')]
-        if(mainCategoryfilter && mainCategoryfilter !=='All') buildQuery.push(Query.equal('maincategory',mainCategoryfilter))
-        const result = await databases.listDocuments(
-            config.databaseId!,
-            config.clothesCollectionId!,
-            buildQuery
-        )
-        return result.documents.map(doc => ({
-            $id: doc.$id,
-            userid: doc.userid,
-            title: doc.title,
-            price: doc.price,
-            image: doc.image,
-            remark: doc.remark,
-            createdAt: new Date(doc.$createdAt),
-            category: doc.category,
-            maincategory: doc.maincategory,
-            subcategories: doc.subcategories,
-            colors: doc.colors,
-            purchasedate: doc.purchasedate
-        })) as CLOTHES
+
+        // Try to read from local storage first
+        let existingData = [];
+        const fileUri = `${FileSystem.documentDirectory}clotheData/clothe.json`;
+
+        try {
+            const existingContent = await FileSystem.readAsStringAsync(fileUri);
+            existingData = JSON.parse(existingContent);
+        } catch (error) {
+            // If local storage read fails,read from Appwrite
+            const buildQuery = [Query.orderDesc('$createdAt')]
+            if(mainCategoryfilter && mainCategoryfilter !=='All') buildQuery.push(Query.equal('maincategory',mainCategoryfilter))
+            const result = await databases.listDocuments(
+                config.databaseId!,
+                config.clothesCollectionId!,
+                buildQuery
+            )
+            return result.documents.map(doc => ({
+                $id: doc.$id,
+                userid: doc.userid,
+                title: doc.title,
+                price: doc.price,
+                image: doc.image,
+                remark: doc.remark,
+                createdAt: new Date(doc.$createdAt),
+                category: doc.category,
+                maincategory: doc.maincategory,
+                subcategories: doc.subcategories,
+                colors: doc.colors,
+                purchasedate: doc.purchasedate
+            })) as CLOTHES
+        }
+
+        if (existingData.length > 0) {
+            return existingData;
+        }
+        return [];
+
+
     } catch (error) {
         console.log(error)
         return []
@@ -232,7 +303,17 @@ export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{que
 }
 
 export async function getClotheById({ id }: { id: string }) {
+
+    let existingData = [];
+    const fileUri = `${FileSystem.documentDirectory}clotheData/clothe.json`;
+
     try {
+        const existingContent = await FileSystem.readAsStringAsync(fileUri);
+        existingData = JSON.parse(existingContent);
+        return existingData.find((clothe: Clothe) => clothe.$id === id);
+    } catch (error) {
+    try {
+
       const result = await databases.getDocument(
         config.databaseId!,
         config.clothesCollectionId!,
@@ -243,6 +324,7 @@ export async function getClotheById({ id }: { id: string }) {
       console.error(error);
       return null;
     }
+}
   }
 
   export async function deleteClotheById({ id }: { id: string },imagefileid:string) {

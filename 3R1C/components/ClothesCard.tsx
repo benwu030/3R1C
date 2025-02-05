@@ -10,7 +10,7 @@ interface Props{
     item: Clothe,
     onPress?:()=>void
 }
-const ClothesCard = ({item:{image,title,price,purchasedate,$id},onPress}:Props) => {
+const ClothesCard = ({item:{image,title,price,purchasedate},onPress}:Props) => {
   return (
     <TouchableOpacity onPress={onPress} className='flex-1  relative'>
       <View className='flex-col items-center justify-center mt-2'>
