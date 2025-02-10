@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSharedValue } from 'react-native-reanimated';
 
@@ -6,9 +7,9 @@ import type { returnedResults } from 'reanimated-color-picker';
 
 export default function CircularHue({setColor}: {setColor: (color: string) => void}) {
 
-  const customSwatches = new Array(6).fill('#fff').map(() => colorKit.randomRgbColor().hex());
-
-  const selectedColor = useSharedValue(customSwatches[0]);
+  const [customSwatches, setCustomSwatches] = useState<string[]>(new Array(6).fill('#fff').map(() => colorKit.randomRgbColor().hex()));
+  const initialColor = customSwatches[0];
+  const selectedColor = useSharedValue(initialColor);
 
   const onColorSelect = (color: returnedResults) => {
     selectedColor.value = color.hex;
@@ -19,7 +20,7 @@ export default function CircularHue({setColor}: {setColor: (color: string) => vo
     
       
           <View style={styles.pickerContainer}>
-            <ColorPicker value={selectedColor.value} sliderThickness={15} thumbSize={24} onChange={onColorSelect} boundedThumb>
+            <ColorPicker value={selectedColor.get()} sliderThickness={15} thumbSize={24} onChange={onColorSelect} boundedThumb>
               <HueCircular containerStyle={styles.hueContainer} thumbShape='pill'>
                 <Panel1 style={styles.panelStyle} />
               </HueCircular>

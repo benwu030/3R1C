@@ -53,6 +53,8 @@ const CreateClothesModal = ({userID }: {userID:string }) => {
       router.back();
     } else {
       Alert.alert('Error', 'Failed to create clothe');
+      router.back();
+
     }
   };
   useEffect(() => {

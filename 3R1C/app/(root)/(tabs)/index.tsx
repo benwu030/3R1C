@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from 'react'
 import { View, Text, FlatList, ActivityIndicator } from 'react-native'
 import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useFocusEffect, useLocalSearchParams, Link, router } from 'expo-router'
+import {useLocalSearchParams, Link, router } from 'expo-router'
 import icons from '@/constants/icons'
 import ClothesCard from '@/components/ClothesCard'
 import Filters from '@/components/Filters'
@@ -13,22 +13,19 @@ import { CATEGORIES } from '@/constants/data'
 //columnwraooer -> row
 //contentContainer over content area
 const totalNumberClothes = "3"
-const index = () => {
+const Index = () => {
   const params = useLocalSearchParams<{mainCategoryfilter?:string}>()
   const {data:clothes,loading,refetch} = useAppwrite({fn:getClothesWithFilter})
   const handleCardPressed = (id:string)=>{
     console.log('card pressed',id)
     router.push(`/details/${id}`)
   }
-  useFocusEffect(
-    useCallback(() => {
-      // Invoked whenever the route is focused.
-      refetch()      
-    }, []));
+
   
   useEffect(()=>{
-    console.log('main Cate filter',params.mainCategoryfilter)
-    refetch({mainCategoryfilter: params.mainCategoryfilter ?? ''})
+ 
+    refetch({mainCategoryfilter: params.mainCategoryfilter??'All'})
+
   },[params.mainCategoryfilter])
    
   
@@ -82,4 +79,4 @@ const index = () => {
   )
 }
 
-export default index
+export default Index

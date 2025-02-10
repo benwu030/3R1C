@@ -35,6 +35,8 @@ const ClotheDetailsScreen= () => {
                 const result = await deleteClotheById({id:clothe!.$id},clothe!.imagefileid);
                 if(!result){
                     Alert.alert('Error', 'Failed to delete item');
+                    router.back();
+                    
                     return;
                 }
                     Alert.alert('Success', 'Item deleted successfully');
