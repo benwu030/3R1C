@@ -19,7 +19,7 @@ const CreateClothesModal = ({userID }: {userID:string }) => {
   const [imageFile, setImageFile] = useState<ImagePickerAsset | null>(null);
 
   const [color, setColor] = useState('');
-  const [purchaseDate, setPurchaseDate] = useState('');
+  const [purchaseDate, setPurchaseDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const handleSubmit = async () => {
     if (!imageFile) {
@@ -42,7 +42,7 @@ const CreateClothesModal = ({userID }: {userID:string }) => {
     maincategory:mainCategoryfilter,
     subcategories: subCategoryfilter,
     colors:color,
-    purchasedate: new Date(purchaseDate),
+    purchasedate: purchaseDate,
     image: imageFile.uri,
     };
     
@@ -107,14 +107,15 @@ const CreateClothesModal = ({userID }: {userID:string }) => {
             <Text className="font-S-RegularItalic text-lg mb-1">Select Purchase Date</Text>
             <View className="ml-[-8]">
             <DateTimePicker
-              value={purchaseDate ? new Date(purchaseDate) : new Date()}
+              value={purchaseDate}
               mode="date"
               display="default"
               onChange={(event, selectedDate) => {
               setShowDatePicker(!showDatePicker);
               if (selectedDate) {
-                setPurchaseDate(selectedDate.toISOString().split('T')[0]);
+                setPurchaseDate(selectedDate);
               } 
+         
               }}
             />
             </View>

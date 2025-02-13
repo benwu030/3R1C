@@ -60,9 +60,8 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
        imageFile.uri = localImageUri;
        imageFile.fileName = `${uid}.${fileExtension}`
         clothe.image = localImageUri;
-   
+        clothe.$id = uid;
         existingData.push(clothe);
-
         const jsonData = JSON.stringify(existingData);
 
         // console.log(jsonData);
@@ -70,7 +69,7 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
         await FileSystem.writeAsStringAsync(fileUri, jsonData, {
             encoding: FileSystem.EncodingType.UTF8
         });
-
+        clothe.$id = null
         const uploadImageResponse = await uploadImage(imageFile)
         clothe.imagefileid = uploadImageResponse!.$id;
         if(!uploadImageResponse) throw new Error('failed to upload image')
@@ -136,6 +135,11 @@ export async function getAllClothes(): Promise<CLOTHES> {
                 [Query.orderAsc('$createdAt')]
             )
             console.log('search from online storage (getAllClothes) ')
+            //store the data in the local storage
+            const jsonData = JSON.stringify(result.documents);
+            await FileSystem.writeAsStringAsync(fileUri, jsonData, {
+                encoding: FileSystem.EncodingType.UTF8
+            });
 
             return result.documents.map(doc => ({
                 $id: doc.$id,
@@ -191,6 +195,25 @@ export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{que
                 config.clothesCollectionId!,
                 buildQuery
             )
+               //store the data in the local storage
+               const jsonData = JSON.stringify(result.documents.map(doc => ({
+                $id: doc.$id,
+                userid: doc.userid,
+                title: doc.title,
+                price: doc.price,
+                image: doc.image,
+                imagefileid: doc.imagefileid,
+                remark: doc.remark,
+                createdAt: new Date(doc.$createdAt),
+                category: doc.category,
+                maincategory: doc.maincategory,
+                subcategories: doc.subcategories,
+                colors: doc.colors,
+                purchasedate: doc.purchasedate
+            })))
+               await FileSystem.writeAsStringAsync(fileUri, jsonData, {
+                   encoding: FileSystem.EncodingType.UTF8
+               });
             return result.documents.map(doc => ({
                 $id: doc.$id,
                 userid: doc.userid,
