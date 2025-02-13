@@ -12,7 +12,7 @@ export default function Layout(){
     return(
         <Stack>
         <Stack.Screen 
-          name="index" 
+          name="OutfitCalendar" 
           options={{
             title: "Outfit Planning",
             headerShown: false,
@@ -23,6 +23,12 @@ export default function Layout(){
           options={{
             title: "Plan Details",
             headerShown: false,
+          }}
+        />
+          <Stack.Screen 
+          name="index" 
+          options={{
+            title: "Calendar",
           }}
         />
       </Stack>
