@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity,ScrollView,FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, FlatList, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import OutfitPreview from './OutfitPreview';
 interface CalendarProps {
     currentDate?: Date;
@@ -38,13 +38,8 @@ const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         onSelectDate?.(newDate);
     };
 
-    const [months, setMonths] = useState<Date[]>([selectedDate]);
 
-    const loadMoreMonths = (direction: 'next' | 'prev') => {
-        const lastDate = months[direction === 'next' ? months.length - 1 : 0];
-        const newDate = new Date(lastDate.getFullYear(), lastDate.getMonth() + (direction === 'next' ? 1 : -1));
-        setMonths(prev => direction === 'next' ? [...prev, newDate] : [newDate, ...prev]);
-    };
+   
 
    
     const renderCalendarDays = (date:Date) => {
@@ -65,26 +60,54 @@ const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
         return days;
     };
+    const [calendarDays, setCalendarDays] = useState<(number | null)[]>(renderCalendarDays(selectedDate));
+    const[currentDisplayDate,setCurrentDisplayDate] = useState(currentDate);
+    const loadMoreMonths = (direction: 'next' | 'prev') => {
+       if(direction === 'next'){
+           const nextMonth = new Date(Date.UTC(currentDisplayDate.getFullYear(), currentDisplayDate.getMonth() + 1))
+           console.log(nextMonth);
+           setCalendarDays(renderCalendarDays(nextMonth));
+           setCurrentDisplayDate(nextMonth);
+    }
+    else{
+        const prevMonth = new Date(Date.UTC(currentDisplayDate.getFullYear(), currentDisplayDate.getMonth() - 1))
+        setCalendarDays(renderCalendarDays(prevMonth))
+        setCurrentDisplayDate(prevMonth)
+    }
+}
 
+//when scrolling end, isScrolling will be set to false via onMomentumScrollEnd
+//thus handleScroll will be update the calendar days once the user stops scrolling
+const [isScrolling, setIsScrolling] = useState(true); 
+const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    console.log(offsetY);
+    if(offsetY < 0 && !isScrolling){
+        loadMoreMonths('prev')
+        setIsScrolling(true)
+    }
+    else if(offsetY > 0 && !isScrolling){
+        loadMoreMonths('next')
+        setIsScrolling(true)
+
+    }
+}
     return (
         
         <View className='px-5 h-full'>
-            <Text className="font-S-Bold text-3xl mb-4">{getDisplayYear(selectedDate)} {getDisplayMonth(selectedDate)}</Text>
+            <Text className="font-S-Bold text-3xl mb-4">{getDisplayYear(currentDisplayDate)} {getDisplayMonth(currentDisplayDate)}</Text>
 
          
             {/* Calendar Days  onMomentumScrollEnd will be called when the scroll stops*/}
             <FlatList
                 className="border-b border-grey-darker flex-1"
-                data={renderCalendarDays(selectedDate)}
+                data={calendarDays}
                 showsVerticalScrollIndicator={false}
                 contentContainerClassName=''
                 columnWrapperClassName=''
                 horizontal={false}
-                onEndReached={() => loadMoreMonths('next')}
-                onEndReachedThreshold={0.1}
-                onStartReached={() => loadMoreMonths('prev')}
-                onStartReachedThreshold={0.1}
-                extraData={months}
+                onScroll={handleScroll}
+                onMomentumScrollEnd={() => setIsScrolling(false)}
                 renderItem={({ item }) => {
                     if(item === null) {
                         return <View key={`empty-${item}`} className="w-[14.28%] items-center p-1" />
@@ -120,7 +143,7 @@ const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
                                  </Text>
                              </TouchableOpacity>)}}
                 numColumns={7}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(_, index) => index.toString()}
                 ListHeaderComponent={
                     <View className="bg-sand-dark flex-row mb-4 border-b border-grey-darker">
 
