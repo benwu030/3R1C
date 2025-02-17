@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, FlatList, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
-import OutfitPreview from './OutfitPreview';
+import CalendarItem from './OutfitPreview';
 interface CalendarProps {
     currentDate?: Date;
-    onSelectDate?: (date: Date) => void;
 }
 
 
 const Calendar= ({ 
     currentDate = new Date(),
-    onSelectDate 
+     
 }:CalendarProps) => {
 
     const [selectedDate, setSelectedDate] = useState<Date>(currentDate);
-const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const[currentDisplayDate,setCurrentDisplayDate] = useState(currentDate);
+
     const getDisplayMonth = (date: Date) => {
         
         return date.toLocaleString('default', { month: 'long' });
@@ -33,14 +34,9 @@ const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     };
 
     const handleDateSelect = (date: number) => {
-        const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), date);
+        const newDate = new Date(Date.UTC(currentDisplayDate.getFullYear(), currentDisplayDate.getMonth(), date));
         setSelectedDate(newDate);
-        onSelectDate?.(newDate);
     };
-
-
-   
-
    
     const renderCalendarDays = (date:Date) => {
         const daysInMonth = getDaysInMonth(date);
@@ -51,7 +47,6 @@ const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         for (let i = 0; i < firstDay; i++) {
             days.push(null);
         }
-
         // Add actual days
         for (let i = 1; i <= daysInMonth; i++) {
             
@@ -61,19 +56,13 @@ const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         return days;
     };
     const [calendarDays, setCalendarDays] = useState<(number | null)[]>(renderCalendarDays(selectedDate));
-    const[currentDisplayDate,setCurrentDisplayDate] = useState(currentDate);
     const loadMoreMonths = (direction: 'next' | 'prev') => {
-       if(direction === 'next'){
-           const nextMonth = new Date(Date.UTC(currentDisplayDate.getFullYear(), currentDisplayDate.getMonth() + 1))
-           console.log(nextMonth);
-           setCalendarDays(renderCalendarDays(nextMonth));
-           setCurrentDisplayDate(nextMonth);
-    }
-    else{
-        const prevMonth = new Date(Date.UTC(currentDisplayDate.getFullYear(), currentDisplayDate.getMonth() - 1))
-        setCalendarDays(renderCalendarDays(prevMonth))
-        setCurrentDisplayDate(prevMonth)
-    }
+     const monthOffset = direction === 'next' ? 1 : -1;
+     const newMonth = new Date(Date.UTC(currentDisplayDate.getFullYear(), currentDisplayDate.getMonth() + monthOffset, 1));
+    setCalendarDays(renderCalendarDays(newMonth));
+    setCurrentDisplayDate(newMonth);
+    const isCurrentMonth = newMonth.getMonth() === new Date().getMonth() && newMonth.getFullYear() === new Date().getFullYear();
+    setSelectedDate(isCurrentMonth ? new Date() : newMonth);
 }
 
 //when scrolling end, isScrolling will be set to false via onMomentumScrollEnd
@@ -81,7 +70,6 @@ const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const [isScrolling, setIsScrolling] = useState(true); 
 const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
-    console.log(offsetY);
     if(offsetY < 0 && !isScrolling){
         loadMoreMonths('prev')
         setIsScrolling(true)
@@ -94,16 +82,16 @@ const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
 }
     return (
         
-        <View className='px-5 h-full'>
+        <View className='px-5  flex-col flex-1 pb-20'>
             <Text className="font-S-Bold text-3xl mb-4">{getDisplayYear(currentDisplayDate)} {getDisplayMonth(currentDisplayDate)}</Text>
 
          
             {/* Calendar Days  onMomentumScrollEnd will be called when the scroll stops*/}
             <FlatList
-                className="border-b border-grey-darker flex-1"
+                className="border-b border-grey-darker  h-[45%]  "
                 data={calendarDays}
                 showsVerticalScrollIndicator={false}
-                contentContainerClassName=''
+                contentContainerClassName='flex-1'
                 columnWrapperClassName=''
                 horizontal={false}
                 onScroll={handleScroll}
@@ -113,12 +101,10 @@ const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
                         return <View key={`empty-${item}`} className="w-[14.28%] items-center p-1" />
                     }
                     const isToday = item === new Date().getDate() && 
-                    selectedDate.getMonth() === new Date().getMonth() &&
-                    selectedDate.getFullYear() === new Date().getFullYear();
+                    currentDisplayDate.getMonth() === new Date().getMonth() &&
+                    currentDisplayDate.getFullYear() === new Date().getFullYear();
                 
-                    const isSelected = selectedDate?.getDate() === item && 
-                                 selectedDate?.getMonth() === selectedDate.getMonth() &&
-                                 selectedDate?.getFullYear() === selectedDate.getFullYear();
+                    const isSelected = selectedDate?.getDate() === item 
                     return(
                                  <TouchableOpacity
                                  key={item}
@@ -135,8 +121,8 @@ const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
                                      className={`
                                          text-lg
                                          text-center
-                                         ${isToday ? 'text-sand-deep font-S-Bold border-b' : ''}
-                                         ${isSelected ? 'text-sand-deep font-S-Bold text-white ' : 'font-S-Regular'}
+                                         ${isToday ? 'text-sand-deep font-S-Bold border-b ' : ''}
+                                         ${isSelected ? 'text-sand-deep font-S-Bold text-white border-white' : 'font-S-Regular'}
                                      `}
                                  >
                                      {item}
@@ -158,10 +144,14 @@ const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
             />
 
 
-
-            <ScrollView>
-                <OutfitPreview date={selectedDate} />
-            </ScrollView>
+            <FlatList
+                className=''
+                data={[1, 2, 3]} // Replace with your actual data array
+                renderItem={() => <CalendarItem date={selectedDate} />}
+                keyExtractor={(item) => item.toString()}
+                showsVerticalScrollIndicator={false}
+            />
+           
         </View>
         
     )

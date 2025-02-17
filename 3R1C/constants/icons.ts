@@ -12,6 +12,7 @@ import rightArrow from '@/assets/icons/rightArrow.svg'
 import logout from '@/assets/icons/logout.svg'
 import edit from '@/assets/icons/edit.svg'
 import deleteIcon from '@/assets/icons/delete.svg'
+import collectionsAdd from '@/assets/icons/collectionsAdd.svg'
 export default{
     plus,
     mirror,
@@ -26,6 +27,7 @@ export default{
     rightArrow,
     logout,
     deleteIcon,
-    edit
+    edit,
+    collectionsAdd
 }
 

@@ -30,6 +30,7 @@ export const avatar = new Avatars(client);
 export const storage = new Storage(client);
 export const databases = new Databases(client)
 
+//create a clothes document
 export async function createClothe(clothe: Clothe,userID:string,imageFile:ImagePickerAsset){
     try {
         let existingData = [];
@@ -334,6 +335,8 @@ export async function getClotheById({ id }: { id: string }) {
 
 
 
+
+//login and logout functions
 export async function login (){
     try{
          // Create a deep link that works across Expo environments

@@ -18,6 +18,12 @@ export default function Layout(){
             headerShown: false,
           }}
         />
+                <Stack.Screen 
+          name="Collections" 
+          options={{
+            title: "Calendar",
+          }}
+        />
         <Stack.Screen 
           name="[id]" 
           options={{
@@ -25,12 +31,7 @@ export default function Layout(){
             headerShown: false,
           }}
         />
-          <Stack.Screen 
-          name="index" 
-          options={{
-            title: "Calendar",
-          }}
-        />
+  
       </Stack>
         )
 }

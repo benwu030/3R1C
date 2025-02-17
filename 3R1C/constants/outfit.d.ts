@@ -6,7 +6,7 @@ export interface Outfit {
     title: string;
     previewImage: string;
     remark?: string;
-    category?: string;
+    outfitGroup?: string;
     items: OutfitItem[];
     createdAt?: Date;
 }
@@ -19,3 +19,4 @@ export interface OutfitItem{
         rotation: number;
     }
 }
+

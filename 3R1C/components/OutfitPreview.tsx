@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text,TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
-
+import { router } from 'expo-router';
 interface OutfitPreviewProps {
   date: Date;
   outfitImage?: string;  // 搭配的截圖
@@ -17,13 +17,13 @@ interface OutfitPreviewProps {
   }>;
 }
 
-const OutfitPreview = ({ date, outfitImage, clothes }: OutfitPreviewProps) => {
+const CalendarItem = ({ date, outfitImage, clothes }: OutfitPreviewProps) => {
   return (
-    <View className="flex-1 bg-white rounded-lg m-4 p-4 shadow-md">
+    <View className="flex-1 bg-white rounded-lg m-4 p-4 shadow-md h-full">
       <Text className="font-S-Bold text-xl mb-2">
-        {date.toLocaleDateString('zh-TW', { month: 'long', day: 'numeric' })}
+        {date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
       </Text>
-      
+      <TouchableOpacity onPress={() => router.push('/OutfitPlanning/Collections')}>
       {outfitImage ? (
         <Image 
           source={outfitImage} 
@@ -35,8 +35,9 @@ const OutfitPreview = ({ date, outfitImage, clothes }: OutfitPreviewProps) => {
           <Text className="font-S-Regular text-gray-400">尚未建立搭配</Text>
         </View>
       )}
+      </TouchableOpacity>
     </View>
   );
 };
 
-export default OutfitPreview;
+export default CalendarItem;
