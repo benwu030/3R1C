@@ -157,6 +157,8 @@ const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
                 stickyHeaderIndices={[0]}
             />
 
+
+
             <ScrollView>
                 <OutfitPreview date={selectedDate} />
             </ScrollView>
