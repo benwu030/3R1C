@@ -1,17 +1,27 @@
 import { Clothe } from "./clothes";
 
+export interface OutfitCollection {
+    $id?: string | null;
+    userid: string;
+    title: string;
+    description?: string;
+    previewImage?: string;
+    outfitIds?: string[]; // related Outfits
+    dayToWear?: Date;
+    createdAt?: Date;
+}
 export interface Outfit {
     $id?: string | null;
     userid: string;
     title: string;
     previewImage: string;
     remark?: string;
-    outfitGroup?: string;
+    outfitCollectionIds?: string[];
     items: OutfitItem[];
     createdAt?: Date;
 }
 export interface OutfitItem{
-    item: Clothe
+    clotheID: string;
     position: {
         x: number;
         y: number;
@@ -20,3 +30,6 @@ export interface OutfitItem{
     }
 }
 
+//Outfit will have many OutfitItems, each OutfitItem will have a clotheID and a position
+//OutfitCollection will have many Outfits
+//calendar view will show OutfitCollections

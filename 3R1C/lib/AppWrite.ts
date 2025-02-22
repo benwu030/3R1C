@@ -6,18 +6,9 @@ import { makeRedirectUri } from 'expo-auth-session'
 import { Clothe, CLOTHES } from "@/constants/clothes";
 import { ImagePickerAsset } from "expo-image-picker";
 import * as FileSystem from 'expo-file-system';
-export const config = {
-    platform: process.env.EXPO_PUBLIC_APPWRITE_PLATFORM,
-    endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOIINT,
-    projectid: process.env.EXPO_PUBLIC_APPWRITE_ID,
-    databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID,
-    clothesCollectionId: process.env.EXPO_PUBLIC_APPWRITE_CLOTHES_COLLECTION_ID,
-    clothesImgStorageId: process.env.EXPO_PUBLIC_APPWRITE_CLOTHES_STORAGE_ID,
-    localClotheJsonUri :`${FileSystem.documentDirectory}clotheData/clothe.json`,
-    localClotheImagesDirectiry :`${FileSystem.documentDirectory}clotheData/Images/`,
-
-}
-
+import { OutfitCollection, Outfit, OutfitItem } from "@/constants/outfit";
+import { config, localConfig } from "./config";
+import { readLocalData, writeLocalData,ensureDirectories } from "./LocalStoreManager";
 export const client = new Client();
 
 client.setEndpoint(config.endpoint!)
@@ -31,70 +22,57 @@ export const storage = new Storage(client);
 export const databases = new Databases(client)
 
 //create a clothes document
-export async function createClothe(clothe: Clothe,userID:string,imageFile:ImagePickerAsset){
+export async function createClothe(clothe: Clothe,userID:string,imageFile:ImagePickerAsset,onLocalSave?: () => void){
     try {
-        let existingData = [];
-        const fileUri = config.localClotheJsonUri;
         const uid = ID.unique();
-
-        try {
-            const existingContent = await FileSystem.readAsStringAsync(fileUri);
-            existingData = JSON.parse(existingContent);
-        } catch (error) {
-            // File doesn't exist yet or is empty, start with empty array
-            existingData = [];
-
-        }
-
         //save the image to local
         const fileExtension = imageFile.uri.split('.').pop()
-        const localImageUri = `${config.localClotheImagesDirectiry}${uid}.${fileExtension}`;
-
-       try{ 
-            await FileSystem.copyAsync({
-            from: imageFile.uri,
-            to: localImageUri
-                });
-        }catch(error){
-        console.error(error)
-    }
-       imageFile.uri = localImageUri;
-       imageFile.fileName = `${uid}.${fileExtension}`
-        clothe.image = localImageUri;
+        const localImageUri = `${localConfig.localClotheImagesDirectiry}${uid}.${fileExtension}`;
+        try{ 
+                await FileSystem.copyAsync({
+                from: imageFile.uri,
+                to: localImageUri
+                    });
+            }catch(error){
+            console.error('fail to save image to local',error)
+        }
+        //update file path
+        imageFile.uri = localImageUri;
+        imageFile.fileName = `${uid}.${fileExtension}`
+        clothe.localImageURL = localImageUri;
         clothe.$id = uid;
-        existingData.push(clothe);
-        const jsonData = JSON.stringify(existingData);
-
-        // console.log(jsonData);
-        
-        await FileSystem.writeAsStringAsync(fileUri, jsonData, {
-            encoding: FileSystem.EncodingType.UTF8
-        });
+        //save data to local storage
+        const existingData = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
+        await writeLocalData(localConfig.localClotheJsonUri, [...existingData, clothe]);
+        //close the modal when saved 
+        onLocalSave?.();
+        //upload to appwrite
         clothe.$id = null
-        const uploadImageResponse = await uploadImage(imageFile)
-        clothe.imagefileid = uploadImageResponse!.$id;
+        const uploadImageResponse = await uploadImage(imageFile,uid)
         if(!uploadImageResponse) throw new Error('failed to upload image')
         const response = await databases.createDocument(
             config.databaseId!,
             config.clothesCollectionId!,
             uid, // Auto-generate ID
             clothe,
-            [Permission.read(Role.user(userID)), Permission.delete(Role.user(userID)), Permission.update(Role.user(userID))]
+            [Permission.read(Role.user(userID)), 
+            Permission.delete(Role.user(userID)), 
+            Permission.update(Role.user(userID))]
         );
         return response;
     } catch (error) {
-        console.error(error);
+        console.error('fail to create clothes',error);
         //delete the uploaded image if the clothe creation fails
         
         return null;
     }
 }
 
-export async function uploadImage(file:ImagePickerAsset){
+export async function uploadImage(file:ImagePickerAsset,uid:string){
    try{
     const response = await storage.createFile(
         config.clothesImgStorageId!,
-        ID.unique(), // Auto-generate ID
+        uid, // Auto-generate ID
         {
             
             name: file.fileName!,
@@ -115,224 +93,160 @@ export async function uploadImage(file:ImagePickerAsset){
 }
 const account = new Account(client);
 
-
+function mapDocumentsToClothes(documents: any[]): CLOTHES {
+    return documents.map(doc => ({
+        $id: doc.$id,
+        userid: doc.userid,
+        title: doc.title,
+        price: doc.price,
+        localImageURL: doc.localImageURL,
+        remark: doc.remark,
+        createdAt: new Date(doc.$createdAt),
+        category: doc.category,
+        maincategory: doc.maincategory,
+        subcategories: doc.subcategories,
+        maincolor: doc.maincolor,
+        subcolors: doc.subcolors,
+        purchasedate: doc.purchasedate
+    }));
+}
 export async function getAllClothes(): Promise<CLOTHES> {
    
-   // Try to read from local storage first
-   let existingData = [];
-   const fileUri = config.localClotheJsonUri;
    try {
-    const existingContent = await FileSystem.readAsStringAsync(fileUri);
-    existingData = JSON.parse(existingContent);
-    console.log('search from local storage (getAllClothes) ')
-
+    const localClothes = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
+    if(localClothes.length > 0) {
+        console.log('reading clothes locally (getAllClothes) ');
+        return localClothes;
+    }
+    console.log('reading clothes from online storage (getAllClothes) ');
+    const result = await databases.listDocuments(
+        config.databaseId!,
+        config.clothesCollectionId!,
+        [Query.orderAsc('$createdAt')]
+    )
+    const clothes = mapDocumentsToClothes(result.documents);
+    //save to local
+    await writeLocalData(localConfig.localClotheJsonUri, clothes);
+    return clothes;
     }   
     catch (error) {
-        //fail to read from local storage, read from Appwrite
-        try {
-            const result = await databases.listDocuments(
-                config.databaseId!,
-                config.clothesCollectionId!,
-                [Query.orderAsc('$createdAt')]
-            )
-            console.log('search from online storage (getAllClothes) ')
-            //store the data in the local storage
-            const jsonData = JSON.stringify(result.documents);
-            await FileSystem.writeAsStringAsync(fileUri, jsonData, {
-                encoding: FileSystem.EncodingType.UTF8
-            });
-
-            return result.documents.map(doc => ({
-                $id: doc.$id,
-                userid: doc.userid,
-                title: doc.title,
-                price: doc.price,
-                image: doc.image,
-                imagefileid: doc.imagefileid,
-                remark: doc.remark,
-                createdAt: new Date(doc.$createdAt),
-                category: doc.category,
-                maincategory: doc.maincategory,
-                subcategories: doc.subcategories,
-                colors: doc.colors,
-                purchasedate: doc.purchasedate
-            })) as CLOTHES
-        }
-        catch(error){
-            console.log(error)
-        }
-    
-}
-    if (existingData.length > 0) {
-        return existingData;
-    }
+        console.error('fail to getclothesAll',error);
         return []
-    
+    }
+}
+function filterClothes(clothes: CLOTHES, category?: string,id?:string): CLOTHES {
+    if(category){
+        if (category === 'All') return clothes;
+        return clothes.filter(item => item.maincategory === category);
+    }
+    if(id) return clothes.filter(item => item.$id === id);
+    return clothes;
 }
 
 export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{query?:string,mainCategoryfilter:string,limit?:number}): Promise<CLOTHES> {
-    try {
-
+    
         // Try to read from local storage first
-        let existingData = [];
-        const fileUri = config.localClotheJsonUri;
-
         try {
-            const existingContent = await FileSystem.readAsStringAsync(fileUri);
-            existingData = JSON.parse(existingContent);
-            if (mainCategoryfilter && mainCategoryfilter !== 'All') {
-                existingData = existingData.filter((item: Clothe) => item.maincategory === mainCategoryfilter);
+            const localClothes = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
+            if(localClothes.length > 0) {
+                console.log('reading clothes locally (getClothesWithFilter) ');
+                return filterClothes(localClothes, mainCategoryfilter);;
             }
-            console.log('search from local storage (getClothesWithFilter) ',mainCategoryfilter)
-
-        } catch (error) {
-            // If local storage read fails,read from Appwrite
+            console.log('search from remote storage (getClothesWithFilter) ',mainCategoryfilter)
             const buildQuery = [Query.orderDesc('$createdAt')]
-            console.log('search from online storage (getClothesWithFilter) ',mainCategoryfilter)
-
-            if(mainCategoryfilter && mainCategoryfilter !=='All') buildQuery.push(Query.equal('maincategory',mainCategoryfilter))
+            if(mainCategoryfilter && mainCategoryfilter !=='All') 
+                buildQuery.push(Query.equal('maincategory',mainCategoryfilter))
             const result = await databases.listDocuments(
                 config.databaseId!,
                 config.clothesCollectionId!,
                 buildQuery
             )
-               //store the data in the local storage
-               const jsonData = JSON.stringify(result.documents.map(doc => ({
-                $id: doc.$id,
-                userid: doc.userid,
-                title: doc.title,
-                price: doc.price,
-                image: doc.image,
-                imagefileid: doc.imagefileid,
-                remark: doc.remark,
-                createdAt: new Date(doc.$createdAt),
-                category: doc.category,
-                maincategory: doc.maincategory,
-                subcategories: doc.subcategories,
-                colors: doc.colors,
-                purchasedate: doc.purchasedate
-            })))
-               await FileSystem.writeAsStringAsync(fileUri, jsonData, {
-                   encoding: FileSystem.EncodingType.UTF8
-               });
-            return result.documents.map(doc => ({
-                $id: doc.$id,
-                userid: doc.userid,
-                title: doc.title,
-                price: doc.price,
-                image: doc.image,
-                imagefileid: doc.imagefileid,
-                remark: doc.remark,
-                createdAt: new Date(doc.$createdAt),
-                category: doc.category,
-                maincategory: doc.maincategory,
-                subcategories: doc.subcategories,
-                colors: doc.colors,
-                purchasedate: doc.purchasedate
-            })) as CLOTHES
-        }
-
-        if (existingData.length > 0) {
-            return existingData;
-        }
-        return [];
-
-
-    } catch (error) {
-        console.log(error)
-        return []
-    }
-}
-
-export async function getClotheById({ id }: { id: string }) {
-
-    let existingData = [];
-    const fileUri = config.localClotheJsonUri;
-
-    try {
-        //search for the clothe in the local storage
-        const existingContent = await FileSystem.readAsStringAsync(fileUri);
-        existingData = JSON.parse(existingContent);
-        console.log('search from local storage (getClotheById) ',id)
-        return existingData.find((clothe: Clothe) => clothe.$id === id);
-
-    } catch (error) {
-    try {
-        console.log('search from online storage (getClotheById) ',id)
-
-      const result = await databases.getDocument(
-        config.databaseId!,
-        config.clothesCollectionId!,
-        id,
-      );
-    return {
-        $id: result.$id,
-        userid: result.userid,
-        title: result.title,
-        price: result.price,
-        image: result.image,
-        imagefileid: result.imagefileid,
-        remark: result.remark,
-        createdAt: new Date(result.$createdAt),
-        category: result.category,
-        maincategory: result.maincategory,
-        subcategories: result.subcategories,
-        colors: result.colors,
-        purchasedate: result.purchasedate
-    } as Clothe
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-}
-  }
-
-  export async function deleteClotheById({ id }: { id: string },imagefileid:string) {
-    try {
-        // First, try to delete from local storage
-        let existingData = [];
-        const fileUri = config.localClotheJsonUri;
-        try {
-            const existingContent = await FileSystem.readAsStringAsync(fileUri);
-            existingData = JSON.parse(existingContent);
-            existingData = existingData.filter((clothe: Clothe) => clothe.$id !== id);
-            await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(existingData));
-            
-            // Also delete the local image file
-            const imageToDelete = existingData.find((clothe: Clothe) => clothe.$id === id)?.image;
-            if (imageToDelete) {
-                await FileSystem.deleteAsync(imageToDelete, { idempotent: true });
-            }
+            const clothes = mapDocumentsToClothes(result.documents);
+            //store the data in the local storage
+            await writeLocalData(localConfig.localClotheJsonUri, [...localClothes, ...clothes]);
+            return filterClothes(clothes, mainCategoryfilter);
         } catch (error) {
-            console.error('Error updating local storage:', error);
+            console.error('Error getClothesWithFilter', error);
+            return [];
         }
-        const result2 = await deleteImageById({fileId:imagefileid});
+}
 
-      const result = await databases.deleteDocument(
-        config.databaseId!,
-        config.clothesCollectionId!,
-        id,
-      );
-    return result && result2;
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-  }
+export async function getClotheById({ id }: { id: string }):Promise<Clothe|null> {
 
-  export async function deleteImageById({ fileId }: { fileId: string }) {
+
+
     try {
-      const result = await storage.deleteFile(
-        config.clothesImgStorageId!,
-        fileId,
-      );
-      return result;
+        const localClothes = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
+            if(localClothes.length > 0) {
+                console.log('reading clothes locally (getClotheById) ');
+                return filterClothes(localClothes, undefined, id)[0] || null;;
+            }
+            console.log('search from remote storage (getClotheById) ',id)
+            const result = await databases.getDocument(
+                config.databaseId!,
+                config.clothesCollectionId!,
+                id,
+              );
+            const clothes = mapDocumentsToClothes(result.documents);
+            await writeLocalData(localConfig.localClotheJsonUri, [...localClothes,...clothes]);
+            return filterClothes(clothes, id)[0] || null;
+
+              
     } catch (error) {
-      console.error(error);
-      return null;
+        console.error('Error getClotheById', error);
+        return null;
     }
   }
+const deleteLocalClothe = async (id: string): Promise<boolean> => {
+    try {
+        const clothes = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
+        const clotheToDelete = clothes.find(clothe => clothe.$id === id);
+        
+        if (!clotheToDelete) return false;
 
+        // delete image file locally
+        if (clotheToDelete.localImageURL) {
+            await FileSystem.deleteAsync(clotheToDelete.localImageURL, { idempotent: true });
+        }
+
+        //update local data
+        const updatedClothes = clothes.filter(clothe => clothe.$id !== id);
+        await writeLocalData(localConfig.localClotheJsonUri, updatedClothes);
+        
+        return true;
+    } catch (error) {
+        console.error('delete clothe locally failed:', error);
+        return false;
+    }
+};
+
+const deleteRemoteClothe = async (id: string, imageId: string): Promise<boolean> => {
+    try {
+        const [imageResult, documentResult] = await Promise.all([
+            storage.deleteFile(config.clothesImgStorageId!, imageId),
+            databases.deleteDocument(config.databaseId!, config.clothesCollectionId!, id)
+        ]);
+        
+        return !!imageResult && !!documentResult;
+    } catch (error) {
+        console.error('delete clothe remotelly failed:', error);
+        return false;
+    }
+};
+
+export async function deleteClotheById(id: string, imageId: string): Promise<boolean> {
+    try {
+        const [localResult, remoteResult] = await Promise.all([
+            deleteLocalClothe(id),
+            deleteRemoteClothe(id, imageId)
+        ]);
+
+        return localResult && remoteResult;
+    } catch (error) {
+        console.error('delete clothe failed:', error);
+        return false;
+    }
+}
 
 
 
@@ -388,16 +302,7 @@ export async function getUser(){
     try{
 
         try {
-            //create a directory to store the clothe data
-            const dirInfo = await FileSystem.getInfoAsync(`${FileSystem.documentDirectory}clotheData`);
-            if (!dirInfo.exists) {
-            await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}clotheData`, { intermediates: true });
-            }
-            //create a directory to store the clothe images
-            const dirInfo2 = await FileSystem.getInfoAsync(`${FileSystem.documentDirectory}clotheData/Images`);
-            if (!dirInfo2.exists) {
-            await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}clotheData/Images`, { intermediates: true });
-            }
+            await ensureDirectories();
         } catch (error) {
             console.error('Error checking/creating directory:', error);
         }
