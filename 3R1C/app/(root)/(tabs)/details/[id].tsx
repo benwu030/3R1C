@@ -2,7 +2,7 @@ import { View, Text, TouchableHighlight, TouchableNativeFeedback, TouchableOpaci
 import React, { useEffect } from 'react'
 import { useLocalSearchParams,router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { deleteClotheById, getClotheById } from '@/lib/AppWrite';
+import { deleteClotheById, getClotheById } from '@/lib/CRUD/clotheCRUD';
 import { useAppwrite } from '@/lib/useAppWrite';
 import { ActivityIndicator } from 'react-native';
 import LoadingScreen from '@/components/LoadingScreen';

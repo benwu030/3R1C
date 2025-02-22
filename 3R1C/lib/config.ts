@@ -6,7 +6,9 @@ export const config = {
     databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID,
     clothesCollectionId: process.env.EXPO_PUBLIC_APPWRITE_CLOTHES_COLLECTION_ID,
     clothesImgStorageId: process.env.EXPO_PUBLIC_APPWRITE_CLOTHES_STORAGE_ID,
-    
+    outfitCollectionId: process.env.EXPO_PUBLIC_APPWRITE_OUTFIT_COLLECTION_ID,
+    outfitCollectionImgStorageId: process.env.EXPO_PUBLIC_APPWRITE_OUTFIT_STORAGE_ID,
+    outfitCollection_CollectionId: process.env.EXPO_PUBLIC_APPWRITE_OUTFIT_COLLECTION_ID,
 }
 
 export const localConfig = {

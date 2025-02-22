@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {View, Text, TextInput, Button, Alert} from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { createClothe } from '@/lib/AppWrite';
+import { createClothe } from '@/lib/CRUD/clotheCRUD';
 import { Category } from '@/constants/category';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router,useLocalSearchParams} from 'expo-router';

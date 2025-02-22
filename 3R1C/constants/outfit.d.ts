@@ -5,16 +5,16 @@ export interface OutfitCollection {
     userid: string;
     title: string;
     description?: string;
-    previewImage?: string;
+    previewImageURL?: string;
     outfitIds?: string[]; // related Outfits
-    dayToWear?: Date;
+    dayToWear?: Date[];
     createdAt?: Date;
 }
 export interface Outfit {
     $id?: string | null;
     userid: string;
     title: string;
-    previewImage: string;
+    previewImageURL?: string;
     remark?: string;
     outfitCollectionIds?: string[];
     items: OutfitItem[];

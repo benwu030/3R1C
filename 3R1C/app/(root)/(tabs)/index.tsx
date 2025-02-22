@@ -7,7 +7,7 @@ import icons from '@/constants/icons'
 import ClothesCard from '@/components/ClothesCard'
 import Filters from '@/components/Filters'
 import { useAppwrite } from '@/lib/useAppWrite'
-import {  getClothesWithFilter } from '@/lib/AppWrite'
+import {  getClothesWithFilter } from '@/lib/CRUD/clotheCRUD'
 import { MainCategoriesFilter } from '@/components/CategoriesFilter'
 import { CATEGORIES } from '@/constants/data'
 //columnwraooer -> row
