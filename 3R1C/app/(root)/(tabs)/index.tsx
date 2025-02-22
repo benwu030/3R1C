@@ -1,33 +1,39 @@
-import React, { useEffect, useCallback } from 'react'
+import React, { useCallback,useEffect,useState } from 'react'
 import { View, Text, FlatList, ActivityIndicator } from 'react-native'
 import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import {useLocalSearchParams, Link, router } from 'expo-router'
+import {useLocalSearchParams, Link, router,useFocusEffect } from 'expo-router'
 import icons from '@/constants/icons'
 import ClothesCard from '@/components/ClothesCard'
 import Filters from '@/components/Filters'
 import { useAppwrite } from '@/lib/useAppWrite'
-import { getClothesWithFilter } from '@/lib/AppWrite'
+import {  getClothesWithFilter } from '@/lib/AppWrite'
 import { MainCategoriesFilter } from '@/components/CategoriesFilter'
 import { CATEGORIES } from '@/constants/data'
 //columnwraooer -> row
 //contentContainer over content area
-const totalNumberClothes = "3"
 const Index = () => {
   const params = useLocalSearchParams<{mainCategoryfilter?:string}>()
   const {data:clothes,loading,refetch} = useAppwrite({fn:getClothesWithFilter})
+  const [totalNumberClothes,setTotalNumberClothes] = useState(0)
   const handleCardPressed = (id:string)=>{
     console.log('card pressed',id)
     router.push(`/details/${id}`)
   }
-
-  
-  useEffect(()=>{
  
-    refetch({mainCategoryfilter: params.mainCategoryfilter??'All'})
+  
 
-  },[params.mainCategoryfilter])
+useEffect(()=>{
+  setTotalNumberClothes(clothes?.length??0)
+},[clothes])
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch({mainCategoryfilter: params.mainCategoryfilter??'All'});
+    }, [params.mainCategoryfilter])
+  );
    
+  
   
   return (
 
@@ -47,7 +53,7 @@ const Index = () => {
       </View>
 
       <View className='flex-row justify-between items-center px-5'>
-        <Text className='text-base font-S-Regular'>{totalNumberClothes} Clothes</Text>
+        <Text className='text-base font-S-Regular'>{totalNumberClothes} Items</Text>
         <Filters/>
       </View>
 

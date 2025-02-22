@@ -41,21 +41,28 @@ const CreateClothesModal = ({userID }: {userID:string }) => {
     remark,
     maincategory:mainCategoryfilter,
     subcategories: subCategoryfilter,
-    colors:color,
+    maincolor:color,
     purchasedate: purchaseDate,
-    image: imageFile.uri,
+    localImageURL: imageFile.uri,
     };
     
 
-    const result = await createClothe(newClothe, userID,imageFile);
-    if (result) {
-      Alert.alert('Success', 'Clothe created successfully');
-      router.back();
-    } else {
-      Alert.alert('Error', 'Failed to create clothe');
-      router.back();
-
+    try {
+      const result = await createClothe(newClothe, userID, imageFile, () => {
+        Alert.alert('Success', 'Clothe stored locally');
+        router.back();
+      });
+    
+      if(!result) {
+        Alert.alert('Fail', 'Failed to store clothe remotelly');
+      }
+    } catch (error) {
+        Alert.alert('Error', 'Failed to store clothe locally');
+        console.error('Failed to store clothe locally',error);
     }
+     
+
+    
   };
   useEffect(() => {
     console.log('mainCate:',params.mainCategoryfilter);

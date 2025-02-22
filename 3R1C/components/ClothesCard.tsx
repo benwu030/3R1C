@@ -10,7 +10,7 @@ interface Props{
     item: Clothe,
     onPress?:()=>void
 }
-const ClothesCard = ({item:{image,title,price,purchasedate},onPress}:Props) => {
+const ClothesCard = ({item:{localImageURL,title,price,purchasedate},onPress}:Props) => {
   return (
     <TouchableOpacity onPress={onPress} className='flex-1  relative'>
       <View className='flex-col items-center justify-center mt-2'>
@@ -18,7 +18,7 @@ const ClothesCard = ({item:{image,title,price,purchasedate},onPress}:Props) => {
             <Text className='text-xs font-S-Bold text-zinc-600 ml-1'>${price}</Text>
         </View>
      
-        <Image source={image} className="w-full h-60" />
+        <Image source={localImageURL} className="w-full h-60" />
 
       <View className='flex-col items-center justify-center mt-2'>
         <Text className='font-S-Regular text-black text-xl'>{title}</Text>

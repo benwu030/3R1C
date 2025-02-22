@@ -10,13 +10,18 @@ import { Image } from 'expo-image';
 import icons from '@/constants/icons';
 import { usePathname } from 'expo-router';
 import { Alert } from 'react-native';
+
 const ClotheDetailsScreen= () => {
     // const path = usePathname(); 
     // console.log(path);
     const { id } = useLocalSearchParams<{id:string}>();
     // console.log(id)
     const { data:clothe,loading,refetch } = useAppwrite({fn:getClotheById,params:{id:id}})
-    useEffect(()=>{refetch()},[id])
+    useEffect(()=>{
+        refetch()
+        if (!clothe&&!loading) router.back();
+
+    },[id])
 
     const handleDelteClothe = ()=>{
         Alert.alert(
@@ -31,8 +36,7 @@ const ClotheDetailsScreen= () => {
                 text: "Delete",
                 onPress: async() => {
                 // Add delete logic here
-                console.log('Item deleted');
-                const result = await deleteClotheById({id:clothe!.$id},clothe!.imagefileid);
+                const result = await deleteClotheById(clothe!.$id!,clothe!.$id!);
                 if(!result){
                     Alert.alert('Error', 'Failed to delete item');
                     router.back();
@@ -74,14 +78,14 @@ const ClotheDetailsScreen= () => {
         </View>
 
         {/* image */}
-      <Image source={clothe!.image} className='w-full h-[32rem] bg-white' contentFit='contain'/>
+      <Image source={clothe!.localImageURL} className='w-full h-[32rem] bg-white' contentFit='contain'/>
       <Text className='text-2xl font-S-Regular mt-5'>${clothe!.price}</Text>
-        <TextInput className='text-lg font-S-Medium mt-2'>Purchased on {clothe!.purchasedate}</TextInput>
+        <Text className='text-lg font-S-Medium mt-2'>Purchased on {clothe!.purchasedate ? new Date(clothe!.purchasedate).toLocaleDateString('en-GB') : ''}</Text>
         <Text className='text-lg font-S-Medium mt-2'>Category: {clothe!.maincategory}</Text>
         <Text className='text-lg font-S-Medium mt-2'>SubCategories:</Text>
         <View className='flex-row flex-wrap'>
 
-        {clothe!.subcategories.map((element: string) => (
+        {clothe?.subcategories?.map((element: string) => (
             <Text key={element} className='text-lg font-S-Medium mr-2'>{element}</Text>
         ))}
         </View>
