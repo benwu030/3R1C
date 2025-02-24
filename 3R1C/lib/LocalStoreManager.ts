@@ -7,7 +7,10 @@ export const ensureDirectories = async () => {
     const dirs = [
         localConfig.localClotheDirectory,
         localConfig.localClotheImagesDirectiry,
-        localConfig.localOutfitDirectory
+        localConfig.localOutfitDirectory,
+        localConfig.localOutfitPreviewsDirectiry,
+        localConfig.localOutfitCollectionPreviewsDirectiry
+
     ];
 
     for (const dir of dirs) {
@@ -17,7 +20,19 @@ export const ensureDirectories = async () => {
         }
     }
 };
+export const ensureFiles = async () => {
+    const files = [
+        localConfig.localOutfitJsonUri,
+        localConfig.localOutfitCollectionsJsonUri
+    ];
 
+    for (const file of files) {
+        const fileInfo = await FileSystem.getInfoAsync(file);
+        if (!fileInfo.exists) {
+            await writeLocalData(file, []);
+        }
+    }
+};
 export const readLocalData = async <T>(path: string): Promise<T[]> => {
     try {
         const content = await FileSystem.readAsStringAsync(path);
@@ -31,7 +46,6 @@ export const readLocalData = async <T>(path: string): Promise<T[]> => {
 
 export const writeLocalData = async <T>(path: string, data: T[]) => {
     try {
-        await ensureDirectories();
         await FileSystem.writeAsStringAsync(path, JSON.stringify(data));
     } catch (err) {
         console.error('Error writing local data:', err);
@@ -39,6 +53,19 @@ export const writeLocalData = async <T>(path: string, data: T[]) => {
     }
 };
 
+export const saveImageLocally = async (path:string,imageUri: string, id: string) => {
+    const fileExtension = imageUri.split('.').pop();
+    const localImageUri = `${path}${id}.${fileExtension}`;
+     try {
+            await FileSystem.copyAsync({
+                from: imageUri,
+                to: localImageUri
+            });
+            return localImageUri;
+            } catch (error) {
+            console.error('Failed to save image locally:', error);
+    }
+}
 // 本地存儲函數
 export const saveOutfitLocally = async (outfit: Outfit) => {
     const outfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);

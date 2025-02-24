@@ -3,8 +3,8 @@ import { Clothe, CLOTHES } from "@/constants/clothes";
 import { ImagePickerAsset } from "expo-image-picker";
 import * as FileSystem from 'expo-file-system';
 import { config, localConfig } from "../config";
-import { readLocalData, writeLocalData,ensureDirectories } from "../LocalStoreManager";
-import {storage,databases} from '../AppWrite'
+import { readLocalData, writeLocalData,saveImageLocally } from "../LocalStoreManager";
+import {storage,databases,uploadImage} from '../AppWrite'
 //create a clothes document
 export async function createClothe(clothe: Clothe,userID:string,imageFile:ImagePickerAsset,onLocalSave?: () => void){
     try {
@@ -12,14 +12,7 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
         //save the image to local
         const fileExtension = imageFile.uri.split('.').pop()
         const localImageUri = `${localConfig.localClotheImagesDirectiry}${uid}.${fileExtension}`;
-        try{ 
-                await FileSystem.copyAsync({
-                from: imageFile.uri,
-                to: localImageUri
-                    });
-            }catch(error){
-            console.error('fail to save image to local',error)
-        }
+        await saveImageLocally(localConfig.localClotheImagesDirectiry,imageFile.uri,uid)
         //update file path
         imageFile.uri = localImageUri;
         imageFile.fileName = `${uid}.${fileExtension}`
@@ -32,7 +25,7 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
         onLocalSave?.();
         //upload to appwrite
         clothe.$id = null
-        const uploadImageResponse = await uploadImage(imageFile,uid)
+        const uploadImageResponse = await uploadImage(imageFile,uid,config.clothesImgStorageId!)    
         if(!uploadImageResponse) throw new Error('failed to upload image')
         const response = await databases.createDocument(
             config.databaseId!,
@@ -52,29 +45,7 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
     }
 }
 
-export async function uploadImage(file:ImagePickerAsset,uid:string){
-   try{
-    const response = await storage.createFile(
-        config.clothesImgStorageId!,
-        uid, // Auto-generate ID
-        {
-            
-            name: file.fileName!,
-            type: file.type!,
-            size: file.fileSize!,
-            uri: file.uri},
-            
-        
-    );
-    console.log(response,'from uploadImage');
 
-    return response
-   
-   } catch(error){
-       console.error(error)
-       return null
-   }
-}
 export async function refetchClotheImage(imageURL:string,id:string,onLocalSave?: () => void){
     console.log('refetching image')
     try {

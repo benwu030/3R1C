@@ -8,7 +8,7 @@ import { ImagePickerAsset } from "expo-image-picker";
 import * as FileSystem from 'expo-file-system';
 import { OutfitCollection, Outfit, OutfitItem } from "@/constants/outfit";
 import { config, localConfig } from "./config";
-import { readLocalData, writeLocalData,ensureDirectories } from "./LocalStoreManager";
+import { ensureFiles,ensureDirectories } from "./LocalStoreManager";
 export const client = new Client();
 
 client.setEndpoint(config.endpoint!)
@@ -21,8 +21,30 @@ export const avatar = new Avatars(client);
 export const storage = new Storage(client);
 export const databases = new Databases(client)
 const account = new Account(client);
+//upload image to bucket
+export async function uploadImage(file:ImagePickerAsset,uid:string,bucketId:string){
+   try{
+    const response = await storage.createFile(
+        bucketId,
+        uid, // Auto-generate ID
+        {
+            
+            name: file.fileName!,
+            type: file.type!,
+            size: file.fileSize!,
+            uri: file.uri},
+            
+        
+    );
+    console.log(response,'from uploadImage');
 
-
+    return response
+   
+   } catch(error){
+       console.error(error)
+       return null
+   }
+}
 
 
 //login and logout functions
@@ -78,6 +100,7 @@ export async function getUser(){
 
         try {
             await ensureDirectories();
+            await ensureFiles();
         } catch (error) {
             console.error('Error checking/creating directory:', error);
         }

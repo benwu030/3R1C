@@ -1,4 +1,4 @@
-import React, { useCallback,useEffect,useState } from 'react'
+import { useCallback,useEffect,useState } from 'react'
 import { View, Text, FlatList, ActivityIndicator } from 'react-native'
 import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
