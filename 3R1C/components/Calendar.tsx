@@ -88,7 +88,7 @@ const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
          
             {/* Calendar Days  onMomentumScrollEnd will be called when the scroll stops*/}
             <FlatList
-                className="border-b border-grey-darker  h-[45%]  "
+                className="border-b border-grey-darker  h-[50%]  "
                 data={calendarDays}
                 showsVerticalScrollIndicator={false}
                 contentContainerClassName='flex-1'

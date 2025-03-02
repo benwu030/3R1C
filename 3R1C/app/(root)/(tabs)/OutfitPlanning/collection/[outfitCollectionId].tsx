@@ -1,32 +1,52 @@
-import { View, Text,SafeAreaView,TouchableOpacity,FlatList,ActivityIndicator} from 'react-native'
-import {useState,useCallback, useEffect} from 'react'
-import icons from '@/constants/icons'
+import { View, Text,SafeAreaView,TouchableOpacity,ActivityIndicator,FlatList } from 'react-native'
+import {useCallback, useEffect, useState} from 'react'
 import { Image } from 'expo-image'
-import { router,Link,useFocusEffect } from 'expo-router'
-import { getOutfitCollections } from '@/lib/CRUD/outfitCRUD'
+import icons from '@/constants/icons'
+import { useLocalSearchParams,router, useFocusEffect, Link } from 'expo-router'
+import { getOutfitsByCollection } from '@/lib/CRUD/outfitCRUD'
 import { useAppwrite } from '@/lib/useAppWrite'
-import OutfitCollectionCard from '@/components/OutfitCollectionCard'
+import OutfitCard from '@/components/OutfitCard'
+import { Outfit } from '@/constants/outfit'
+import { ID } from 'react-native-appwrite';
 import CustomHeader from '@/components/CustomHeader'
-import { OutfitCollection } from '@/constants/outfit'
-const OutfitCollections = () => {
-
+const OutfitCollection = () => {
+  const localParams = useLocalSearchParams<{outfitCollectionId:string,collectionName:string}>()
+  const {data:outfits,loading,refetch} = useAppwrite({
+    fn: (params) => getOutfitsByCollection(params.id),
+    params: {id: localParams.outfitCollectionId}
+  })
+  const [totalNumberOutfits, setTotalNumberOutfits] = useState(0)
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [totalNumberCollections, setTotalNumberCollections] = useState(0);
-  const handleCollectionPressed = (id:string, title:string = "Your Outfits")=>{
+
+  const handleAddOutfit = () => {
+    const uid = ID.unique();
+    router.push({
+      pathname: `./outfit/${uid}`,
+      params: { 
+        outfitName: "New Outfit"
+      }
+    });
+  }
+   const handleOutfitPressed = (item:Outfit)=>{
+    const id = item.$id || '';
+    const outfitName = item.title;
+    
     if (isSelectMode) {
       setSelectedItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id) 
-        : [...prev, id]
+        prev.includes(id) 
+          ? prev.filter(item => item !== id) 
+          : [...prev, id]
       );
     } else {
       router.push({
-      pathname: `./collection/${id}`,
-      params: {collectionName: title}
+        pathname: `./outfit/${id}`,
+        params: { 
+          outfitName: outfitName
+        }
       });
     }
-    }
+  }
     const handleDeleteSelected = async () => {
       // TODO: Implement delete functionality
       console.log('Deleting items:', selectedItems);
@@ -35,20 +55,20 @@ const OutfitCollections = () => {
       setIsSelectMode(false);
     
     }
-    const {data:collections,loading,refetch} = useAppwrite({fn:getOutfitCollections})
      useFocusEffect(
         useCallback(() => {
           refetch();
         },[])
       );
        useEffect(()=>{
-    setTotalNumberCollections(collections?.length??0)
-       },[collections])
+    setTotalNumberOutfits(outfits?.length??0)
+       },[outfits])
   return (
   <SafeAreaView className='bg-sand-dark flex-1'>
    
-  <CustomHeader 
-    title='Your Collections' 
+    
+   <CustomHeader 
+    title={localParams.collectionName}
     rightComponent={
       <View className='flex-row justify-end items-end py-2 px-5'>
         
@@ -61,15 +81,15 @@ const OutfitCollections = () => {
             <Image source={icons.deleteIcon} className='size-5' />
           </TouchableOpacity>
         ) : (
-          <Link href="/AddOutfitCollection" className=''>
+          <TouchableOpacity onPress={handleAddOutfit} className=''>
             <Image source={icons.plus} className='size-6' />
-          </Link>
+          </TouchableOpacity>
         )}
       </View>
     } 
   />
    <View className='flex-row justify-between items-center px-5 py-2'>
-        <Text className='text-base font-S-Regular'>{totalNumberCollections} Items</Text>
+        <Text className='text-base font-S-Regular'>{totalNumberOutfits} Items</Text>
         {/* Select/Cancel Button */}
         <TouchableOpacity 
           onPress={() => {
@@ -83,25 +103,22 @@ const OutfitCollections = () => {
             </Text>
         </TouchableOpacity>
       </View>
-    
-    
-    
     {/* fetch Collections Here*/}
-    <View className='px-5 py-2 flex-1'>
+    <View className='px-5'>
      
        {loading ? (
               <ActivityIndicator className='text-beige-darker mt-[16rem]' size='large' />
             ) : (
               <FlatList
-                data={collections}
-                renderItem={({item}: {item: OutfitCollection}) => (
-                  <View  className='w-1/2 px-2'>
-                    <OutfitCollectionCard key={item.$id}item={item} onPress={() => handleCollectionPressed(item.$id!,item.title)} isSelected={selectedItems.includes(item.$id!)}
+                data={outfits}
+                renderItem={({item}: {item: Outfit}) => (
+                  <View key={item.$id} className='w-1/2 px-2'>
+                    <OutfitCard item={item} onPress={() => handleOutfitPressed(item)} isSelected={selectedItems.includes(item.$id || '')}
                    isSelectMode={isSelectMode} />
                   </View>
                 )}
                 numColumns={2}
-                contentContainerClassName='pb-20'
+                contentContainerStyle={{}}
                 columnWrapperStyle={{marginHorizontal: 20, flexDirection: 'row'}}
                 showsVerticalScrollIndicator={false}
                 horizontal={false}
@@ -115,4 +132,4 @@ const OutfitCollections = () => {
   )
 }
 
-export default OutfitCollections
+export default OutfitCollection

@@ -12,7 +12,6 @@ import { Dimensions,StyleSheet } from 'react-native';
 
 import {Image} from 'expo-image';
 import { cssInterop } from "nativewind";
-import { useDraggableBoardContext } from '@/app/(root)/(tabs)/OutfitPlanning/[id]';
 cssInterop(Image, { className: "style" });
 interface Position {
     x: number;

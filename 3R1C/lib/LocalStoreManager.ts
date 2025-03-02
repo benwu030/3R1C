@@ -23,7 +23,8 @@ export const ensureDirectories = async () => {
 export const ensureFiles = async () => {
     const files = [
         localConfig.localOutfitJsonUri,
-        localConfig.localOutfitCollectionsJsonUri
+        localConfig.localOutfitCollectionsJsonUri,
+        localConfig.localOutfitCollectionRelationshipJsonUri
     ];
 
     for (const file of files) {
@@ -52,7 +53,29 @@ export const writeLocalData = async <T>(path: string, data: T[]) => {
         throw err;
     }
 };
-
+export const writeLocalDataWithDuplicateCheck = async <T extends { $id?:string|null }>(path: string, newItems: T | T[]) => {
+    try {
+        const existingData = await readLocalData<T>(path);
+        const itemsToAdd = Array.isArray(newItems) ? newItems : [newItems];
+        
+        // Filter out items that already exist in the data
+        const nonDuplicates = itemsToAdd.filter(newItem => 
+            !existingData.some(item => item.$id === newItem.$id)
+        );
+        
+        if (nonDuplicates.length > 0) {
+            // Only add non-duplicate items
+            await writeLocalData(path, [...existingData, ...nonDuplicates]);
+            return nonDuplicates; // Return items that were added
+        } else {
+            console.log(`No new items to add to ${path}`);
+            return []; // No items added
+        }
+    } catch (err) {
+        console.error('Error writing data with duplicate check:', err);
+        throw err;
+    }
+};
 export const saveImageLocally = async (path:string,imageUri: string, id: string) => {
     const fileExtension = imageUri.split('.').pop();
     const localImageUri = `${path}${id}.${fileExtension}`;

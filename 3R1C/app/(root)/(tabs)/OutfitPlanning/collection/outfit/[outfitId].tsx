@@ -4,26 +4,27 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import DraggableClothing from '@/components/DraggableClothing'
 import images from '@/constants/images'
 import { cssInterop } from "nativewind";
+import CustomHeader from '@/components/CustomHeader'
+import { useLocalSearchParams } from 'expo-router'
 cssInterop(GestureHandlerRootView, { className: "style" });
 
-interface DraggalbeBoardCOntextProps{
-  width:number;
-  height:number;
-  x:number
-  y:number
+
+const updateTitle = (title:string)=>{
+  console.log(title)
 }
 
-export const DraggableBoardContext = createContext<DraggalbeBoardCOntextProps>({width:0,height:0,x:0,y:0})
-export const useDraggableBoardContext = () => useContext(DraggableBoardContext)
 const OutfitPlanning = () => {
-  const [boardLayout, setBoardLayout] = useState({width:0,height:0,x:0,y:0})
+  const localParams = useLocalSearchParams<{outfitId:string}>()
   return (
     <SafeAreaView className=' flex-1'>
-      {/* <DraggableBoardContext.Provider value={boardLayout} > */}
-      <GestureHandlerRootView className='bg-white flex-1' onLayout={(event) => {setBoardLayout(event.nativeEvent.layout)}}>
+
+      <CustomHeader title='New Outfit'   
+      editableTitle={true}
+      onTitleChange={updateTitle}
+      />
+      <GestureHandlerRootView className='bg-white flex-1'>
         <DraggableClothing imageUri={images.jacket}/>      
         </GestureHandlerRootView>
-        {/* </DraggableBoardContext.Provider> */}
 
     </SafeAreaView>
   )

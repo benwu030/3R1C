@@ -9,6 +9,7 @@ export const config = {
     outfitCollectionId: process.env.EXPO_PUBLIC_APPWRITE_OUTFIT_COLLECTION_ID,
     outfitCollectionImgStorageId: process.env.EXPO_PUBLIC_APPWRITE_OUTFIT_STORAGE_ID,
     outfitCollection_CollectionId: process.env.EXPO_PUBLIC_APPWRITE_OUTFITCOLLECTION_COLLECTION_ID,
+    outftiCollectionRelationshipId: process.env.EXPO_PUBLIC_APPWRITE_OUTFITCOLLECTION_RELATIONSHIP_COLLECTION_ID,
 }
 
 export const localConfig = {
@@ -22,4 +23,7 @@ export const localConfig = {
     //outfit collection
     localOutfitCollectionsJsonUri: `${FileSystem.documentDirectory}outfitData/outfitCollection.json`,
     localOutfitCollectionPreviewsDirectiry :`${FileSystem.documentDirectory}outfitData/OutfitCollectionPreviews/`,
+
+    //outfti collection relationship
+    localOutfitCollectionRelationshipJsonUri: `${FileSystem.documentDirectory}outfitData/outfitCollectionRelationship.json`,
 }

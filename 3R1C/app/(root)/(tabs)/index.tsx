@@ -72,7 +72,7 @@ useEffect(()=>{
             </View>
           )}
           numColumns={2}
-          contentContainerStyle={{}}
+          contentContainerClassName='pb-20'
           columnWrapperStyle={{marginHorizontal: 20, flexDirection: 'row'}}
           showsVerticalScrollIndicator={false}
           horizontal={false}

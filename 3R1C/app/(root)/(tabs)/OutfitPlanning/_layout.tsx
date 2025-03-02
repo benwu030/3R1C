@@ -1,5 +1,5 @@
 import { useGlobalContext } from "@/lib/globalProvider";
-import { Redirect,Stack } from "expo-router";
+import { Redirect,Slot,Stack } from "expo-router";
 
 import LoadingScreen from "@/components/LoadingScreen";
 export default function Layout(){
@@ -10,28 +10,10 @@ export default function Layout(){
         return(<Redirect href='/signIn'/>)
     }
     return(
-        <Stack>
-        <Stack.Screen 
-          name="OutfitCalendar" 
-          options={{
-            title: "Outfit Planning",
-            headerShown: false,
-          }}
-        />
-                <Stack.Screen 
-          name="Collections" 
-          options={{
-            title: "Calendar",
-          }}
-        />
-        <Stack.Screen 
-          name="[id]" 
-          options={{
-            title: "Plan Details",
-            headerShown: false,
-          }}
-        />
-  
-      </Stack>
+        <Stack 
+            screenOptions={{headerShown: false}}
+            initialRouteName="OutfitCalendar">
+            <Slot />
+        </Stack>
         )
 }
