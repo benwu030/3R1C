@@ -1,5 +1,5 @@
-import { Stack } from 'expo-router';
-import ModalTitle from '@/components/ModalTitle';
+import { Stack } from "expo-router";
+import ModalTitle from "@/components/ModalTitle";
 
 const HeaderTitleComponent = (props: any) => <ModalTitle {...props} />;
 
@@ -10,9 +10,9 @@ export default function ModalsLayout() {
         name="AddClothes"
         options={{
           headerStyle: {
-            backgroundColor: '#776E65',
+            backgroundColor: "#776E65",
           },
-          title: 'Add Clothes',
+          title: "Add Clothes",
           headerTitle: HeaderTitleComponent,
         }}
       />
@@ -20,9 +20,9 @@ export default function ModalsLayout() {
         name="AddOutfitCollection"
         options={{
           headerStyle: {
-            backgroundColor: '#776E65',
+            backgroundColor: "#776E65",
           },
-          title: 'Add Outfit Collection',
+          title: "Add Outfit Collection",
           headerTitle: HeaderTitleComponent,
         }}
       />

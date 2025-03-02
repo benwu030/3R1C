@@ -1,39 +1,38 @@
-import React from 'react';
+import React from "react";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-} from 'react-native-reanimated';
-import {
-  Gesture,
-  GestureDetector,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Dimensions, StyleSheet } from "react-native";
 
-} from 'react-native-gesture-handler';
-import { Dimensions,StyleSheet } from 'react-native';
-
-import {Image} from 'expo-image';
+import { Image } from "expo-image";
 import { cssInterop } from "nativewind";
 cssInterop(Image, { className: "style" });
 interface Position {
-    x: number;
-    y: number;
-    scale: number;
-    rotation: number;
-  }
-  
-  interface DraggableClothingProps {
-    imageUri: string;
-    initialPosition?: Position;
-  }
+  x: number;
+  y: number;
+  scale: number;
+  rotation: number;
+}
 
-  function clamp(val:number, min:number, max:number) {
-    return Math.min(Math.max(val, min), max);
-  }
-  
-  const { width, height } = Dimensions.get('screen');
-  console.log(width,height)
-const DraggableClothing = ({imageUri,initialPosition}:DraggableClothingProps) => {
-  const translationX = useSharedValue(initialPosition?.x ?? width/ 2);
-  const translationY = useSharedValue(initialPosition?.y ?? height/ 2);
+interface DraggableClothingProps {
+  imageUri: string;
+  initialPosition?: Position;
+}
+
+function clamp(val: number, min: number, max: number) {
+  return Math.min(Math.max(val, min), max);
+}
+
+const { width, height } = Dimensions.get("screen");
+console.log(width, height);
+const DraggableClothing = ({
+  imageUri,
+  initialPosition,
+}: DraggableClothingProps) => {
+  const translationX = useSharedValue(initialPosition?.x ?? width / 2);
+  const translationY = useSharedValue(initialPosition?.y ?? height / 2);
   const prevTranslationX = useSharedValue(0);
   const prevTranslationY = useSharedValue(0);
   const scale = useSharedValue(initialPosition?.scale ?? 1);
@@ -46,7 +45,7 @@ const DraggableClothing = ({imageUri,initialPosition}:DraggableClothingProps) =>
       { translateX: translationX.value },
       { translateY: translationY.value },
       { scale: scale.value },
-      {rotate: `${rotationAngle.value}rad` }
+      { rotate: `${rotationAngle.value}rad` },
     ],
     borderWidth: selected.value,
   }));
@@ -62,8 +61,6 @@ const DraggableClothing = ({imageUri,initialPosition}:DraggableClothingProps) =>
     .onEnd(() => {
       selected.value = 0;
     });
-
-
 
   const pinch = Gesture.Pinch()
     .onStart(() => {
@@ -83,51 +80,51 @@ const DraggableClothing = ({imageUri,initialPosition}:DraggableClothingProps) =>
     .runOnJS(true);
 
   const pan = Gesture.Pan()
-  .minDistance(1)
-  .onStart(() => {
-    prevTranslationX.value = translationX.value;
-    prevTranslationY.value = translationY.value;
-  })
-  .onUpdate((event) => {
-    const maxTranslateX = width;
-    const maxTranslateY = height;
+    .minDistance(1)
+    .onStart(() => {
+      prevTranslationX.value = translationX.value;
+      prevTranslationY.value = translationY.value;
+    })
+    .onUpdate((event) => {
+      const maxTranslateX = width;
+      const maxTranslateY = height;
 
-    translationX.value = clamp(
-      prevTranslationX.value + event.translationX,
-      0,
-      maxTranslateX
-    );
-    translationY.value = clamp(
-      prevTranslationY.value + event.translationY,
-      0,
-      maxTranslateY
-    );
-    selected.value = 1;
-  })
-  .onEnd(() => {
-    selected.value = 0;
-  })
-  .runOnJS(true);
-  const composed = Gesture.Simultaneous(pan, pinch,rotation);
+      translationX.value = clamp(
+        prevTranslationX.value + event.translationX,
+        0,
+        maxTranslateX
+      );
+      translationY.value = clamp(
+        prevTranslationY.value + event.translationY,
+        0,
+        maxTranslateY
+      );
+      selected.value = 1;
+    })
+    .onEnd(() => {
+      selected.value = 0;
+    })
+    .runOnJS(true);
+  const composed = Gesture.Simultaneous(pan, pinch, rotation);
   return (
-   <GestureDetector gesture={composed}>
-        <Animated.View  style={[animatedStyles,styles.box]}>
-          <Image source={imageUri} className='w-full h-full'/>
-        </Animated.View>
-      </GestureDetector>
-  )
-}
+    <GestureDetector gesture={composed}>
+      <Animated.View style={[animatedStyles, styles.box]}>
+        <Image source={imageUri} className="w-full h-full" />
+      </Animated.View>
+    </GestureDetector>
+  );
+};
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    box: {
-      width: 200,
-      height: 200,
-      borderColor: 'black',
-      padding: 10,
-      }
-})
-export default DraggableClothing
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  box: {
+    width: 200,
+    height: 200,
+    borderColor: "black",
+    padding: 10,
+  },
+});
+export default DraggableClothing;

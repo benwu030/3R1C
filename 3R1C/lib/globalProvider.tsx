@@ -34,17 +34,19 @@ export const GlobalProvider = ({ children }: GlobalProviderProps) => {
     fn: getUser,
   });
   const [isOfflineMode, setIsOfflineMode] = useState(false);
-  
+
   const isLoggedIn = !!user;
   return (
     <GlobalContext.Provider
-      value={{isLoggedIn,
+      value={{
+        isLoggedIn,
         user,
         loading,
         refetch,
         isOfflineMode,
-        setIsOfflineMode
-      }}>
+        setIsOfflineMode,
+      }}
+    >
       {children}
     </GlobalContext.Provider>
   );
