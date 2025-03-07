@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { cssInterop } from "nativewind";
 import { Image } from "expo-image";
 import GlobalProvider from "@/lib/globalProvider";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 cssInterop(Image, { className: "style" });
 SplashScreen.preventAutoHideAsync();
 
@@ -35,8 +36,10 @@ export default function RootLayout() {
     return null;
   }
   return (
-    <GlobalProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </GlobalProvider>
+    <GestureHandlerRootView>
+      <GlobalProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </GlobalProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -20,6 +20,12 @@ export default function AppLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="outfit/[outfitId]"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

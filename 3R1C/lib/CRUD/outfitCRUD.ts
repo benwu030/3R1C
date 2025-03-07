@@ -33,15 +33,23 @@ export async function createOutfit(outfit: Outfit, outfitCollectionId?: string, 
         onLocalSave?.();
 
         // Save to remote
+
+const { $id, ...outfitWithoutId } = outfit;
+const outfitForRemote = {
+    ...outfitWithoutId,
+    previewImageURL: null,
+    items: JSON.stringify(outfitWithoutId.items) // Stringify the items array
+};
+console.log('outfitForRemote',outfit)
         const response = await databases.createDocument(
             config.databaseId!,
             config.outfitCollectionId!,
             uid,
-            outfit,
+            outfitForRemote,
             [
-                Permission.read(Role.user(outfit.userid)),
-                Permission.update(Role.user(outfit.userid)),
-                Permission.delete(Role.user(outfit.userid))
+            Permission.read(Role.user(outfit.userid)),
+            Permission.update(Role.user(outfit.userid)),
+            Permission.delete(Role.user(outfit.userid))
             ]
         );
         
@@ -185,39 +193,76 @@ export async function getOutfitCollections(): Promise<OutfitCollection[]> {
     }
 }
 // Update outfit items positions
-export async function updateOutfitItemPositions(
-    outfitId: string,
-    items: OutfitItem[],
-    onLocalUpdate?: () => void
-) {
+export async function updateOutfit(outfit: Outfit, onLocalUpdate?: () => void) {
     try {
+        if (!outfit.$id) {
+            throw new Error('Outfit ID is required for update');
+        }
+        
         // Update locally first
         const localOutfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
-        const updatedOutfits = localOutfits.map(outfit => {
-            if (outfit.$id === outfitId) {
-                return { ...outfit, items };
+        const updatedOutfits = localOutfits.map(item => {
+            if (item.$id === outfit.$id) {
+                return { ...item, ...outfit };
             }
-            return outfit;
+            return item;
         });
         
         await writeLocalData(localConfig.localOutfitJsonUri, updatedOutfits);
         onLocalUpdate?.();
-
+        
         // Update remote
+        const { $id, ...outfitWithoutId } = outfit;
         await databases.updateDocument(
             config.databaseId!,
-            config.outfitsCollectionId!,
-            outfitId,
-            { items }
+            config.outfitCollectionId!,
+            $id,
+            outfitWithoutId
         );
-
+        
         return true;
     } catch (error) {
-        console.error('Failed to update outfit positions:', error);
+        console.error('Failed to update outfit:', error);
         return false;
     }
 }
-
+export async function getOutfitById(outfitId: string): Promise<Outfit | null> {
+    try {
+        // Try local first
+        const localOutfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
+        const outfit = localOutfits.find(o => o.$id === outfitId);
+        
+        if (outfit) {
+            return outfit;
+        }
+        
+        // Fetch from remote
+        const response = await databases.getDocument(
+            config.databaseId!,
+            config.outfitCollectionId!,
+            outfitId
+        );
+        
+        const mappedOutfit = {
+            $id: response.$id,
+            userid: response.userid,
+            title: response.title,
+            previewImageURL: response.previewImageURL,
+            remark: response.remark,
+            outfitCollectionIds: response.outfitCollectionIds,
+            items: response.items || [],
+            createdAt: new Date(response.$createdAt),
+        };
+        
+        // Update local storage
+        await writeLocalDataWithDuplicateCheck(localConfig.localOutfitJsonUri, [mappedOutfit]);
+        
+        return mappedOutfit;
+    } catch (error) {
+        console.error('Failed to get outfit:', error);
+        return null;
+    }
+}
 function mapDocumentsToOutfit(documents: any[]): Outfit[] {
    
     return documents.map(doc => ({

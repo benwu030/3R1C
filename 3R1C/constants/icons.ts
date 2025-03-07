@@ -13,6 +13,7 @@ import logout from '@/assets/icons/logout.svg'
 import edit from '@/assets/icons/edit.svg'
 import deleteIcon from '@/assets/icons/delete.svg'
 import collectionsAdd from '@/assets/icons/collectionsAdd.svg'
+import close from '@/assets/icons/close.svg'
 export default{
     plus,
     mirror,
@@ -28,6 +29,7 @@ export default{
     logout,
     deleteIcon,
     edit,
-    collectionsAdd
+    collectionsAdd,
+    close
 }
 

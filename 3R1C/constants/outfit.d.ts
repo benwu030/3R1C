@@ -25,8 +25,10 @@ export interface OutfitItem{
     position: {
         x: number;
         y: number;
+        z:number;
         scale: number;
         rotation: number;
+        
     }
 }
 export interface OutfitCollectionRelation {

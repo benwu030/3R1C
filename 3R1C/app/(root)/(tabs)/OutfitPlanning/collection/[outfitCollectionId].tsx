@@ -41,9 +41,11 @@ const OutfitCollection = () => {
   const handleAddOutfit = () => {
     const uid = ID.unique();
     router.push({
-      pathname: `./outfit/${uid}`,
+      pathname: `/outfit/[outfitId]`,
       params: {
+        outfitId: uid,
         outfitName: "New Outfit",
+        collectionId: localParams.outfitCollectionId,
       },
     });
   };
@@ -57,9 +59,11 @@ const OutfitCollection = () => {
       );
     } else {
       router.push({
-        pathname: `./outfit/${id}`,
+        pathname: `/outfit/[outfitId]`,
         params: {
+          outfitId: id,
           outfitName: outfitName,
+          collectionId: localParams.outfitCollectionId,
         },
       });
     }
