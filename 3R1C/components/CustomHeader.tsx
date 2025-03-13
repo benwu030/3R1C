@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { View, Text, TouchableOpacity, TextInput } from "react-native";
+import { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import icons from "@/constants/icons";
@@ -24,6 +31,9 @@ const CustomHeader = ({
 }: CustomHeaderProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
+  useEffect(() => {
+    setNewTitle(title);
+  }, [title]);
   const handleBack = () => {
     if (onBackPress) {
       onBackPress();
@@ -32,16 +42,12 @@ const CustomHeader = ({
     }
   };
 
-  const handleTitilePress = () => {
-    if (editableTitle) {
-      setIsEditing(true);
-    }
-  };
   const handleTitleSubmit = () => {
     if (onTitleChange && newTitle !== title) {
       onTitleChange(newTitle);
     }
     setIsEditing(false);
+    Keyboard.dismiss();
   };
   return (
     <View className="flex-row justify-between items-center px-5">
@@ -53,20 +59,16 @@ const CustomHeader = ({
 
       {/* Title */}
       <View className="flex-col flex-1 justify-center items-center">
-        {isEditing ? (
+        {editableTitle ? (
           <TextInput
             value={newTitle}
             onChangeText={setNewTitle}
             onBlur={handleTitleSubmit}
             onSubmitEditing={handleTitleSubmit}
-            autoFocus
-            selectTextOnFocus
             className="font-S-ExtraLightItalic text-2xl"
           />
         ) : (
-          <TouchableOpacity onPress={handleTitilePress}>
-            <Text className="font-S-ExtraLightItalic text-2xl">{title}</Text>
-          </TouchableOpacity>
+          <Text className="font-S-ExtraLightItalic text-2xl">{title}</Text>
         )}
 
         <Image source={icons.headerUnderline} className="w-full h-4" />

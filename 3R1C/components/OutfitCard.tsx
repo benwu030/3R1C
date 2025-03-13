@@ -18,8 +18,6 @@ const OutfitCard = ({
   isSelected,
   onPress,
 }: OutfitProps) => {
-  console.log("Card Render:", { title, isSelectMode, isSelected, $id });
-
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -40,6 +38,7 @@ const OutfitCard = ({
             source={{ uri: previewImageURL }}
             className="w-full h-full"
             contentFit="cover"
+            cachePolicy={"none"}
           />
         ) : (
           <View className="flex-1 items-center justify-center">

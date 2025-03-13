@@ -46,6 +46,17 @@ export async function uploadImage(file:ImagePickerAsset,uid:string,bucketId:stri
    }
 }
 
+//delete image from bucket
+export async function deleteImage(bucketId:string, fileId:string){
+    try{
+        const response = await storage.deleteFile(bucketId,fileId)
+        console.log(response)
+        return response
+    }catch(error){
+        console.error(error)
+        return null
+    }
+}
 
 //login and logout functions
 export async function login (){

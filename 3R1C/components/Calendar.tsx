@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,10 @@ import {
   NativeSyntheticEvent,
 } from "react-native";
 import CalendarItem from "./OutfitPreview";
+import { useAppwrite } from "@/lib/useAppWrite";
+import { getOutfitCollectionsByDate } from "@/lib/CRUD/outfitCRUD";
+import { ActivityIndicator } from "react-native";
+import { OutfitCollection } from "@/constants/outfit";
 interface CalendarProps {
   currentDate?: Date;
 }
@@ -17,7 +21,14 @@ const Calendar = ({ currentDate = new Date() }: CalendarProps) => {
   const [selectedDate, setSelectedDate] = useState<Date>(currentDate);
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const [currentDisplayDate, setCurrentDisplayDate] = useState(currentDate);
-
+  const {
+    data: collections,
+    loading,
+    refetch,
+  } = useAppwrite({
+    fn: (params) => getOutfitCollectionsByDate(new Date(params.date)),
+    params: { date: selectedDate.toISOString() },
+  });
   const getDisplayMonth = (date: Date) => {
     return date.toLocaleString("default", { month: "long" });
   };
@@ -94,6 +105,10 @@ const Calendar = ({ currentDate = new Date() }: CalendarProps) => {
       setIsScrolling(true);
     }
   };
+
+  useEffect(() => {
+    refetch();
+  }, [selectedDate]);
   return (
     <View className="px-5  flex-col flex-1 pb-20">
       <Text className="font-S-Bold text-3xl mb-4">
@@ -103,7 +118,7 @@ const Calendar = ({ currentDate = new Date() }: CalendarProps) => {
 
       {/* Calendar Days  onMomentumScrollEnd will be called when the scroll stops*/}
       <FlatList
-        className="border-b border-grey-darker  h-[50%]  "
+        className="border-b border-grey-darker "
         data={calendarDays}
         showsVerticalScrollIndicator={false}
         contentContainerClassName="flex-1"
@@ -164,14 +179,25 @@ const Calendar = ({ currentDate = new Date() }: CalendarProps) => {
         }
         stickyHeaderIndices={[0]}
       />
-
-      <FlatList
-        className=""
-        data={[1, 2, 3]} // Replace with your actual data array
-        renderItem={() => <CalendarItem date={selectedDate} />}
-        keyExtractor={(item) => item.toString()}
-        showsVerticalScrollIndicator={false}
-      />
+      {collections ? (
+        loading ? (
+          <ActivityIndicator
+            size="large"
+            className="text-beige-darker mt-[16rem]"
+          />
+        ) : (
+          <FlatList
+            style={{ flex: 1 }}
+            data={collections}
+            renderItem={({ item }: { item: OutfitCollection }) => (
+              <CalendarItem date={selectedDate} key={item.$id} />
+            )}
+            showsVerticalScrollIndicator={false}
+          />
+        )
+      ) : (
+        <CalendarItem date={selectedDate} />
+      )}
     </View>
   );
 };

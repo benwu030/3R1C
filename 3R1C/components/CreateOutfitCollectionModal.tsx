@@ -27,6 +27,7 @@ const CreateOutfitCollectionModal = ({ userID }: { userID: string }) => {
       title,
       description,
       previewImageURL: imageFile.uri,
+      dayToWear: [dayToWear],
     };
 
     try {
@@ -72,7 +73,7 @@ const CreateOutfitCollectionModal = ({ userID }: { userID: string }) => {
 
         <View className="flex-col items-begin">
           <Text className="font-S-RegularItalic text-lg mb-1">
-            Select Purchase Date
+            Select Day to Wear
           </Text>
           <View className="ml-[-8]">
             <DateTimePicker

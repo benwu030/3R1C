@@ -17,8 +17,6 @@ const OutfitCollectionCard = ({
   isSelected,
   onPress,
 }: OutfitCollectionProps) => {
-  console.log("Card Render:", { title, isSelectMode, isSelected, $id });
-
   return (
     <TouchableOpacity
       onPress={onPress}

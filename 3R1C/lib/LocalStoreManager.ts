@@ -76,9 +76,9 @@ export const writeLocalDataWithDuplicateCheck = async <T extends { $id?:string|n
         throw err;
     }
 };
-export const saveImageLocally = async (path:string,imageUri: string, id: string) => {
+export const saveImageLocally = async (path:string,imageUri: string, id: string,prefix?:string) => {
     const fileExtension = imageUri.split('.').pop();
-    const localImageUri = `${path}${id}.${fileExtension}`;
+    const localImageUri = `${path}${prefix}${id}.${fileExtension}`;
      try {
             await FileSystem.copyAsync({
                 from: imageUri,
@@ -89,7 +89,6 @@ export const saveImageLocally = async (path:string,imageUri: string, id: string)
             console.error('Failed to save image locally:', error);
     }
 }
-// 本地存儲函數
 export const saveOutfitLocally = async (outfit: Outfit) => {
     const outfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
     await writeLocalData(localConfig.localOutfitJsonUri, [...outfits, outfit]);
