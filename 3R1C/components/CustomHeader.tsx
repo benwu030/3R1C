@@ -19,6 +19,7 @@ interface CustomHeaderProps {
   onBackPress?: () => void;
   editableTitle?: boolean;
   onTitleChange?: (newTitle: string) => void;
+  fontSize?: string;
 }
 
 const CustomHeader = ({
@@ -28,6 +29,7 @@ const CustomHeader = ({
   onBackPress,
   editableTitle = false,
   onTitleChange,
+  fontSize = "2xl",
 }: CustomHeaderProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
@@ -50,11 +52,13 @@ const CustomHeader = ({
     Keyboard.dismiss();
   };
   return (
-    <View className="flex-row justify-between items-center px-5">
-      {showBackButton && (
+    <View className="flex-row justify-center items-center py-2 px-5">
+      {showBackButton ? (
         <TouchableOpacity onPress={handleBack} className="pr-3 flex-1">
           <Image source={icons.rightArrow} className="w-6 h-6 rotate-180" />
         </TouchableOpacity>
+      ) : (
+        <Text className=" flex-1 "></Text>
       )}
 
       {/* Title */}
@@ -68,14 +72,19 @@ const CustomHeader = ({
             className="font-S-ExtraLightItalic text-2xl"
           />
         ) : (
-          <Text className="font-S-ExtraLightItalic text-2xl">{title}</Text>
+          <Text className={`font-S-ExtraLightItalic text-${fontSize}`}>
+            {title}
+          </Text>
         )}
 
         <Image source={icons.headerUnderline} className="w-full h-4" />
       </View>
-      <View className="flex-1 items-end">
-        {rightComponent ?? <Text></Text>}
-      </View>
+
+      {rightComponent ? (
+        <View className="flex-1 justify-end items-end">{rightComponent}</View>
+      ) : (
+        <Text className=" flex-1 "></Text>
+      )}
     </View>
   );
 };

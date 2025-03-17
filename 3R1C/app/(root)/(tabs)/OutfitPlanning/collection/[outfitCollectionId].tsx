@@ -21,6 +21,8 @@ import OutfitCard from "@/components/OutfitCard";
 import { Outfit } from "@/constants/outfit";
 import { ID } from "react-native-appwrite";
 import CustomHeader from "@/components/CustomHeader";
+import { deleteOutfitsFromCollection } from "@/lib/CRUD/outfitCRUD";
+import { Alert } from "react-native";
 const OutfitCollection = () => {
   const localParams = useLocalSearchParams<{
     outfitCollectionId: string;
@@ -45,6 +47,7 @@ const OutfitCollection = () => {
       params: {
         outfitId: uid,
         outfitName: "New Outfit",
+        isNewOutfit: "true",
         collectionId: localParams.outfitCollectionId,
       },
     });
@@ -68,12 +71,40 @@ const OutfitCollection = () => {
       });
     }
   };
-  const handleDeleteSelected = async () => {
-    // TODO: Implement delete functionality
-    console.log("Deleting items:", selectedItems);
-    // Reset selection
-    setSelectedItems([]);
-    setIsSelectMode(false);
+  const handleDeleteSelected = () => {
+    // Delete selected items
+
+    Alert.alert(
+      "Delete Confirmation",
+      "Are you sure you want to delete this outfit?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => {
+            // Add delete logic here
+            deleteOutfitsFromCollection(
+              selectedItems,
+              localParams.outfitCollectionId
+            ).then((result) => {
+              if (!result) {
+                Alert.alert("Error", "Failed to delete item");
+                return;
+              }
+              Alert.alert("Success", "Outfit deleted successfully");
+              refetch();
+              // Reset selection
+              setSelectedItems([]);
+              setIsSelectMode(false);
+            });
+          },
+          style: "destructive",
+        },
+      ]
+    );
   };
   useFocusEffect(
     useCallback(() => {
@@ -123,7 +154,7 @@ const OutfitCollection = () => {
         </TouchableOpacity>
       </View>
       {/* fetch Collections Here*/}
-      <View className="px-5">
+      <View className="px-5 flex-1 py-2">
         {loading ? (
           <ActivityIndicator
             className="text-beige-darker mt-[16rem]"
@@ -143,7 +174,7 @@ const OutfitCollection = () => {
               </View>
             )}
             numColumns={2}
-            contentContainerStyle={{}}
+            contentContainerClassName="pb-20"
             columnWrapperStyle={{ marginHorizontal: 20, flexDirection: "row" }}
             showsVerticalScrollIndicator={false}
             horizontal={false}

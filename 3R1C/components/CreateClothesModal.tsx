@@ -105,7 +105,7 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
         </Text>
         <SubCategoriesFilter Categories={categories} />
 
-        <View className="flex-col flex-1">
+        <View className="mb-6 mt-4">
           <Text className="font-S-RegularItalic text-lg mb-1">
             Select a Color
           </Text>

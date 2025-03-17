@@ -52,12 +52,6 @@ export default function CircularHue({
   );
 }
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "flex-start",
-    alignContent: "flex-start",
-    backgroundColor: "orange",
-  },
   pickerContainer: {
     alignSelf: "center",
     width: 250,
@@ -78,8 +72,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   panelStyle: {
-    width: "70%",
-    height: "70%",
+    width: 120,
+    height: 120,
     alignSelf: "center",
     borderRadius: 8,
   },

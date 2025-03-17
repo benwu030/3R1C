@@ -1,19 +1,25 @@
 import { ID, Permission, Query, Role } from 'react-native-appwrite';
 import { Outfit, OutfitCollection,OutfitCollectionRelation } from '@/constants/outfit';
 import { config, localConfig } from '../config';
-import { databases, storage, uploadImage } from '../AppWrite';
+import { databases, deleteImage, storage, uploadImage } from '../AppWrite';
 import { readLocalData, writeLocalData,saveImageLocally, writeLocalDataWithDuplicateCheck } from '../LocalStoreManager';
 import { Image } from 'expo-image';
 import { ImagePickerAsset } from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 // Create Outfit
 export async function createOutfit(outfit: Outfit, outfitCollectionId?: string, onLocalSave?: () => void) {
     try {
         const uid = ID.unique();
         let relation: OutfitCollectionRelation | null = null;
         outfit.$id = uid;
-        
+        let previewImageName;
         // Save locally first
         const localOutfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
+        if (outfit.previewImageURL) {
+            previewImageName = await saveImageLocally(localConfig.localOutfitPreviewsDirectiry, outfit.previewImageURL, uid,"Outfit-Preview-");
+            outfit.previewImageURL = previewImageName
+            previewImageName = `Outfit-Preview-${uid}.${previewImageName?.split('.').pop()}`;
+        }
         await writeLocalData(localConfig.localOutfitJsonUri, [...localOutfits, outfit]);
         
         // Create relationship locally first if outfitCollectionId was provided
@@ -33,14 +39,31 @@ export async function createOutfit(outfit: Outfit, outfitCollectionId?: string, 
         onLocalSave?.();
 
         // Save to remote
-
+        if (outfit.previewImageURL) {
+            const fileInfo = await FileSystem.getInfoAsync(outfit.previewImageURL);
+            if (fileInfo.exists) {
+            const imagePicker: ImagePickerAsset = {
+                uri: outfit.previewImageURL,
+                assetId: null,
+                base64: null,
+                duration: null,
+                exif: null,
+                height: 0,
+                width: 0,
+                type: 'image',
+                fileSize:fileInfo.size,
+                fileName: previewImageName
+            };
+            await uploadImage(imagePicker, uid, config.previewStorageId!);
+            }
+        }
 const { $id, ...outfitWithoutId } = outfit;
 const outfitForRemote = {
     ...outfitWithoutId,
-    previewImageURL: null,
+    previewImageURL: `https://cloud.appwrite.io/v1/storage/buckets/${config.previewStorageId}/files/${uid}/view?project=${config.projectid}`,
     items: JSON.stringify(outfitWithoutId.items) // Stringify the items array
 };
-console.log('outfitForRemote',outfit)
+console.log('outfitForRemote',outfitForRemote)
         const response = await databases.createDocument(
             config.databaseId!,
             config.outfitCollectionId!,
@@ -69,7 +92,6 @@ console.log('outfitForRemote',outfit)
         return null;
     }
 }
-
 
 
 // Local operation
@@ -192,6 +214,25 @@ export async function getOutfitCollections(): Promise<OutfitCollection[]> {
         return [];
     }
 }
+//get outfit collections by date
+export async function getOutfitCollectionsByDate(date: Date): Promise<OutfitCollection[]> {
+    try {
+
+        const localCollections = await readLocalData<OutfitCollection>(localConfig.localOutfitCollectionsJsonUri);
+        const collections = localCollections.filter(collection => {
+            return collection.dayToWear?.some(day => {
+            const dayDate = new Date(day);
+            return dayDate.getFullYear() === date.getFullYear() &&
+                   dayDate.getMonth() === date.getMonth() &&
+                   dayDate.getDate() === date.getDate();
+            });
+        });
+        return collections;
+    } catch (error) {
+        console.error('Failed to get collections by date:', error);
+        return [];
+    }
+}
 // Update outfit items positions
 export async function updateOutfit(outfit: Outfit, onLocalUpdate?: () => void) {
     try {
@@ -201,23 +242,57 @@ export async function updateOutfit(outfit: Outfit, onLocalUpdate?: () => void) {
         
         // Update locally first
         const localOutfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
-        const updatedOutfits = localOutfits.map(item => {
+        let previewImageName;
+        const updatedOutfits = await Promise.all(localOutfits.map(async item => {
             if (item.$id === outfit.$id) {
+                if (outfit.previewImageURL) {
+                    previewImageName = await saveImageLocally(localConfig.localOutfitPreviewsDirectiry, outfit.previewImageURL, outfit.$id!,"Outfit-Preview-");
+                    outfit.previewImageURL = previewImageName
+                    previewImageName = `Outfit-Preview-${outfit.$id}.${previewImageName?.split('.').pop()}`;
+                }
                 return { ...item, ...outfit };
             }
             return item;
-        });
+        }));
+       
         
         await writeLocalData(localConfig.localOutfitJsonUri, updatedOutfits);
         onLocalUpdate?.();
         
         // Update remote
         const { $id, ...outfitWithoutId } = outfit;
+        const outfitForRemote = {
+            ...outfitWithoutId,
+            items: JSON.stringify(outfitWithoutId.items) // Stringify the items array
+            }
+    
+        // Save to remote
+        if (outfit.previewImageURL) {
+            const fileInfo = await FileSystem.getInfoAsync(outfit.previewImageURL);
+            if (fileInfo.exists) {
+            const imagePicker: ImagePickerAsset = {
+                uri: outfit.previewImageURL,
+                assetId: null,
+                base64: null,
+                duration: null,
+                exif: null,
+                height: 0,
+                width: 0,
+                type: 'image',
+                fileSize:fileInfo.size,
+                fileName: previewImageName
+            };
+            await deleteImage(config.previewStorageId!, outfit.$id);
+            await uploadImage(imagePicker, outfit.$id, config.previewStorageId!);
+            }
+        }
+        console.log('outfit',outfit)
+        console.log('outfitWithoutId',outfitForRemote)
         await databases.updateDocument(
             config.databaseId!,
             config.outfitCollectionId!,
             $id,
-            outfitWithoutId
+            outfitForRemote
         );
         
         return true;
@@ -243,17 +318,16 @@ export async function getOutfitById(outfitId: string): Promise<Outfit | null> {
             outfitId
         );
         
-        const mappedOutfit = {
+        const mappedOutfit: Outfit = {
             $id: response.$id,
             userid: response.userid,
             title: response.title,
             previewImageURL: response.previewImageURL,
             remark: response.remark,
             outfitCollectionIds: response.outfitCollectionIds,
-            items: response.items || [],
+            items: JSON.parse(response.items),
             createdAt: new Date(response.$createdAt),
         };
-        
         // Update local storage
         await writeLocalDataWithDuplicateCheck(localConfig.localOutfitJsonUri, [mappedOutfit]);
         
@@ -342,4 +416,49 @@ function mapDocumentsToRelationship(documents: any[]): OutfitCollectionRelation[
         outfitCollectionId: doc.outfitCollectionId,
         userId: doc.userId
     }));
+}
+
+
+// Delete outfit from collection
+export async function deleteOutfitsFromCollection(outfitIds: string[], collectionId: string, onLocalUpdate?: () => void) {
+    try {
+        // Delete locally first
+        const localRelations = await readLocalData<OutfitCollectionRelation>(
+            localConfig.localOutfitCollectionRelationshipJsonUri
+        );
+        
+        const updatedRelations = localRelations.filter(
+            rel => !(outfitIds.includes(rel.outfitId) && rel.outfitCollectionId === collectionId)
+        );
+        
+        await writeLocalData(
+            localConfig.localOutfitCollectionRelationshipJsonUri,
+            updatedRelations
+        );
+        onLocalUpdate?.();
+        // Delete from remote
+        for (const outfitId of outfitIds) {
+            const relationships = await databases.listDocuments(
+            config.databaseId!,
+            config.outftiCollectionRelationshipId!,
+            [
+                Query.equal('outfitId', outfitId),
+                Query.equal('outfitCollectionId', collectionId)
+            ]
+            );
+
+            for (const doc of relationships.documents) {
+            await databases.deleteDocument(
+                config.databaseId!,
+                config.outftiCollectionRelationshipId!,
+                doc.$id
+            );
+            }
+        }
+        console.log('from remote outfitIds',outfitIds)
+        return true;
+    } catch (error) {
+        console.error('Failed to delete outfit from collection:', error);
+        return false;
+    }
 }

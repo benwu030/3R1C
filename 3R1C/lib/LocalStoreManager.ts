@@ -68,7 +68,7 @@ export const writeLocalDataWithDuplicateCheck = async <T extends { $id?:string|n
             await writeLocalData(path, [...existingData, ...nonDuplicates]);
             return nonDuplicates; // Return items that were added
         } else {
-            console.log(`No new items to add to ${path}`);
+            // console.log(`No new items to add to ${path}`);
             return []; // No items added
         }
     } catch (err) {
@@ -76,7 +76,7 @@ export const writeLocalDataWithDuplicateCheck = async <T extends { $id?:string|n
         throw err;
     }
 };
-export const saveImageLocally = async (path:string,imageUri: string, id: string,prefix?:string) => {
+export const saveImageLocally = async (path:string,imageUri: string, id: string,prefix:string='') => {
     const fileExtension = imageUri.split('.').pop();
     const localImageUri = `${path}${prefix}${id}.${fileExtension}`;
      try {

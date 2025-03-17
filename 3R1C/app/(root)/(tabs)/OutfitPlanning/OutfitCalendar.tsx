@@ -10,7 +10,7 @@ const OutfitCalendar = () => {
     <SafeAreaView className="bg-sand-dark flex-1">
       <TouchableOpacity
         onPress={() => router.push("/OutfitPlanning/Collections")}
-        className="flex-row items-center p-2 "
+        className="flex-row items-center px-5 justify-end"
       >
         <Image source={icons.collectionsAdd} className="size-5" />
       </TouchableOpacity>

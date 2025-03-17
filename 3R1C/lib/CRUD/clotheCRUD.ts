@@ -10,13 +10,10 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
     try {
         const uid = ID.unique();
         //save the image to local
-        const fileExtension = imageFile.uri.split('.').pop()
-        const localImageUri = `${localConfig.localClotheImagesDirectiry}${uid}.${fileExtension}`;
-        await saveImageLocally(localConfig.localClotheImagesDirectiry,imageFile.uri,uid)
+        const fileExtension = imageFile.uri.split('.').pop();
+        const localImageUri = await saveImageLocally(localConfig.localClotheImagesDirectiry,imageFile.uri,uid)
         //update file path
-        imageFile.uri = localImageUri;
-        imageFile.fileName = `${uid}.${fileExtension}`
-        clothe.localImageURL = localImageUri;
+        clothe.localImageURL = localImageUri??'';
         clothe.$id = uid;
         //save data to local storage
         const existingData = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
@@ -25,6 +22,13 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
         onLocalSave?.();
         //upload to appwrite
         clothe.$id = null
+        
+        const fileInfo = await FileSystem.getInfoAsync(localImageUri??'');
+        if (!fileInfo.exists) {
+            throw new Error('Local image file not found');
+        }
+        
+        
         const uploadImageResponse = await uploadImage(imageFile,uid,config.clothesImgStorageId!)    
         if(!uploadImageResponse) throw new Error('failed to upload image')
         const response = await databases.createDocument(
@@ -113,7 +117,7 @@ export async function getAllClothes(): Promise<CLOTHES> {
         console.log('reading clothes locally (getAllClothes) ');
         return localClothes;
     }
-    console.log('reading clothes from online storage (getAllClothes) ');
+    // console.log('reading clothes from online storage (getAllClothes) ');
     const result = await databases.listDocuments(
         config.databaseId!,
         config.clothesCollectionId!,
@@ -129,6 +133,67 @@ export async function getAllClothes(): Promise<CLOTHES> {
         return []
     }
 }
+export async function getAllClothesWithQuery(query:{attribute:string,method:string}): Promise<CLOTHES> {
+   
+    try {
+     const localClothes = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
+     if(localClothes.length > 0) {
+        //  console.log('reading clothes locally (getAllClothesWithQuery) ');
+        //  console.log('query',query)
+         if(query.attribute && query.method){
+            if(query.method === 'orderAsc') {
+                localClothes.sort((a,b) => {
+                    const aValue = a[query.attribute as keyof Clothe];
+                    const bValue = b[query.attribute as keyof Clothe];
+                    
+                    // Handle date values (createdAt or purchasedate)
+                    if (query.attribute === 'createdAt' || query.attribute === 'purchasedate') {
+                        const aDate = aValue instanceof Date ? aValue : Array.isArray(aValue) ? new Date(0) : new Date(aValue || 0);
+                        const bDate = bValue instanceof Date ? bValue : Array.isArray(bValue) ? new Date(0) : new Date(bValue || 0);
+                        return aDate.getTime() - bDate.getTime();
+                    }
+                    
+                    // Handle regular string/number comparisons
+                    const aCompare = aValue ?? '';
+                    const bCompare = bValue ?? '';
+                    return aCompare > bCompare ? 1 : -1;
+                });
+            }
+            if(query.method === 'orderDesc') {
+                localClothes.sort((a,b) => {
+                    const aValue = a[query.attribute as keyof Clothe];
+                    const bValue = b[query.attribute as keyof Clothe];
+                    
+                    // Handle date values (createdAt or purchasedate)
+                    if (query.attribute === 'createdAt' || query.attribute === 'purchaseDate') {
+                        const aDate = aValue instanceof Date ? aValue : Array.isArray(aValue) ? new Date(0) : new Date(aValue || 0);
+                        const bDate = bValue instanceof Date ? bValue : Array.isArray(bValue) ? new Date(0) : new Date(bValue || 0);
+                        return aDate.getTime() - bDate.getTime();
+                    }
+                    
+                    // Handle regular string/number comparisons
+                    const aCompare = aValue ?? '';
+                    const bCompare = bValue ?? '';
+                    return aCompare < bCompare ? 1 : -1;
+            });
+        }
+         }
+         return localClothes;
+     }
+    //  console.log('reading clothes from online storage (getAllClothesWithQuery) ');
+     const result = await databases.listDocuments(
+         config.databaseId!,
+         config.clothesCollectionId!,
+         [query.method === 'orderAsc' ? Query.orderAsc(query.attribute) : Query.orderDesc(query.attribute)]
+     )
+     const clothes = mapDocumentsToClothes(result.documents);
+     return clothes;
+     }   
+     catch (error) {
+         console.error('fail to getclothesAll',error);
+         return []
+     }
+ }
 function filterClothes(clothes: CLOTHES, category?: string,id?:string): CLOTHES {
     if(category){
         if (category === 'All') return clothes;
@@ -158,7 +223,7 @@ export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{que
             )
             const clothes = mapDocumentsToClothes(result.documents);
             //store the data in the local storage
-            await writeLocalData(localConfig.localClotheJsonUri, [...localClothes, ...clothes]);
+            // await writeLocalData(localConfig.localClotheJsonUri, [...localClothes, ...clothes]);
             return filterClothes(clothes, mainCategoryfilter);
         } catch (error) {
             console.error('Error getClothesWithFilter', error);
@@ -183,7 +248,7 @@ export async function getClotheById({ id }: { id: string }):Promise<Clothe|null>
                 id,
               );
             const clothes = mapDocumentsToClothes(result.documents);
-            await writeLocalData(localConfig.localClotheJsonUri, [...localClothes,...clothes]);
+            // await writeLocalData(localConfig.localClotheJsonUri, [...localClothes,...clothes]);
             return filterClothes(clothes, id)[0] || null;
 
               

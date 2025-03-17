@@ -46,6 +46,10 @@ module.exports = {
           DEFAULT:'#f2f2f2',
           'dark':'#efefef',
           'darker':'#dadedf'
+        },
+        'brick':{
+          DEFAULT:'#b17457',
+          'light':'#DD8560',
         }
       }
     },

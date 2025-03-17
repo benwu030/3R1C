@@ -33,6 +33,8 @@ import { useGlobalContext } from "@/lib/globalProvider";
 import ClotheItemBar from "@/components/ClotheItemBar";
 import icons from "@/constants/icons";
 import OutfitPlanningBoard from "@/components/OutfitPlanningBoard";
+import { Keyboard } from "react-native";
+import { TouchableWithoutFeedback } from "react-native";
 // Create context for board dimensions
 interface BoardContextType {
   width: number;
@@ -45,13 +47,29 @@ const OutfitPlanning = () => {
   const params = useLocalSearchParams<{
     outfitId: string;
     outfitName: string;
+    isNewOutfit: string;
     collectionId: string;
   }>();
-  const isNewOutfit = params.outfitName === "New Outfit";
+  const isNewOutfit = params.isNewOutfit === "true";
   const { user } = useGlobalContext();
+  // Refs
+  const viewShotRef = useRef<ViewShot>(null);
 
+  // Get clothes data
+  const { data: clothes, loading: loadingClothes } = useAppwrite({
+    fn: getAllClothes,
+  });
+  //get outfit data
+  const {
+    data: outfit,
+    loading: loadingOutfit,
+    refetch,
+  } = useAppwrite({
+    fn: (params) => getOutfitById(params.id),
+    params: { id: params.outfitId },
+  });
   // State management
-  const [title, setTitle] = useState("New Outfit");
+  const [title, setTitle] = useState(outfit?.title ?? "New Outfit");
   const [selectedClothes, setSelectedClothes] = useState<Clothe[]>([]);
   const [outfitItems, setOutfitItems] = useState<OutfitItem[]>([]);
   const [isSaving, setSaving] = useState(false);
@@ -61,42 +79,30 @@ const OutfitPlanning = () => {
     height: 0,
   });
 
-  // Refs
-  const viewShotRef = useRef<ViewShot>(null);
+  const loadOutfit = () => {
+    console.log("Loading outfit:", params.outfitId, isNewOutfit);
+    if (!isNewOutfit) {
+      if (outfit) {
+        setTitle(outfit.title);
+        setOutfitItems(outfit.items || []);
+        // Load clothes for each outfit item
+        const outfitClothes = [];
+        for (const item of outfit.items) {
+          const clothe = clothes?.find((c) => c.$id === item.clotheID);
+          if (clothe) outfitClothes.push(clothe);
+        }
 
-  // Get clothes data
-  const { data: clothes, loading } = useAppwrite({ fn: getAllClothes });
-
+        setSelectedClothes(outfitClothes);
+      }
+    }
+  };
   // Load existing outfit if editing
   useEffect(() => {
-    const loadOutfit = async () => {
-      if (!isNewOutfit) {
-        try {
-          const outfit = await getOutfitById(params.outfitId);
-          if (outfit) {
-            setTitle(outfit.title);
-            setOutfitItems(outfit.items || []);
-
-            // Load clothes for each outfit item
-            const outfitClothes = [];
-            for (const item of outfit.items) {
-              const clothe = clothes?.find((c) => c.$id === item.clotheID);
-              if (clothe) outfitClothes.push(clothe);
-            }
-
-            setSelectedClothes(outfitClothes);
-          }
-        } catch (error) {
-          console.error("Failed to load outfit:", error);
-          Alert.alert("Error", "Could not load outfit data");
-        }
-      }
-    };
-
     if (clothes && clothes.length > 0) {
       loadOutfit();
     }
-  }, [isNewOutfit, params.outfitId, clothes]);
+    console.log(outfitItems);
+  }, [outfit, isNewOutfit, params.outfitId, clothes]);
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
@@ -197,59 +203,61 @@ const OutfitPlanning = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-sand-dark">
-      <CustomHeader
-        title={title}
-        editableTitle={true}
-        onTitleChange={handleTitleChange}
-        rightComponent={
-          <TouchableOpacity onPress={handleSaveOutfit} disabled={isSaving}>
-            <Text className="font-S-Medium text-base">
-              {isSaving ? "Saving..." : "Save"}
-            </Text>
-          </TouchableOpacity>
-        }
-      />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <SafeAreaView className="flex-1 bg-sand-dark">
+        <CustomHeader
+          title={title}
+          editableTitle={true}
+          onTitleChange={handleTitleChange}
+          rightComponent={
+            <TouchableOpacity onPress={handleSaveOutfit} disabled={isSaving}>
+              <Text className="font-S-Medium text-base">
+                {isSaving ? "Saving..." : "Save"}
+              </Text>
+            </TouchableOpacity>
+          }
+        />
 
-      <BoardContext.Provider value={boardDimensions}>
-        <ViewShot ref={viewShotRef} style={{ flex: 1 }}>
-          <View
-            className="bg-white flex-1"
-            onLayout={(event) => {
-              const { width, height } = event.nativeEvent.layout;
-              setBoardDimensions({ width, height });
-            }}
+        <BoardContext.Provider value={boardDimensions}>
+          <ViewShot ref={viewShotRef} style={{ flex: 1 }}>
+            <View
+              className="bg-white flex-1"
+              onLayout={(event) => {
+                const { width, height } = event.nativeEvent.layout;
+                setBoardDimensions({ width, height });
+              }}
+            >
+              <OutfitPlanningBoard
+                selectedClothes={selectedClothes}
+                outfitItems={outfitItems}
+                boardDimensions={boardDimensions}
+                onUpdatePosition={handleUpdatePosition}
+                onRemoveItem={handleRemoveItem}
+              />
+            </View>
+          </ViewShot>
+        </BoardContext.Provider>
+        {/* Add button to show item bar */}
+        <View className="pb-2">
+          <TouchableOpacity
+            className="absolute bottom-4 right-4 bg-beige rounded-full p-5 shadow-lg"
+            onPress={() => setItemBarOpen(!isItemBarOpen)}
           >
-            <OutfitPlanningBoard
-              selectedClothes={selectedClothes}
-              outfitItems={outfitItems}
-              boardDimensions={boardDimensions}
-              onUpdatePosition={handleUpdatePosition}
-              onRemoveItem={handleRemoveItem}
-            />
-          </View>
-        </ViewShot>
-      </BoardContext.Provider>
-      {/* Add button to show item bar */}
-      <View className="pb-2">
-        <TouchableOpacity
-          className="absolute bottom-4 right-4 bg-beige rounded-full p-5 shadow-lg"
-          onPress={() => setItemBarOpen(!isItemBarOpen)}
-        >
-          <Image source={icons.plus} className="w-6 h-6" />
-        </TouchableOpacity>
+            <Image source={icons.plus} className="w-6 h-6" />
+          </TouchableOpacity>
 
-        {/* Item bar */}
-        {isItemBarOpen && (
-          <ClotheItemBar
-            clothes={clothes || []}
-            loading={loading}
-            onSelectItem={handleAddClothing}
-            onClose={() => setItemBarOpen(false)}
-          />
-        )}
-      </View>
-    </SafeAreaView>
+          {/* Item bar */}
+          {isItemBarOpen && (
+            <ClotheItemBar
+              clothes={clothes || []}
+              loading={loadingClothes}
+              onSelectItem={handleAddClothing}
+              onClose={() => setItemBarOpen(false)}
+            />
+          )}
+        </View>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
