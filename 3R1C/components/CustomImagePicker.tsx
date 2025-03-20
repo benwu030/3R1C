@@ -15,7 +15,7 @@ export default function CustomImagePicker({
     let result = await launchImageLibraryAsync({
       mediaTypes: ["images"],
       aspect: [4, 5],
-      quality: 0.5,
+      quality: 1,
     });
 
     if (!result.canceled) {
