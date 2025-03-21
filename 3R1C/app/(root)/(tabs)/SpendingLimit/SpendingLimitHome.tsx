@@ -113,7 +113,7 @@ const SpendingLimit = () => {
           ListHeaderComponent={() => (
             <View className="">
               <CustomHeader title="Expense Tracker" showBackButton={false} />
-              <View className="px-5 flex-1">
+              <View className="px-7 flex-1">
                 <View className="bg-sand-darker rounded-xl my-2 p-5 shadow-md ">
                   <View className=" items-center ">
                     <Text className="font-S-Bold text-2xl text-yellow-900">
@@ -131,13 +131,13 @@ const SpendingLimit = () => {
                   Total Expenses
                 </Text>
 
-                <View className="bg-brick rounded-xl p-7 shadow-md">
+                <View className="bg-brick rounded-xl p-6 shadow-md">
                   <View className="flex-row  items-center justify-between">
                     <Text className="font-S-Medium text-white text-xl">
                       HKD
                     </Text>
-                    <Text className="font-S-Regular text-white text-5xl">
-                      {totalExpenses}
+                    <Text className="font-S-Regular text-white text-4xl">
+                      ${totalExpenses}
                     </Text>
                   </View>
                   <View className="flex-row items-center justify-end">

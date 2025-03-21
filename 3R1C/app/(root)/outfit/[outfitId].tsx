@@ -42,7 +42,10 @@ interface BoardContextType {
 }
 
 const BoardContext = createContext<BoardContextType>({ width: 0, height: 0 });
-
+export interface CombinedOutfitItem extends OutfitItem {
+  clothe: Clothe;
+  instanceId: string;
+}
 const OutfitPlanning = () => {
   const params = useLocalSearchParams<{
     outfitId: string;
@@ -70,8 +73,7 @@ const OutfitPlanning = () => {
   });
   // State management
   const [title, setTitle] = useState(outfit?.title ?? "New Outfit");
-  const [selectedClothes, setSelectedClothes] = useState<Clothe[]>([]);
-  const [outfitItems, setOutfitItems] = useState<OutfitItem[]>([]);
+  const [outfitItems, setOutfitItems] = useState<CombinedOutfitItem[]>([]);
   const [isSaving, setSaving] = useState(false);
   const [isItemBarOpen, setItemBarOpen] = useState(false);
   const [boardDimensions, setBoardDimensions] = useState({
@@ -84,15 +86,20 @@ const OutfitPlanning = () => {
     if (!isNewOutfit) {
       if (outfit) {
         setTitle(outfit.title);
-        setOutfitItems(outfit.items || []);
         // Load clothes for each outfit item
-        const outfitClothes = [];
+        const loadedOutfitItems: CombinedOutfitItem[] = [];
         for (const item of outfit.items) {
+          //find the clothe with the id and insert it into the outfit items
           const clothe = clothes?.find((c) => c.$id === item.clotheID);
-          if (clothe) outfitClothes.push(clothe);
+          if (clothe)
+            loadedOutfitItems.push({
+              ...item,
+              clothe: clothe,
+              instanceId: ID.unique(),
+            });
+          //TODO: handle case where clothe is not found
         }
-
-        setSelectedClothes(outfitClothes);
+        setOutfitItems(loadedOutfitItems);
       }
     }
   };
@@ -109,13 +116,13 @@ const OutfitPlanning = () => {
   };
 
   const handleAddClothing = (clothe: Clothe) => {
-    setSelectedClothes((prev) => [...prev, clothe]);
-
     // Add to outfit items with random position
     setOutfitItems((prev) => [
       ...prev,
       {
         clotheID: clothe.$id!,
+        clothe: clothe,
+        instanceId: ID.unique(),
         position: {
           x: Math.random() * 100 + 50,
           y: Math.random() * 100 + 100,
@@ -130,29 +137,18 @@ const OutfitPlanning = () => {
     // setItemBarOpen(false);
   };
 
-  const handleRemoveItem = (index: number) => {
-    setSelectedClothes((prev) => {
-      const newItems = [...prev];
-      newItems.splice(index, 1);
-      return newItems;
-    });
-
-    setOutfitItems((prev) => {
-      const newItems = [...prev];
-      newItems.splice(index, 1);
-      return newItems;
-    });
+  const handleRemoveItem = (instanceId: string) => {
+    setOutfitItems((prev) =>
+      prev.filter((item) => item.instanceId !== instanceId)
+    );
   };
 
-  const handleUpdatePosition = (index: number, position: any) => {
-    setOutfitItems((prev) => {
-      const newItems = [...prev];
-      newItems[index] = {
-        ...newItems[index],
-        position,
-      };
-      return newItems;
-    });
+  const handleUpdatePosition = (instanceId: string, position: any) => {
+    setOutfitItems((prev) =>
+      prev.map((item) =>
+        item.instanceId === instanceId ? { ...item, position } : item
+      )
+    );
   };
 
   const capturePreview = async () => {
@@ -174,12 +170,18 @@ const OutfitPlanning = () => {
       setSaving(true);
       // Capture preview
       const previewImageURL = await capturePreview();
-
+      //turn combined outfit items into outfit items
+      const saveOutfitItems = outfitItems.map((item) => {
+        return {
+          clotheID: item.clotheID,
+          position: item.position,
+        };
+      });
       const outfitData: Outfit = {
         $id: isNewOutfit ? null : params.outfitId,
         userid: user?.$id ?? "",
         title,
-        items: outfitItems,
+        items: saveOutfitItems,
         previewImageURL: previewImageURL ?? undefined,
       };
       console.log("Saving outfit:", outfitData);
@@ -228,7 +230,6 @@ const OutfitPlanning = () => {
               }}
             >
               <OutfitPlanningBoard
-                selectedClothes={selectedClothes}
                 outfitItems={outfitItems}
                 boardDimensions={boardDimensions}
                 onUpdatePosition={handleUpdatePosition}

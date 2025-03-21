@@ -14,7 +14,6 @@ export default function CustomImagePicker({
     // No permissions request is necessary for launching the image library
     let result = await launchImageLibraryAsync({
       mediaTypes: ["images"],
-      aspect: [4, 5],
       quality: 1,
     });
 

@@ -3,17 +3,16 @@ import { View, Text } from "react-native";
 import DraggableClothing from "@/components/DraggableClothing";
 import { Clothe } from "@/constants/clothes";
 import { OutfitItem } from "@/constants/outfit";
+import { CombinedOutfitItem } from "@/app/(root)/outfit/[outfitId]";
 
 interface OutfitPlanningBoardProps {
-  selectedClothes: Clothe[];
-  outfitItems: OutfitItem[];
+  outfitItems: CombinedOutfitItem[];
   boardDimensions: { width: number; height: number };
-  onUpdatePosition: (index: number, position: any) => void;
-  onRemoveItem: (index: number) => void;
+  onUpdatePosition: (index: string, position: any) => void;
+  onRemoveItem: (index: string) => void;
 }
 
 const OutfitPlanningBoard = ({
-  selectedClothes,
   outfitItems,
   boardDimensions,
   onUpdatePosition,
@@ -21,18 +20,21 @@ const OutfitPlanningBoard = ({
 }: OutfitPlanningBoardProps) => {
   return (
     <>
-      {selectedClothes.map((clothe, index) => (
+      {outfitItems.map((item) => (
         <DraggableClothing
-          key={`${clothe.$id}-${index}`}
-          imageUri={clothe.localImageURL}
-          initialPosition={outfitItems[index]?.position}
-          onPositionChange={(position) => onUpdatePosition(index, position)}
-          onRemoveItem={() => onRemoveItem(index)}
+          key={item.instanceId}
+          instanceId={item.instanceId}
+          imageUri={item.clothe.localImageURL}
+          initialPosition={item.position}
+          onPositionChange={(position) =>
+            onUpdatePosition(item.instanceId, position)
+          }
+          onRemoveItem={() => onRemoveItem(item.instanceId)}
           boardDimensions={boardDimensions}
         />
       ))}
 
-      {selectedClothes.length === 0 && (
+      {outfitItems.length === 0 && (
         <View className="absolute inset-0 flex items-center justify-center">
           <Text className="text-gray-400 text-center font-S-Regular">
             Add clothes from your wardrobe{"\n"}to create an outfit

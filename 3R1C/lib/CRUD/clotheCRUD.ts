@@ -60,7 +60,6 @@ export async function refetchClotheImage(imageURL:string,id:string,onLocalSave?:
             result.href,
             localPath
         );
-
         if (downloadResult.status !== 200) {
             throw new Error(`Failed to download image: ${downloadResult.status}`);
         }
@@ -70,6 +69,7 @@ export async function refetchClotheImage(imageURL:string,id:string,onLocalSave?:
             if(item.$id === id) {
                 item.localImageURL = localPath;
             }
+            
             return item;
         });
         await writeLocalData(localConfig.localClotheJsonUri, updatedData);
@@ -79,13 +79,12 @@ export async function refetchClotheImage(imageURL:string,id:string,onLocalSave?:
         }
         onLocalSave?.();
         //update remote data
-        await databases.updateDocument(
+        const response = await databases.updateDocument(
             config.databaseId!,
             config.clothesCollectionId!,
             id,
             clothe
-                );
-        console.log('image refetched')
+        );
         return localPath
     } catch (error) {
         console.error('Failed to fetch remote image:', error);
@@ -223,7 +222,9 @@ export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{que
             )
             const clothes = mapDocumentsToClothes(result.documents);
             //store the data in the local storage
-            // await writeLocalData(localConfig.localClotheJsonUri, [...localClothes, ...clothes]);
+            //temporary fix when there is no data in the local storage
+            if(mainCategoryfilter==='All')
+            await writeLocalData(localConfig.localClotheJsonUri, [...localClothes, ...clothes]);
             return filterClothes(clothes, mainCategoryfilter);
         } catch (error) {
             console.error('Error getClothesWithFilter', error);

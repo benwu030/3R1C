@@ -27,7 +27,7 @@ export const MainCategoriesFilter = ({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      className="grow-0 "
+      className="mb-2 grow-0 "
     >
       {Categories.map((category, index) => (
         <TouchableOpacity

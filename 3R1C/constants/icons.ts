@@ -14,6 +14,10 @@ import edit from '@/assets/icons/edit.svg'
 import deleteIcon from '@/assets/icons/delete.svg'
 import collectionsAdd from '@/assets/icons/collectionsAdd.svg'
 import close from '@/assets/icons/close.svg'
+import camera from '@/assets/icons/camera.svg'
+import save from '@/assets/icons/save.svg'
+import minus from '@/assets/icons/minus.svg'
+import image from '@/assets/icons/image.svg'
 export default{
     plus,
     mirror,
@@ -30,6 +34,10 @@ export default{
     deleteIcon,
     edit,
     collectionsAdd,
-    close
+    close,
+    camera,
+    save,
+    minus,
+    image
 }
 

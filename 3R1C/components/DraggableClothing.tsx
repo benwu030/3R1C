@@ -18,6 +18,7 @@ type Position = OutfitItem["position"];
 
 interface DraggableClothingProps {
   imageUri: string;
+  instanceId: string;
   initialPosition?: Position;
   onPositionChange?: (position: Position) => void;
   onRemoveItem?: () => void;
@@ -26,6 +27,7 @@ interface DraggableClothingProps {
 const ITEM_SIZE = { width: 150, height: 150 };
 const DraggableClothing = ({
   imageUri,
+  instanceId,
   initialPosition,
   onPositionChange,
   onRemoveItem,
@@ -179,7 +181,7 @@ const DraggableClothing = ({
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleZChange(-1)}>
               <View className="bg-grey rounded-full p-1.5 shadow-sm">
-                <Image source={icons.plus} className="size-4" />
+                <Image source={icons.minus} className="size-4" />
               </View>
             </TouchableOpacity>
           </View>

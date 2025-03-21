@@ -22,8 +22,14 @@ export const ensureDirectories = async () => {
 };
 export const ensureFiles = async () => {
     const files = [
+        //clothes
+        localConfig.localClotheJsonUri,
+
+        //outfit
         localConfig.localOutfitJsonUri,
         localConfig.localOutfitCollectionsJsonUri,
+        localConfig.localOutfitCollectionRelationshipJsonUri,
+        //outfit relation
         localConfig.localOutfitCollectionRelationshipJsonUri
     ];
 

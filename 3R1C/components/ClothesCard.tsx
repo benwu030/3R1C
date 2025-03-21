@@ -50,6 +50,7 @@ const ClothesCard = ({
               key={localImageURLState.uri}
               source={localImageURLState}
               className="w-full h-60"
+              onError={handleImageError}
             />
 
             <View className="flex-col items-center justify-center mt-2">
