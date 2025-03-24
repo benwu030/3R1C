@@ -68,8 +68,8 @@ const OutfitPlanning = () => {
     loading: loadingOutfit,
     refetch,
   } = useAppwrite({
-    fn: (params) => getOutfitById(params.id),
-    params: { id: params.outfitId },
+    fn: (params) => getOutfitById(params.id, params.isNew),
+    params: { id: params.outfitId, isNew: isNewOutfit },
   });
   // State management
   const [title, setTitle] = useState(outfit?.title ?? "New Outfit");
@@ -82,7 +82,6 @@ const OutfitPlanning = () => {
   });
 
   const loadOutfit = () => {
-    console.log("Loading outfit:", params.outfitId, isNewOutfit);
     if (!isNewOutfit) {
       if (outfit) {
         setTitle(outfit.title);
@@ -108,7 +107,6 @@ const OutfitPlanning = () => {
     if (clothes && clothes.length > 0) {
       loadOutfit();
     }
-    console.log(outfitItems);
   }, [outfit, isNewOutfit, params.outfitId, clothes]);
 
   const handleTitleChange = (newTitle: string) => {
@@ -184,7 +182,6 @@ const OutfitPlanning = () => {
         items: saveOutfitItems,
         previewImageURL: previewImageURL ?? undefined,
       };
-      console.log("Saving outfit:", outfitData);
       if (isNewOutfit) {
         await createOutfit(outfitData, params.collectionId, () => {
           Alert.alert("Success", "Outfit created successfully!");

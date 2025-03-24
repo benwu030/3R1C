@@ -28,7 +28,6 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
             throw new Error('Local image file not found');
         }
         
-        
         const uploadImageResponse = await uploadImage(imageFile,uid,config.clothesImgStorageId!)    
         if(!uploadImageResponse) throw new Error('failed to upload image')
         const response = await databases.createDocument(
@@ -51,7 +50,6 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
 
 
 export async function refetchClotheImage(imageURL:string,id:string,onLocalSave?: () => void){
-    console.log('refetching image')
     try {
         const fileExtension = imageURL.split('.').pop();
         const localPath = `${localConfig.localClotheImagesDirectiry}${id}.${fileExtension}`;
@@ -113,10 +111,8 @@ export async function getAllClothes(): Promise<CLOTHES> {
    try {
     const localClothes = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
     if(localClothes.length > 0) {
-        console.log('reading clothes locally (getAllClothes) ');
         return localClothes;
     }
-    // console.log('reading clothes from online storage (getAllClothes) ');
     const result = await databases.listDocuments(
         config.databaseId!,
         config.clothesCollectionId!,
@@ -137,8 +133,7 @@ export async function getAllClothesWithQuery(query:{attribute:string,method:stri
     try {
      const localClothes = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
      if(localClothes.length > 0) {
-        //  console.log('reading clothes locally (getAllClothesWithQuery) ');
-        //  console.log('query',query)
+  
          if(query.attribute && query.method){
             if(query.method === 'orderAsc') {
                 localClothes.sort((a,b) => {
@@ -179,7 +174,6 @@ export async function getAllClothesWithQuery(query:{attribute:string,method:stri
          }
          return localClothes;
      }
-    //  console.log('reading clothes from online storage (getAllClothesWithQuery) ');
      const result = await databases.listDocuments(
          config.databaseId!,
          config.clothesCollectionId!,
@@ -193,28 +187,74 @@ export async function getAllClothesWithQuery(query:{attribute:string,method:stri
          return []
      }
  }
-function filterClothes(clothes: CLOTHES, category?: string,id?:string): CLOTHES {
-    if(category){
-        if (category === 'All') return clothes;
-        return clothes.filter(item => item.maincategory === category);
+ function sortClothes(clothes: CLOTHES, sortByText: string): CLOTHES {
+    const [sortBy, sortOrder] = sortByText.split('_');
+    
+    // Sort the clothes based on the selected criteria
+    let sortedClothes = [...clothes];
+  
+    if (sortBy === 'price') {
+        sortedClothes.sort((a, b) => {
+            return sortOrder === 'asc' ? (a.price || 0) - (b.price || 0) : (b.price || 0) - (a.price || 0);
+        });
+    } else if (sortBy === 'createdate') {
+        sortedClothes.sort((a, b) => {
+            
+            const aDate = a.createdAt ? (new Date(a.createdAt)).getTime() : 0;
+            const bDate = b.createdAt ? (new Date(b.createdAt)).getTime() : 0;
+            return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
+        });
+    } else if (sortBy === 'title') {
+        sortedClothes.sort((a, b) => {
+            const aTitle = a.title || '';
+            const bTitle = b.title || '';
+            return sortOrder === 'asc' ? aTitle.localeCompare(bTitle) : bTitle.localeCompare(aTitle);
+        });
+    }else if (sortBy === 'purchasedate') {
+        sortedClothes.sort((a, b) => {
+            const aDate = a.purchasedate ? (new Date(a.purchasedate)).getTime() : 0;
+            const bDate = b.purchasedate ? (new Date(b.purchasedate)).getTime() : 0;
+            return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
+        });
     }
-    if(id) return clothes.filter(item => item.$id === id);
-    return clothes;
+    
+    return sortedClothes;
+ }
+function filterClothes(clothes: CLOTHES, category="All",searchText?:string,sortByText="createdate_asc",id?:string): CLOTHES {
+    if (id) return clothes.filter(item => item.$id === id);
+    
+    let filteredClothes = clothes;
+    
+    if (category && category !== 'All') {
+        filteredClothes = filteredClothes.filter(item => item.maincategory === category);
+    }
+    
+    if (searchText && searchText.trim() !== '') {
+        const searchLower = searchText.toLowerCase().trim();
+        filteredClothes = filteredClothes.filter(item => 
+            item.title?.toLowerCase().includes(searchLower) ||
+            item.remark?.toLowerCase().includes(searchLower) ||
+            item.maincategory?.toLowerCase().includes(searchLower) ||
+            item.subcategories?.some(sub => sub.toLowerCase().includes(searchLower))
+        );
+    }
+
+    //sort the clothes by sortByText
+    filteredClothes = sortClothes(filteredClothes, sortByText);
+    return filteredClothes;
 }
 
-export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{query?:string,mainCategoryfilter:string,limit?:number}): Promise<CLOTHES> {
+export async function getClothesWithFilter({searchText,mainCategoryfilter,sortByText}:{searchText?:string,mainCategoryfilter:string,sortByText?:string}): Promise<CLOTHES> {
     
         // Try to read from local storage first
         try {
+
             const localClothes = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
             if(localClothes.length > 0) {
-                console.log('reading clothes locally (getClothesWithFilter) ');
-                return filterClothes(localClothes, mainCategoryfilter);;
+                return filterClothes(localClothes, mainCategoryfilter, searchText,sortByText);
             }
-            console.log('search from remote storage (getClothesWithFilter) ',mainCategoryfilter)
             const buildQuery = [Query.orderDesc('$createdAt')]
-            if(mainCategoryfilter && mainCategoryfilter !=='All') 
-                buildQuery.push(Query.equal('maincategory',mainCategoryfilter))
+            //fetch all data again
             const result = await databases.listDocuments(
                 config.databaseId!,
                 config.clothesCollectionId!,
@@ -222,10 +262,8 @@ export async function getClothesWithFilter({query,mainCategoryfilter,limit}:{que
             )
             const clothes = mapDocumentsToClothes(result.documents);
             //store the data in the local storage
-            //temporary fix when there is no data in the local storage
-            if(mainCategoryfilter==='All')
             await writeLocalData(localConfig.localClotheJsonUri, [...localClothes, ...clothes]);
-            return filterClothes(clothes, mainCategoryfilter);
+            return filterClothes(clothes, mainCategoryfilter, searchText,sortByText);
         } catch (error) {
             console.error('Error getClothesWithFilter', error);
             return [];
@@ -239,18 +277,16 @@ export async function getClotheById({ id }: { id: string }):Promise<Clothe|null>
     try {
         const localClothes = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
             if(localClothes.length > 0) {
-                console.log('reading clothes locally (getClotheById) ');
-                return filterClothes(localClothes, undefined, id)[0] || null;;
+                const foundClothe = localClothes.find(item => item.$id === id);
+                return foundClothe || null;;
             }
-            console.log('search from remote storage (getClotheById) ',id)
             const result = await databases.getDocument(
                 config.databaseId!,
                 config.clothesCollectionId!,
                 id,
               );
             const clothes = mapDocumentsToClothes(result.documents);
-            // await writeLocalData(localConfig.localClotheJsonUri, [...localClothes,...clothes]);
-            return filterClothes(clothes, id)[0] || null;
+            return clothes.find(item => item.$id === id) || null;
 
               
     } catch (error) {
@@ -267,13 +303,13 @@ const deleteLocalClothe = async (id: string): Promise<boolean> => {
 
         // delete image file locally
         if (clotheToDelete.localImageURL) {
+            if((await FileSystem.getInfoAsync(clotheToDelete.localImageURL)).exists)
             await FileSystem.deleteAsync(clotheToDelete.localImageURL, { idempotent: true });
         }
 
         //update local data
         const updatedClothes = clothes.filter(clothe => clothe.$id !== id);
-        await writeLocalData(localConfig.localClotheJsonUri, updatedClothes);
-        
+        await writeLocalData(localConfig.localClotheJsonUri, [...updatedClothes]);
         return true;
     } catch (error) {
         console.error('delete clothe locally failed:', error);

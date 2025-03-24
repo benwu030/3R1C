@@ -1,40 +1,122 @@
+import { View, Platform, Alert, Linking, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import { useState } from "react";
-import { Button, Image, View, TouchableOpacity } from "react-native";
-import { ImagePickerAsset, launchImageLibraryAsync } from "expo-image-picker";
+import TryOnCustomButton from "@/components/TryOnCustomButton";
+import {
+  ImagePickerAsset,
+  useCameraPermissions,
+  PermissionStatus,
+  launchCameraAsync,
+  launchImageLibraryAsync,
+} from "expo-image-picker";
+import icons from "@/constants/icons";
+
 export default function CustomImagePicker({
   imageFile,
   setImageFile,
+  imageSizeClassName = "aspect-[4/5]",
 }: {
   imageFile: ImagePickerAsset | null;
   setImageFile: (image: ImagePickerAsset | null) => void;
+  imageSizeClassName?: string;
 }) {
   const [image, setImage] = useState<string | null>(null);
-
-  const pickImage = async () => {
+  const [cameraPermissionStatus, requestPermission] = useCameraPermissions();
+  const pickImageFromGallery = async () => {
     // No permissions request is necessary for launching the image library
     let result = await launchImageLibraryAsync({
       mediaTypes: ["images"],
       quality: 1,
+      allowsEditing: true,
     });
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
       setImageFile(result.assets[0]);
-      console.log(result.assets[0], "from image picker");
     }
   };
 
+  const pickImageFromCamera = async () => {
+    if (cameraPermissionStatus?.status !== PermissionStatus.GRANTED) {
+      if (!cameraPermissionStatus?.canAskAgain) {
+        // If the user denied the permission and if the permission can't be asked again
+        // navigate them to settings
+
+        Alert.alert(
+          "Camera Permission Required",
+          "Please enable camera access in your device settings to use this feature.",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Open Settings",
+              onPress: () => {
+                if (Platform.OS === "ios") {
+                  Linking.openURL("app-settings:");
+                } else {
+                  Linking.openSettings();
+                }
+              },
+            },
+          ]
+        );
+      }
+      requestPermission();
+      return;
+    }
+    let result = await launchCameraAsync({
+      mediaTypes: ["images"],
+      quality: 1,
+      allowsEditing: true,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      setImageFile(result.assets[0]);
+    }
+  };
+
+  const removeBackground = async () => {
+    //called the trained ai model to remove the background
+    console.log("remove background");
+  };
   return !image ? (
-    <View className="flex-col items-center justify-center bg-grey aspect-[4/5]">
-      <Button title="Pick an image from camera roll" onPress={pickImage} />
+    <View
+      className={`flex-row gap-20
+     items-center justify-center bg-grey ${imageSizeClassName}`}
+    >
+      <TryOnCustomButton
+        imageUri={icons.image}
+        title="Image"
+        onPress={() => pickImageFromGallery()}
+      />
+      <TryOnCustomButton
+        imageUri={icons.camera}
+        title="Camera"
+        onPress={() => pickImageFromCamera()}
+      />
     </View>
   ) : (
-    <TouchableOpacity onPress={pickImage}>
-      <Image
-        source={{ uri: image }}
-        style={{ width: "100%", aspectRatio: 5 / 4 }}
-        resizeMode="contain"
-      />
-    </TouchableOpacity>
+    <View className={`${imageSizeClassName} relative`}>
+      <TouchableOpacity onPress={() => pickImageFromGallery()}>
+        <Image source={image} className="w-full h-full" contentFit="contain" />
+      </TouchableOpacity>
+      <View className="absolute top-2 right-2 flex-row gap-2 ">
+        <TryOnCustomButton
+          imageUri={icons.image}
+          title=""
+          onPress={() => pickImageFromGallery()}
+        />
+        <TryOnCustomButton
+          imageUri={icons.camera}
+          title=""
+          onPress={() => pickImageFromCamera()}
+        />
+        <TryOnCustomButton
+          imageUri={icons.scissor}
+          title=""
+          onPress={() => removeBackground()}
+        />
+      </View>
+    </View>
   );
 }

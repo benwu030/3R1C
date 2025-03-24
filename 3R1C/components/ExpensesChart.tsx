@@ -89,7 +89,7 @@ const ExpensesChart = ({
             return (
               <View className="bg-brick p-2 rounded-md">
                 <Text className="text-white font-S-Medium text-[0.6rem]">
-                  {items[0].date.toLocaleDateString("en-GB", {
+                  {items[0].date.toLocaleDateString("default", {
                     month: "short",
                     day: "numeric",
                   })}

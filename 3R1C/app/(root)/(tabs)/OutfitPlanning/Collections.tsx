@@ -5,12 +5,16 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useState, useCallback, useEffect } from "react";
 import icons from "@/constants/icons";
 import { Image } from "expo-image";
 import { router, Link, useFocusEffect } from "expo-router";
-import { getOutfitCollections } from "@/lib/CRUD/outfitCRUD";
+import {
+  deleteOutfitCollection,
+  getOutfitCollections,
+} from "@/lib/CRUD/outfitCRUD";
 import { useAppwrite } from "@/lib/useAppWrite";
 import OutfitCollectionCard from "@/components/OutfitCollectionCard";
 import CustomHeader from "@/components/CustomHeader";
@@ -34,12 +38,43 @@ const OutfitCollections = () => {
       });
     }
   };
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleDeleteSelected = async () => {
-    // TODO: Implement delete functionality
-    console.log("Deleting items:", selectedItems);
-    // Reset selection
-    setSelectedItems([]);
-    setIsSelectMode(false);
+    Alert.alert(
+      "Delete Confirmation",
+      "Are you sure you want to delete these outfits?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            // Add delete logic here
+            try {
+              setIsDeleting(true);
+
+              for (const id of selectedItems) {
+                await deleteOutfitCollection(id);
+              }
+
+              refetch();
+              // Reset selection
+              setSelectedItems([]);
+              setIsSelectMode(false);
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete item");
+              return;
+            } finally {
+              setIsDeleting(false);
+            }
+          },
+          style: "destructive",
+        },
+      ]
+    );
   };
   const {
     data: collections,
@@ -123,6 +158,13 @@ const OutfitCollections = () => {
           />
         )}
       </View>
+
+      {/* Overlay loading indicator */}
+      {isDeleting && (
+        <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/20 items-center justify-center h-full">
+          <ActivityIndicator className="text-beige-darker" size="large" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };

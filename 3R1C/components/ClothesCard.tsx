@@ -11,11 +11,15 @@ interface Props {
   item: Clothe;
   cardType?: "horizontal" | "vertical";
   onPress?: () => void;
+  isSelectMode?: boolean;
+  isSelected?: boolean;
 }
 const ClothesCard = ({
   item: { localImageURL, title, price, purchasedate, $id },
-  onPress,
   cardType = "vertical",
+  onPress,
+  isSelectMode,
+  isSelected,
 }: Props) => {
   const [localImageURLState, setLocalImageURLState] = useState({
     uri: localImageURL,
@@ -25,10 +29,7 @@ const ClothesCard = ({
     if (isRefetching || !$id) return;
 
     setIsRefetching(true);
-    const newPath = await refetchClotheImage(localImageURL, $id, () => {
-      console.log("Image refetched locally");
-    });
-    console.log("newPath", newPath);
+    const newPath = await refetchClotheImage(localImageURL, $id, () => {});
 
     if (newPath) {
       setLocalImageURLState({ uri: `${newPath}?timestamp=${Date.now()}` });
@@ -38,7 +39,17 @@ const ClothesCard = ({
   const card = () => {
     if (cardType === "vertical") {
       return (
-        <TouchableOpacity onPress={onPress} className="flex-1  relative">
+        <TouchableOpacity
+          onPress={onPress}
+          className={`flex-1  relative${isSelected ? "opacity-50" : ""}`}
+        >
+          {isSelectMode && (
+            <View
+              className={`absolute top-3 right-1 z-50  rounded-full p-1 w-5 h-5 rounded-full border-2 border-beige 
+              ${isSelected ? "bg-beige-darker" : "bg-transparent"}`}
+            />
+          )}
+
           <View className="flex-col items-center justify-center mt-2">
             <View className="flex-row items-center absolute px-2 top-5 right-5 bg-stone-300 p-1 rounded-full z-50">
               <Text className="text-xs font-S-Bold text-zinc-600 ml-1">
@@ -49,7 +60,7 @@ const ClothesCard = ({
             <Image
               key={localImageURLState.uri}
               source={localImageURLState}
-              className="w-full h-60"
+              className={`w-full h-60 ${isSelected ? "opacity-60" : ""} rounded-xl`}
               onError={handleImageError}
             />
 

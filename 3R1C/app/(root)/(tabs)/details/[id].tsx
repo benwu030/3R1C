@@ -19,10 +19,8 @@ import { usePathname } from "expo-router";
 import { Alert } from "react-native";
 
 const ClotheDetailsScreen = () => {
-  // const path = usePathname();
-  // console.log(path);
+  const path = usePathname();
   const { id } = useLocalSearchParams<{ id: string }>();
-  // console.log(id)
   const {
     data: clothe,
     loading,
@@ -107,7 +105,7 @@ const ClotheDetailsScreen = () => {
       <Text className="text-lg font-S-Medium mt-2">
         Purchased on{" "}
         {clothe!.purchasedate
-          ? new Date(clothe!.purchasedate).toLocaleDateString("en-GB")
+          ? new Date(clothe!.purchasedate).toLocaleDateString("default")
           : ""}
       </Text>
       <Text className="text-lg font-S-Medium mt-2">

@@ -2,7 +2,7 @@ import { ID, Permission, Query, Role } from 'react-native-appwrite';
 import { Outfit, OutfitCollection,OutfitCollectionRelation } from '@/constants/outfit';
 import { config, localConfig } from '../config';
 import { databases, deleteImage, storage, uploadImage } from '../AppWrite';
-import { readLocalData, writeLocalData,saveImageLocally, writeLocalDataWithDuplicateCheck } from '../LocalStoreManager';
+import { readLocalData, writeLocalData,saveImageLocally, writeLocalDataWithDuplicateCheck, deleteImageLocally } from '../LocalStoreManager';
 import { Image } from 'expo-image';
 import { ImagePickerAsset } from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
@@ -63,7 +63,6 @@ const outfitForRemote = {
     previewImageURL: `https://cloud.appwrite.io/v1/storage/buckets/${config.previewStorageId}/files/${uid}/view?project=${config.projectid}`,
     items: JSON.stringify(outfitWithoutId.items) // Stringify the items array
 };
-console.log('outfitForRemote',outfitForRemote)
         const response = await databases.createDocument(
             config.databaseId!,
             config.outfitCollectionId!,
@@ -142,7 +141,6 @@ export async function createOutfitCollection(collection: OutfitCollection,previe
              const newPath = await saveImageLocally(localConfig.localOutfitCollectionPreviewsDirectiry,collection.previewImageURL, uid);
             // Update file path
             collection.previewImageURL = newPath;
-            console.log('newPath',newPath)
         }
 
    
@@ -286,8 +284,7 @@ export async function updateOutfit(outfit: Outfit, onLocalUpdate?: () => void) {
             await uploadImage(imagePicker, outfit.$id, config.previewStorageId!);
             }
         }
-        console.log('outfit',outfit)
-        console.log('outfitWithoutId',outfitForRemote)
+       
         await databases.updateDocument(
             config.databaseId!,
             config.outfitCollectionId!,
@@ -301,7 +298,10 @@ export async function updateOutfit(outfit: Outfit, onLocalUpdate?: () => void) {
         return false;
     }
 }
-export async function getOutfitById(outfitId: string): Promise<Outfit | null> {
+export async function getOutfitById(outfitId: string,isNewOutfit:boolean): Promise<Outfit | null> {
+    if(isNewOutfit){
+        return null;
+    }
     try {
         // Try local first
         const localOutfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
@@ -354,7 +354,6 @@ function mapDocumentsToOutfit(documents: any[]): Outfit[] {
 // Get outfits by collection
 export async function getOutfitsByCollection(collectionId: string): Promise<Outfit[]> {
     try {
-        console.log('getOutfitsByCollection',collectionId)
         // Try local first
         const localRelations = await readLocalData<OutfitCollectionRelation>(
             localConfig.localOutfitCollectionRelationshipJsonUri
@@ -390,7 +389,6 @@ export async function getOutfitsByCollection(collectionId: string): Promise<Outf
                 );
                 outfits.push(outfit);
             } catch (e) {
-                console.log(`Outfit ${id} not found`);
             }
         }
         
@@ -455,10 +453,77 @@ export async function deleteOutfitsFromCollection(outfitIds: string[], collectio
             );
             }
         }
-        console.log('from remote outfitIds',outfitIds)
         return true;
     } catch (error) {
         console.error('Failed to delete outfit from collection:', error);
+        return false;
+    }
+}
+
+//delete outfit collections
+export async function deleteLocalOutfitCollection(collectionId: string) {
+    try {
+        // Delete locally first
+        const localCollections = await readLocalData<OutfitCollection>(localConfig.localOutfitCollectionsJsonUri);
+        const updatedCollections = localCollections.filter(collection => collection.$id !== collectionId);
+        await writeLocalData(localConfig.localOutfitCollectionsJsonUri, updatedCollections);
+        //Remove relationship
+        const localRelations = await readLocalData<OutfitCollectionRelation>(
+            localConfig.localOutfitCollectionRelationshipJsonUri
+        );
+        const updatedRelations = localRelations.filter(rel => rel.outfitCollectionId !== collectionId);
+        await writeLocalData(localConfig.localOutfitCollectionRelationshipJsonUri, updatedRelations);
+        //remove the local outfitcollection image
+        let previewImageURL = localCollections.find(collection => collection.$id === collectionId)?.previewImageURL;
+        if (previewImageURL) {
+            await deleteImageLocally(previewImageURL);
+        }
+        return true;
+    } catch (error) {
+        console.error('Failed to delete collection:', error);
+        return false;
+    }
+}
+export async function deleteRemoteOutfitCollection(collectionId: string) {
+    try {
+        // Delete outfits collection from collection
+        await databases.deleteDocument(
+            config.databaseId!,
+            config.outfitCollection_CollectionId!,
+            collectionId
+        )
+        // Delete all related realtionships
+        const relationships = await databases.listDocuments(
+            config.databaseId!,
+            config.outftiCollectionRelationshipId!,
+            [
+                Query.equal('outfitCollectionId', collectionId)
+            ]
+            );
+            for (const doc of relationships.documents) {
+                await databases.deleteDocument(
+                    config.databaseId!,
+                    config.outfitCollection_CollectionId!,
+                    doc.$id
+                )
+            }
+       //delete the image from storage
+       await deleteImage(config.outfitCollectionImgStorageId!,collectionId)
+        return true;
+    } catch (error) {
+        console.error('Failed to delete collection:', error);
+        return false;
+    }
+}
+
+//delete outfit collection
+export async function deleteOutfitCollection(collectionId: string) {
+    try {
+        const localDelete = await deleteLocalOutfitCollection(collectionId);
+        const remoteDelete = await deleteRemoteOutfitCollection(collectionId);
+        return localDelete && remoteDelete;
+    } catch (error) {
+        console.error('Failed to delete collection:', error);
         return false;
     }
 }

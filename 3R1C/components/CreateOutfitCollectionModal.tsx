@@ -51,23 +51,28 @@ const CreateOutfitCollectionModal = ({ userID }: { userID: string }) => {
 
   return (
     <ScrollView
-      contentContainerClassName="pb-32 bg-white"
+      contentContainerClassName="pb-32 bg-white flex-1"
       showsHorizontalScrollIndicator={true}
     >
       <View className="p-5 flex-col">
-        <CustomImagePicker imageFile={imageFile} setImageFile={setImageFile} />
+        <CustomImagePicker
+          imageFile={imageFile}
+          setImageFile={setImageFile}
+          imageSizeClassName="h-[15rem]"
+        />
 
         <TextInput
-          placeholder="Title"
+          placeholder="Title*"
+          placeholderTextColor={"#776E65"}
           value={title}
           onChangeText={setTitle}
           className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl py-2"
         />
         <TextInput
-          placeholder="description"
+          placeholder="Description"
+          placeholderTextColor={"#776E65"}
           value={description}
           onChangeText={setDescription}
-          keyboardType="numeric"
           className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl py-2"
         />
 

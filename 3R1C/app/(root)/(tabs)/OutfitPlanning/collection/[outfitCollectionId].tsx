@@ -76,7 +76,7 @@ const OutfitCollection = () => {
 
     Alert.alert(
       "Delete Confirmation",
-      "Are you sure you want to delete this outfit?",
+      "Are you sure you want to delete these outfits?",
       [
         {
           text: "Cancel",
@@ -94,7 +94,7 @@ const OutfitCollection = () => {
                 Alert.alert("Error", "Failed to delete item");
                 return;
               }
-              Alert.alert("Success", "Outfit deleted successfully");
+              Alert.alert("Success", "Outfits deleted successfully");
               refetch();
               // Reset selection
               setSelectedItems([]);

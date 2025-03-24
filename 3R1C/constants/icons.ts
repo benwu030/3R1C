@@ -18,6 +18,10 @@ import camera from '@/assets/icons/camera.svg'
 import save from '@/assets/icons/save.svg'
 import minus from '@/assets/icons/minus.svg'
 import image from '@/assets/icons/image.svg'
+import scissor from '@/assets/icons/scissor.svg'
+import filter from '@/assets/icons/filter.svg'
+import sortAsc from '@/assets/icons/sortAsc.svg'
+import sortDesc from '@/assets/icons/sortDesc.svg'
 export default{
     plus,
     mirror,
@@ -38,6 +42,10 @@ export default{
     camera,
     save,
     minus,
-    image
+    image,
+    scissor,
+    filter,
+    sortAsc,
+    sortDesc
 }
 

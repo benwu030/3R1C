@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -12,54 +19,189 @@ import icons from "@/constants/icons";
 import ClothesCard from "@/components/ClothesCard";
 import Filters from "@/components/Filters";
 import { useAppwrite } from "@/lib/useAppWrite";
-import { getClothesWithFilter } from "@/lib/CRUD/clotheCRUD";
+import { deleteClotheById, getClothesWithFilter } from "@/lib/CRUD/clotheCRUD";
 import { MainCategoriesFilter } from "@/components/CategoriesFilter";
 import { CATEGORIES } from "@/constants/data";
+import CustomHeader from "@/components/CustomHeader";
+import CustomSearchBar from "@/components/CustomSearchBar";
+import CustomFilter from "@/components/CustomFilter";
+import { MenuAction } from "@react-native-menu/menu";
 //columnwraooer -> row
 //contentContainer over content area
+
+const filterOptions: MenuAction[] = [
+  {
+    id: "price_asc",
+    title: "Purchase Price",
+    image: "arrow.up.square.fill",
+    subtitle: "(Ascending)",
+    imageColor: "#777",
+  },
+  {
+    id: "price_desc",
+    title: "Purchase Price",
+    subtitle: "(Descending)",
+    image: "arrow.down.square.fill",
+    imageColor: "#777",
+  },
+  {
+    id: "purchasedate_asc",
+    title: "Purchase Date ",
+    subtitle: "(Ascending)",
+    image: "arrow.up.square.fill",
+    imageColor: "#777",
+  },
+  {
+    id: "purchasedate_desc",
+    title: "Purchase Date",
+    subtitle: "(Descending)",
+    image: "arrow.down.square.fill",
+    imageColor: "#777",
+  },
+  {
+    id: "createdate_asc",
+    title: "Create Date",
+    subtitle: "(Ascending)",
+    image: "arrow.up.square.fill",
+    imageColor: "#777",
+  },
+  {
+    id: "createdate_desc",
+    title: "Create Date",
+    subtitle: "(Descending)",
+    image: "arrow.down.square.fill",
+    imageColor: "#777",
+  },
+];
 const Index = () => {
-  const params = useLocalSearchParams<{ mainCategoryfilter?: string }>();
+  const params = useLocalSearchParams<{
+    mainCategoryfilter: string;
+    searchText: string;
+    sortByText: string;
+  }>();
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const {
     data: clothes,
     loading,
     refetch,
   } = useAppwrite({ fn: getClothesWithFilter });
+  const handleDeleteSelected = () => {
+    // Delete selected items
+
+    Alert.alert(
+      "Delete Confirmation",
+      "Are you sure you want to delete these clothes?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            try {
+              // Delete selected items
+              for (const id of selectedItems) {
+                await deleteClotheById(id, id);
+              }
+              // Reset selection
+              setSelectedItems([]);
+              setIsSelectMode(false);
+              // Refetch data
+              refetch({
+                mainCategoryfilter: params.mainCategoryfilter ?? "All",
+              });
+            } catch (error) {
+              console.error("Error deleting clothes", error);
+            }
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
   const [totalNumberClothes, setTotalNumberClothes] = useState(0);
   const handleCardPressed = (id: string) => {
-    console.log("card pressed", id);
-    router.push(`/details/${id}`);
+    if (isSelectMode) {
+      setSelectedItems((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      );
+    } else {
+      router.push(`/details/${id}`);
+    }
   };
-
+  const searchClothes = (searchText: string) => {
+    // Update search params in URL
+    router.setParams({
+      searchText: searchText,
+    });
+  };
+  const onFilter = (sortByText: string) => {
+    router.setParams({
+      sortByText: sortByText || "createdate_asc",
+    });
+  };
   useEffect(() => {
     setTotalNumberClothes(clothes?.length ?? 0);
   }, [clothes]);
 
   useFocusEffect(
     useCallback(() => {
-      refetch({ mainCategoryfilter: params.mainCategoryfilter ?? "All" });
-    }, [params.mainCategoryfilter])
+      refetch({
+        searchText: params.searchText,
+        mainCategoryfilter: params.mainCategoryfilter,
+        sortByText: params.sortByText,
+      });
+    }, [params.mainCategoryfilter, params.searchText, params.sortByText])
   );
-
   return (
     <SafeAreaView className="bg-sand-dark flex-1">
-      <View className="flex-row justify-center items-center py-2 px-5">
-        <Text className=" flex-1 "></Text>
-        <View className="flex-col flex-1 justify-center items-center">
-          <Text className="font-S-ExtraLightItalic text-3xl">Your Closet</Text>
-          <Image source={icons.headerUnderline} className="w-full h-4" />
-        </View>
-        <View className="flex-1 justify-end items-end">
-          <Link href="/AddClothes">
-            <Image source={icons.plus} className="size-8" />
-          </Link>
-        </View>
-      </View>
-
-      <View className="flex-row justify-between items-center px-5">
+      <CustomHeader
+        title="Your Closet"
+        showBackButton={false}
+        rightComponent={
+          <View className="flex-row justify-end items-end py-2 px-5">
+            {isSelectMode ? (
+              <TouchableOpacity
+                onPress={handleDeleteSelected}
+                disabled={selectedItems.length === 0}
+                className=""
+              >
+                <Image source={icons.deleteIcon} className="size-5" />
+              </TouchableOpacity>
+            ) : (
+              <Link href="/AddClothes" className="">
+                <Image source={icons.plus} className="size-6" />
+              </Link>
+            )}
+          </View>
+        }
+      />
+      <CustomSearchBar onSearch={searchClothes} />
+      <View className="flex-row justify-between items-center px-5 py-2 mb-2">
         <Text className="text-base font-S-Regular">
           {totalNumberClothes} Items
         </Text>
-        <Filters />
+        {/* Select/Cancel Button */}
+        <View className="flex-row items-center gap-2">
+          <CustomFilter
+            title="Sort By"
+            filterOptions={filterOptions}
+            onFilter={onFilter}
+          />
+          <TouchableOpacity
+            onPress={() => {
+              setIsSelectMode(!isSelectMode);
+              setSelectedItems([]);
+            }}
+            className=""
+          >
+            <Text className="font-S-Regular text-base text-right w-full">
+              {isSelectMode ? "Cancel" : "Select"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View className="px-5">
@@ -74,11 +216,12 @@ const Index = () => {
         <FlatList
           data={clothes}
           renderItem={({ item }: { item: any }) => (
-            <View className="w-1/2 px-2">
+            <View className="w-1/2 px-2" key={item.$id}>
               <ClothesCard
-                key={item.$id}
                 item={item}
-                onPress={() => handleCardPressed(item.$id!)}
+                isSelected={selectedItems.includes(item.$id || "")}
+                isSelectMode={isSelectMode}
+                onPress={() => handleCardPressed(item.$id)}
               />
             </View>
           )}

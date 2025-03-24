@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { useAppwrite } from "@/lib/useAppWrite";
 import { getOutfitCollectionsByDate } from "@/lib/CRUD/outfitCRUD";
 import { ActivityIndicator } from "react-native";
 import { OutfitCollection } from "@/constants/outfit";
+import { useFocusEffect } from "expo-router";
 interface CalendarProps {
   currentDate?: Date;
 }
@@ -109,13 +110,11 @@ const Calendar = ({ currentDate = new Date() }: CalendarProps) => {
   useEffect(() => {
     refetch();
   }, [selectedDate]);
-  useEffect(() => {
-    console.log("-------- Calendar Debug --------");
-    console.log("collections:", collections);
-    console.log("loading:", loading);
-    console.log("selectedDate:", selectedDate);
-    console.log("-----------------------------");
-  }, [collections, loading, selectedDate]);
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [])
+  );
   return (
     <View className="px-5  flex-col flex-1 pb-20">
       <Text className="font-S-Bold text-3xl mb-4">

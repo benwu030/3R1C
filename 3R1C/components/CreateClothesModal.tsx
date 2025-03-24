@@ -67,7 +67,6 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
     console.log("mainCate:", params.mainCategoryfilter);
     console.log("subCate:", params.subCategoryfilter);
   }, [params.mainCategoryfilter, params.subCategoryfilter]);
-  // console.log('userID',userID)
 
   return (
     <ScrollView
@@ -78,15 +77,17 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
         <CustomImagePicker imageFile={imageFile} setImageFile={setImageFile} />
 
         <TextInput
-          placeholder="Title"
+          placeholder="Title*"
           value={title}
           onChangeText={setTitle}
-          className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl py-2"
+          placeholderTextColor={"#776E65"}
+          className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl py-2 mt-2"
         />
         <TextInput
-          placeholder="Price"
+          placeholder="Price*"
           value={price}
           onChangeText={setPrice}
+          placeholderTextColor={"#776E65"}
           keyboardType="numeric"
           className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl py-2"
         />
@@ -94,11 +95,14 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
           placeholder="Remark"
           value={remark}
           onChangeText={setRemark}
+          placeholderTextColor={"#776E65"}
           className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl py-2"
           multiline={true}
           numberOfLines={4}
         />
-        <Text className="font-S-RegularItalic text-lg mb-1">Main Category</Text>
+        <Text className="font-S-RegularItalic text-lg mb-1">
+          Main Category*
+        </Text>
         <MainCategoriesFilter Categories={categories} />
         <Text className="font-S-RegularItalic text-lg my-2">
           Sub Categories

@@ -29,14 +29,13 @@ export async function uploadImage(file:ImagePickerAsset,uid:string,bucketId:stri
         uid, // Auto-generate ID
         {
             
-            name: file.fileName!,
-            type: file.type!,
-            size: file.fileSize!,
+            name: file.fileName??uid,
+            type: file.type??'image',
+            size: file.fileSize??0,
             uri: file.uri},
             
         
     );
-    console.log(response,'from uploadImage');
 
     return response
    
@@ -50,7 +49,6 @@ export async function uploadImage(file:ImagePickerAsset,uid:string,bucketId:stri
 export async function deleteImage(bucketId:string, fileId:string){
     try{
         const response = await storage.deleteFile(bucketId,fileId)
-        console.log(response)
         return response
     }catch(error){
         console.error(error)
@@ -68,7 +66,6 @@ export async function login (){
             deepLink.hostname = 'localhost';
         }
         
-        // console.log(deepLink)
         const scheme = `${deepLink.protocol}//`;
         const loginUrl = await account.createOAuth2Token(
             OAuthProvider.Google,
@@ -79,7 +76,6 @@ export async function login (){
             
            
         const browserResult = await openAuthSessionAsync(loginUrl.toString(), scheme);
-        console.log(browserResult)
         if (browserResult.type !== 'success') throw new Error('Failed to login (Google)');
         //extract credentails from the OAUTH redirect URL
         const url =new URL(browserResult.url)

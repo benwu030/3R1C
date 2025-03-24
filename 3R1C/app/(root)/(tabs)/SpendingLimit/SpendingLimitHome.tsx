@@ -44,7 +44,6 @@ const SpendingLimit = () => {
   };
 
   const handleCardPressed = (id: string) => {
-    console.log("card pressed", id);
     router.push(`/details/${id}`);
   };
   const handlePeriodChange = (period: TimePeriod) => {

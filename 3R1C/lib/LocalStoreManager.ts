@@ -74,7 +74,6 @@ export const writeLocalDataWithDuplicateCheck = async <T extends { $id?:string|n
             await writeLocalData(path, [...existingData, ...nonDuplicates]);
             return nonDuplicates; // Return items that were added
         } else {
-            // console.log(`No new items to add to ${path}`);
             return []; // No items added
         }
     } catch (err) {
@@ -93,6 +92,17 @@ export const saveImageLocally = async (path:string,imageUri: string, id: string,
             return localImageUri;
             } catch (error) {
             console.error('Failed to save image locally:', error);
+    }
+}
+export const deleteImageLocally = async (imageUri: string) => {
+    try {
+         const fileInfo = await FileSystem.getInfoAsync(imageUri);
+        if (!fileInfo.exists) {
+            return;
+        }
+        await FileSystem.deleteAsync(imageUri, { idempotent: true });
+    } catch (error) {
+        console.error('Failed to delete image locally:', error);
     }
 }
 export const saveOutfitLocally = async (outfit: Outfit) => {

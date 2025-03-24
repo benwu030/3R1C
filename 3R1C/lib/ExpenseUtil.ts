@@ -62,7 +62,6 @@ export function createLineChartData(clothes: CLOTHES, groupBy: 'week' | 'month' 
         acc[key] += clothe.price;
         return acc;
     }, {} as Record<string, number>);
-console.log(groupedClothes);
     // Convert to required format with proper labels
     let result: { label: string, value: number,date:Date }[] = [];
     
@@ -93,6 +92,5 @@ console.log(groupedClothes);
                 date: new Date(parseInt(year), 0, 1)
             }));
     }
-    console.log(result);
     return result;
 }

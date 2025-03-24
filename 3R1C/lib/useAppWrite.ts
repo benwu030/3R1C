@@ -14,7 +14,7 @@ interface UseAppwriteReturn<T, P> {
   refetch: (newParams?: P) => Promise<void>;
 }
 
-export const useAppwrite = <T, P extends Record<string, string | number>>({
+export const useAppwrite = <T, P extends Record<string, any>>({
   fn,
   params = {} as P,
   skip = false,

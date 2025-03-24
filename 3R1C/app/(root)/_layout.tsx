@@ -5,7 +5,6 @@ import LoadingScreen from "@/components/LoadingScreen";
 export default function AppLayout() {
   const { isLoggedIn, loading, isOfflineMode } = useGlobalContext();
   if (loading) return <LoadingScreen />;
-  // console.log(!isLoggedIn||!isOfflineMode)
   if (!isLoggedIn && !isOfflineMode) {
     return <Redirect href="/signIn" />;
   }
@@ -22,6 +21,12 @@ export default function AppLayout() {
       />
       <Stack.Screen
         name="outfit/[outfitId]"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Utils/EditImage"
         options={{
           headerShown: false,
         }}
