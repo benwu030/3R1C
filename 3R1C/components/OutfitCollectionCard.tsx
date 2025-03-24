@@ -48,12 +48,12 @@ const OutfitCollectionCard = ({
       {/* Existing card content */}
       {isSelectMode && (
         <View
-          className={`absolute top-1 right-1 z-50  rounded-full p-1 w-5 h-5 rounded-full border-2 border-beige 
+          className={`absolute top-1 left-1 z-50  rounded-full p-1 w-5 h-5 rounded-full border-2 border-beige 
         ${isSelected ? "bg-beige-darker" : "bg-transparent"}`}
         />
       )}
       {displayDate && (
-        <View className="flex-row items-center absolute px-2 top-5 right-5 bg-stone-300 p-1 rounded-full z-50">
+        <View className="flex-row items-center absolute px-2 -top-2 -right-2 bg-stone-300 p-1 rounded-full z-50">
           <Text className="text-xs font-S-Bold text-zinc-600 ml-1">
             {displayDate}
           </Text>

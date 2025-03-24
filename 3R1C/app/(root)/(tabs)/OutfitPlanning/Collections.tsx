@@ -151,7 +151,7 @@ const OutfitCollections = () => {
               </View>
             )}
             numColumns={2}
-            contentContainerClassName="pb-20"
+            contentContainerClassName="pb-20 mt-2"
             columnWrapperStyle={{ marginHorizontal: 20, flexDirection: "row" }}
             showsVerticalScrollIndicator={false}
             horizontal={false}

@@ -45,7 +45,7 @@ const ClothesCard = ({
         >
           {isSelectMode && (
             <View
-              className={`absolute top-3 right-1 z-50  rounded-full p-1 w-5 h-5 rounded-full border-2 border-beige 
+              className={`absolute top-3 left-1 z-50  rounded-full p-1 w-5 h-5 rounded-full border-2 border-beige 
               ${isSelected ? "bg-beige-darker" : "bg-transparent"}`}
             />
           )}
