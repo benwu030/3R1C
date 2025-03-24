@@ -1,5 +1,5 @@
 import { useGlobalContext } from "@/lib/globalProvider";
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Slot, Stack } from "expo-router";
 
 import LoadingScreen from "@/components/LoadingScreen";
 export default function AppLayout() {
@@ -21,12 +21,6 @@ export default function AppLayout() {
       />
       <Stack.Screen
         name="outfit/[outfitId]"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="Utils/EditImage"
         options={{
           headerShown: false,
         }}

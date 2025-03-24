@@ -7,18 +7,21 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
 import CustomImagePicker from "./CustomImagePicker";
 import { MainCategoriesFilter, SubCategoriesFilter } from "./CategoriesFilter";
-import { CATEGORIES } from "@/constants/data";
+import { CATEGORIES, SEASONS } from "@/constants/data";
 import { ImagePickerAsset } from "expo-image-picker";
 import CircularHue from "./CircularHue";
+
 const CreateClothesModal = ({ userID }: { userID: string }) => {
   const params = useLocalSearchParams<{
     mainCategoryfilter?: string;
     subCategoryfilter?: string;
   }>();
   const categories = CATEGORIES.filter((category) => category !== "All");
+  const subCategories = SEASONS;
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [remark, setRemark] = useState("");
+  const [brand, setBrand] = useState("");
   const [imageFile, setImageFile] = useState<ImagePickerAsset | null>(null);
 
   const [color, setColor] = useState("");
@@ -31,7 +34,7 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
     }
     const mainCategoryfilter = params.mainCategoryfilter as Category;
     const subCategoryfilter = params.subCategoryfilter
-      ? (params.subCategoryfilter.split(",") as Category[])
+      ? params.subCategoryfilter.split(",")
       : [];
     if (!title || !price || !mainCategoryfilter) {
       Alert.alert("Error", "Please fill all the required fields");
@@ -42,6 +45,7 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
       title,
       price: parseFloat(price),
       remark,
+      brand,
       maincategory: mainCategoryfilter,
       subcategories: subCategoryfilter,
       maincolor: color,
@@ -75,28 +79,41 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
     >
       <View className="p-5 flex-col">
         <CustomImagePicker imageFile={imageFile} setImageFile={setImageFile} />
-
+        <Text className="font-S-RegularItalic text-sm ">Title*</Text>
         <TextInput
-          placeholder="Title*"
+          placeholder="Enter a name"
           value={title}
           onChangeText={setTitle}
           placeholderTextColor={"#776E65"}
-          className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl py-2 mt-2"
+          className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl "
         />
+        <Text className="font-S-RegularItalic text-sm ">Purchased Price*</Text>
+
         <TextInput
-          placeholder="Price*"
+          placeholder="Enter price"
           value={price}
           onChangeText={setPrice}
           placeholderTextColor={"#776E65"}
           keyboardType="numeric"
-          className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl py-2"
+          className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl"
         />
+        <Text className="font-S-RegularItalic text-sm ">Brand</Text>
+
         <TextInput
-          placeholder="Remark"
+          placeholder="Enter a brand name"
+          value={brand}
+          onChangeText={setBrand}
+          placeholderTextColor={"#776E65"}
+          className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl"
+        />
+        <Text className="font-S-RegularItalic text-sm ">Remark</Text>
+
+        <TextInput
+          placeholder="Enter remark"
           value={remark}
           onChangeText={setRemark}
           placeholderTextColor={"#776E65"}
-          className="font-S-RegularItalic border-b border-gray-300 mb-4 text-2xl py-2"
+          className="font-S-RegularItalic border-b border-gray-300 mb-4 text-xl"
           multiline={true}
           numberOfLines={4}
         />
@@ -107,7 +124,7 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
         <Text className="font-S-RegularItalic text-lg my-2">
           Sub Categories
         </Text>
-        <SubCategoriesFilter Categories={categories} />
+        <SubCategoriesFilter Categories={subCategories} />
 
         <View className="mb-6 mt-4">
           <Text className="font-S-RegularItalic text-lg mb-1">

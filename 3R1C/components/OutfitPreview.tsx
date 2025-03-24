@@ -75,16 +75,6 @@ const CalendarItem = ({ date, outfitCollection }: OutfitPreviewProps) => {
     });
   };
   const handleAddOutfit = () => {
-    // const uid = ID.unique();
-    // router.push({
-    //   pathname: `/outfit/[outfitId]`,
-    //   params: {
-    //     outfitId: uid,
-    //     outfitName: "New Outfit",
-    //     isNewOutfit: "true",
-    //     collectionId: outfitCollection?.$id ?? "",
-    //   },
-    // });
     router.push("/AddOutfitCollection");
   };
   const handleCollectionPressed = (

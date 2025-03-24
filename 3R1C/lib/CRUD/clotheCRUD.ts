@@ -235,7 +235,9 @@ function filterClothes(clothes: CLOTHES, category="All",searchText?:string,sortB
             item.title?.toLowerCase().includes(searchLower) ||
             item.remark?.toLowerCase().includes(searchLower) ||
             item.maincategory?.toLowerCase().includes(searchLower) ||
-            item.subcategories?.some(sub => sub.toLowerCase().includes(searchLower))
+            item.subcategories?.some(sub => sub.toLowerCase().includes(searchLower))||
+            item.brand?.toLowerCase().includes(searchLower) ||
+            item.maincolor?.toLowerCase().includes(searchLower)
         );
     }
 

@@ -101,7 +101,9 @@ const ClotheDetailsScreen = () => {
         className="w-full h-[32rem] bg-white"
         contentFit="contain"
       />
-      <Text className="text-2xl font-S-Regular mt-5">${clothe!.price}</Text>
+      <Text className="text-2xl font-S-Regular mt-5">
+        Purchase Price: ${clothe!.price}
+      </Text>
       <Text className="text-lg font-S-Medium mt-2">
         Purchased on{" "}
         {clothe!.purchasedate

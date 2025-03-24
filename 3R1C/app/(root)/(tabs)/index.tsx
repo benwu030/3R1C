@@ -178,8 +178,7 @@ const Index = () => {
           </View>
         }
       />
-      <CustomSearchBar onSearch={searchClothes} />
-      <View className="flex-row justify-between items-center px-5 py-2 mb-2">
+      <View className="flex-row justify-between items-center px-5 ">
         <Text className="text-base font-S-Regular">
           {totalNumberClothes} Items
         </Text>
@@ -203,6 +202,7 @@ const Index = () => {
           </TouchableOpacity>
         </View>
       </View>
+      <CustomSearchBar onSearch={searchClothes} />
 
       <View className="px-5">
         <MainCategoriesFilter Categories={CATEGORIES} />

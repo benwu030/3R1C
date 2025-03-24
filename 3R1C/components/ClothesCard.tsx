@@ -15,7 +15,7 @@ interface Props {
   isSelected?: boolean;
 }
 const ClothesCard = ({
-  item: { localImageURL, title, price, purchasedate, $id },
+  item: { localImageURL, title, price, purchasedate, $id, brand },
   cardType = "vertical",
   onPress,
   isSelectMode,
@@ -51,11 +51,18 @@ const ClothesCard = ({
           )}
 
           <View className="flex-col items-center justify-center mt-2">
-            <View className="flex-row items-center absolute px-2 top-5 right-5 bg-stone-300 p-1 rounded-full z-50">
-              <Text className="text-xs font-S-Bold text-zinc-600 ml-1">
+            <View className="flex-row items-center absolute px-2 top-4 -right-2 bg-stone-300 p-1 rounded-full z-50">
+              <Text className="text-xs font-S-Bold text-zinc-600 ">
                 ${price}
               </Text>
             </View>
+            {brand && (
+              <View className="flex-row items-center absolute px-2 -top-2 -right-2 bg-beige-dark p-1 rounded-full z-50">
+                <Text className="font-S-Regular text-sand text-xs">
+                  Brand - {brand}
+                </Text>
+              </View>
+            )}
 
             <Image
               key={localImageURLState.uri}
@@ -66,6 +73,7 @@ const ClothesCard = ({
 
             <View className="flex-col items-center justify-center mt-2">
               <Text className="font-S-Regular text-black text-xl">{title}</Text>
+
               <Text className="font-S-Medium text-beige-darker text-sm">
                 {purchasedate?.toString().split("T")[0] ?? ""}
               </Text>

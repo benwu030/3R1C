@@ -14,6 +14,9 @@ import { getOutfitCollectionsByDate } from "@/lib/CRUD/outfitCRUD";
 import { ActivityIndicator } from "react-native";
 import { OutfitCollection } from "@/constants/outfit";
 import { useFocusEffect } from "expo-router";
+import icons from "@/constants/icons";
+import { router } from "expo-router";
+import { Image } from "expo-image";
 interface CalendarProps {
   currentDate?: Date;
 }
@@ -116,7 +119,7 @@ const Calendar = ({ currentDate = new Date() }: CalendarProps) => {
     }, [])
   );
   return (
-    <View className="px-5  flex-col flex-1 pb-20">
+    <View className="px-5  flex-col flex-1">
       <Text className="font-S-Bold text-3xl mb-4">
         {getDisplayYear(currentDisplayDate)}{" "}
         {getDisplayMonth(currentDisplayDate)}
@@ -187,7 +190,7 @@ const Calendar = ({ currentDate = new Date() }: CalendarProps) => {
           stickyHeaderIndices={[0]}
         />
       </View>
-      <View className="flex-1 mt-4">
+      <View className="h-[32rem] mt-4">
         {loading ? (
           <ActivityIndicator
             size="large"
@@ -208,6 +211,37 @@ const Calendar = ({ currentDate = new Date() }: CalendarProps) => {
         ) : (
           <CalendarItem date={selectedDate} />
         )}
+        <View className="flex-row justify-center items-center  gap-10">
+          <View className="flex-col justify-center items-center">
+            <TouchableOpacity
+              onPress={() => router.push("/OutfitPlanning/Collections")}
+              className=""
+            >
+              <Image
+                source={icons.folderAdd}
+                className="size-16"
+                tintColor={"#776E65"}
+              />
+            </TouchableOpacity>
+            <Text className="font-S-Regular text-sm ">
+              Browse your Collections
+            </Text>
+          </View>
+
+          <View className="flex-col justify-center items-center">
+            <TouchableOpacity
+              onPress={() => router.push("/OutfitPlanning/Outfits")}
+              className=""
+            >
+              <Image
+                source={icons.collectionsAdd}
+                className="size-16 "
+                tintColor={"#776E65"}
+              />
+            </TouchableOpacity>
+            <Text className="font-S-Regular text-sm ">Browse your Outfits</Text>
+          </View>
+        </View>
       </View>
     </View>
   );

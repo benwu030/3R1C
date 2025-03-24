@@ -231,6 +231,49 @@ export async function getOutfitCollectionsByDate(date: Date): Promise<OutfitColl
         return [];
     }
 }
+//get all outfits from Local
+export async function getAllOutfitFromLocal(): Promise<Outfit[]> {
+    try {
+        const localOutfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
+        return localOutfits;
+    } catch (error) {
+        console.error('Failed to get all outfits:', error);
+        return [];
+    }
+}
+//get all outfits from Remote
+export async function getAllOutfitFromRemote(): Promise<Outfit[]> {
+    try{
+        const response = await databases.listDocuments(
+            config.databaseId!,
+            config.outfitCollectionId!,
+            []
+        );
+        const outfits = mapDocumentsToOutfit(response.documents);
+        return outfits;
+    }catch(error){
+        console.error('Failed to get all outfits:', error);
+        return [];
+    }
+}
+
+//get all outfits
+export async function getAllOutfits(): Promise<Outfit[]> {
+    try {
+        const localOutfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
+        if(localOutfits.length > 0){
+            return localOutfits;
+        }
+        // Fetch from remote and update local
+        const remoteOutfits = await getAllOutfitFromRemote();
+        await writeLocalData(localConfig.localOutfitJsonUri, remoteOutfits);
+        return remoteOutfits;
+    }
+    catch (error) {
+        console.error('Failed to get all outfits:', error);
+        return [];
+    }
+}
 // Update outfit items positions
 export async function updateOutfit(outfit: Outfit, onLocalUpdate?: () => void) {
     try {
@@ -298,6 +341,7 @@ export async function updateOutfit(outfit: Outfit, onLocalUpdate?: () => void) {
         return false;
     }
 }
+
 export async function getOutfitById(outfitId: string,isNewOutfit:boolean): Promise<Outfit | null> {
     if(isNewOutfit){
         return null;
@@ -416,7 +460,45 @@ function mapDocumentsToRelationship(documents: any[]): OutfitCollectionRelation[
     }));
 }
 
+//delete outfit by id
+export async function deleteOutfitById(outfitId: string) {
+    try {
+        // Delete locally first
+        const localOutfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
+        const updatedOutfits = localOutfits.filter(outfit => outfit.$id !== outfitId);
+        await writeLocalData(localConfig.localOutfitJsonUri, updatedOutfits);
+        // Remove relationship
+        const localRelations = await readLocalData<OutfitCollectionRelation>(
+            localConfig.localOutfitCollectionRelationshipJsonUri
+        );
+        const updatedRelations = localRelations.filter(rel => rel.outfitId !== outfitId);
+        await writeLocalData(localConfig.localOutfitCollectionRelationshipJsonUri, updatedRelations);
+        //delete local preview image
+        let previewImageURL = localOutfits.find(outfit => outfit.$id === outfitId)?.previewImageURL;
+        if (previewImageURL) {
+            await deleteImageLocally(previewImageURL);
+        }
+        // Delete  outfit from remote
+        await databases.deleteDocument(
+            config.databaseId!,
+            config.outfitCollectionId!,
+            outfitId
+        );
+        //delete relationship from remote
+        await databases.deleteDocument(
+            config.databaseId!,
+            config.outftiCollectionRelationshipId!,
+            outfitId
+        );
+        //delete the image from storage
+        await deleteImage(config.previewStorageId!, outfitId);
 
+        return true;
+    } catch (error) {
+        console.error('Failed to delete outfit:', error);
+        return false;
+    }
+}
 // Delete outfit from collection
 export async function deleteOutfitsFromCollection(outfitIds: string[], collectionId: string, onLocalUpdate?: () => void) {
     try {
@@ -424,7 +506,7 @@ export async function deleteOutfitsFromCollection(outfitIds: string[], collectio
         const localRelations = await readLocalData<OutfitCollectionRelation>(
             localConfig.localOutfitCollectionRelationshipJsonUri
         );
-        
+        //delete relationship
         const updatedRelations = localRelations.filter(
             rel => !(outfitIds.includes(rel.outfitId) && rel.outfitCollectionId === collectionId)
         );

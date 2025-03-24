@@ -22,6 +22,7 @@ import scissor from '@/assets/icons/scissor.svg'
 import filter from '@/assets/icons/filter.svg'
 import sortAsc from '@/assets/icons/sortAsc.svg'
 import sortDesc from '@/assets/icons/sortDesc.svg'
+import folderAdd from '@/assets/icons/folderAdd.svg'
 export default{
     plus,
     mirror,
@@ -46,6 +47,7 @@ export default{
     scissor,
     filter,
     sortAsc,
-    sortDesc
+    sortDesc,
+    folderAdd  
 }
 

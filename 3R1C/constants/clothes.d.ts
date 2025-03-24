@@ -9,7 +9,8 @@ export interface Clothe{
     localImageURL: string; // this is the local url of the image file
     remark?: string;
     maincategory: Category;
-    subcategories?: Category[];
+    subcategories?: string[];
+    brand?: string;
     maincolor: string;
     subcolors?: string[];
     purchasedate?: Date;

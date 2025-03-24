@@ -25,12 +25,10 @@ const OutfitCard = ({
     >
       {/* Existing card content */}
       {isSelectMode && (
-        <View className="absolute top-2 right-2 z-50 bg-white rounded-full p-1">
-          <View
-            className={`w-5 h-5 rounded-full border-2 border-black 
-              ${isSelected ? "bg-black" : "bg-transparent"}`}
-          />
-        </View>
+        <View
+          className={`absolute top-1 right-1 z-50  rounded-full p-1 w-5 h-5 rounded-full border-2 border-beige 
+            ${isSelected ? "bg-beige-darker" : "bg-transparent"}`}
+        />
       )}
       <View className="aspect-square bg-gray-100 rounded-xl overflow-hidden">
         {previewImageURL ? (
