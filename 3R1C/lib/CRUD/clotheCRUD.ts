@@ -199,7 +199,6 @@ export async function getAllClothesWithQuery(query:{attribute:string,method:stri
         });
     } else if (sortBy === 'createdate') {
         sortedClothes.sort((a, b) => {
-            
             const aDate = a.createdAt ? (new Date(a.createdAt)).getTime() : 0;
             const bDate = b.createdAt ? (new Date(b.createdAt)).getTime() : 0;
             return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;

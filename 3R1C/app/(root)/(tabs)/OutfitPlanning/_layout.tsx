@@ -12,8 +12,6 @@ export default function Layout() {
     <Stack
       screenOptions={{ headerShown: false }}
       initialRouteName="OutfitCalendar"
-    >
-      <Slot />
-    </Stack>
+    />
   );
 }

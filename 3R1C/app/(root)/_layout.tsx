@@ -25,6 +25,12 @@ export default function AppLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="Utils"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

@@ -184,6 +184,15 @@ const Index = () => {
         </Text>
         {/* Select/Cancel Button */}
         <View className="flex-row items-center gap-2">
+          {!!params.sortByText && (
+            <Text className="text-sm font-S-Regular">
+              {filterOptions.find((menu) => menu.id === params.sortByText)
+                ?.title || ""}
+              {params.sortByText.split("_")[1] === "asc"
+                ? " (Ascending)"
+                : " (Descending)"}
+            </Text>
+          )}
           <CustomFilter
             title="Sort By"
             filterOptions={filterOptions}

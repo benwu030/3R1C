@@ -9,8 +9,10 @@ export const ensureDirectories = async () => {
         localConfig.localClotheImagesDirectiry,
         localConfig.localOutfitDirectory,
         localConfig.localOutfitPreviewsDirectiry,
-        localConfig.localOutfitCollectionPreviewsDirectiry
-
+        localConfig.localOutfitCollectionPreviewsDirectiry,
+        localConfig.localTryOnDirectory,
+        localConfig.localTryOnBodyImagesDirectory,
+        localConfig.localTryOnResultImagesDirectory,
     ];
 
     for (const dir of dirs) {

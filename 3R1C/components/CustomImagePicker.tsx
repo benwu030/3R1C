@@ -77,6 +77,7 @@ export default function CustomImagePicker({
 
   const removeBackground = async () => {
     //called the trained ai model to remove the background
+    // await ImageUploader(image ?? "");
     console.log("remove background");
   };
   return !image ? (

@@ -63,7 +63,9 @@ const TryOnCloset = () => {
 
     router.back();
     router.setParams({
+      garmentImageFromClosetID: selectedClothe.$id,
       garmentImageFromClosetUri: selectedClothe.localImageURL,
+      garmentImageFromClosetTitle: selectedClothe.title,
     });
   };
   return (

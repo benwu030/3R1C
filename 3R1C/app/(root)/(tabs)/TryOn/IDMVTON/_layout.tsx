@@ -9,9 +9,10 @@ export default function Layout() {
     return <Redirect href="/signIn" />;
   }
   return (
-    <Stack
-      screenOptions={{ headerShown: false }}
-      initialRouteName="SpendingLimitHome"
-    />
+    <Stack screenOptions={{ headerShown: false }} initialRouteName="PickModel">
+      <Stack.Screen name="PickModel" />
+      <Stack.Screen name="PickGarment" />
+      <Stack.Screen name="Result" />
+    </Stack>
   );
 }

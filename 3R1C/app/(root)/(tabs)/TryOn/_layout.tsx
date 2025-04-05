@@ -9,8 +9,9 @@ export default function Layout() {
     return <Redirect href="/signIn" />;
   }
   return (
-    <Stack screenOptions={{ headerShown: false }} initialRouteName="TryOnHome">
-      <Slot />
-    </Stack>
+    <Stack
+      screenOptions={{ headerShown: false }}
+      initialRouteName="TryOnHome"
+    />
   );
 }

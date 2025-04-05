@@ -50,7 +50,14 @@ module.exports = {
         'brick':{
           DEFAULT:'#b17457',
           'light':'#DD8560',
+        },
+        'green':{
+          DEFAULT:'#A4B8A1',
+          'light':'#C7D6C3',
+          'dark':'#A4B8A1',
+          'darker':'#7F9C7E'
         }
+
       }
     },
   },

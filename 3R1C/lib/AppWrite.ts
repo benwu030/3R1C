@@ -1,7 +1,7 @@
 import { createURL, getLinkingURL } from "expo-linking";
 import { openAuthSessionAsync } from "expo-web-browser";
 import { Platform } from 'react-native';
-import { Account, Avatars, Client, Databases, OAuthProvider, Permission, Query,Role,Storage,ID } from "react-native-appwrite"
+import { Account, Avatars, Client, Databases, OAuthProvider, Permission, Query,Role,Storage,ID, Functions, ExecutionMethod } from "react-native-appwrite"
 import { makeRedirectUri } from 'expo-auth-session'
 import { Clothe, CLOTHES } from "@/constants/clothes";
 import { ImagePickerAsset } from "expo-image-picker";
@@ -20,7 +20,7 @@ export const avatar = new Avatars(client);
 
 export const storage = new Storage(client);
 export const databases = new Databases(client)
-const account = new Account(client);
+export const account = new Account(client);
 //upload image to bucket
 export async function uploadImage(file:ImagePickerAsset,uid:string,bucketId:string){
    try{
@@ -129,5 +129,26 @@ export async function getUser(){
      
        console.log(err);
      return null;
+    }
+}
+
+//appwrite functions for clothes
+export async function CallAppWriteFunction(functionId:string, body?:string, async?:boolean, path?:string, method?:ExecutionMethod, headers?:any){
+    const functionCLient = client.setPlatform('')
+    const functions = new Functions(functionCLient);
+    try{
+        console.log('Calling function:', functionId);
+        const response = await functions.createExecution(
+            functionId,
+            body,
+            async,
+            path,
+            method,
+            headers
+        )
+        return response
+    }catch(error){
+        console.error(error)
+        return null
     }
 }

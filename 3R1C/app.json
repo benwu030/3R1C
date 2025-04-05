@@ -9,13 +9,18 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ben1110992.3R1C",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ben1110992.x3R1C"
     },
     "web": {
       "bundler": "metro",
@@ -35,27 +40,42 @@
       ],
       [
         "expo-font",
-      {
-        "fonts": ["./assets/fonts/Signifier-Bold.otf",
-      "./assets/fonts/Signifier-BoldItalic.otf",
-      "./assets/fonts/Signifier-Extralight.otf",
-      "./assets/fonts/Signifier-ExtralightItalic.otf",
-      "./assets/fonts/Signifier-Light.otf",
-      "./assets/fonts/Signifier-LightItalic.otf",
-      "./assets/fonts/Signifier-Medium.otf",
-      "./assets/fonts/Signifier-MediumItalic.otf",
-      "./assets/fonts/Signifier-Regular.otf",
-      "./assets/fonts/Signifier-RegularItalic.otf",
-      "./assets/fonts/Signifier-Thin.otf",
-      "./assets/fonts/Signifier-ThinItalic.otf"
-
-
+        {
+          "fonts": [
+            "./assets/fonts/Signifier-Bold.otf",
+            "./assets/fonts/Signifier-BoldItalic.otf",
+            "./assets/fonts/Signifier-Extralight.otf",
+            "./assets/fonts/Signifier-ExtralightItalic.otf",
+            "./assets/fonts/Signifier-Light.otf",
+            "./assets/fonts/Signifier-LightItalic.otf",
+            "./assets/fonts/Signifier-Medium.otf",
+            "./assets/fonts/Signifier-MediumItalic.otf",
+            "./assets/fonts/Signifier-Regular.otf",
+            "./assets/fonts/Signifier-RegularItalic.otf",
+            "./assets/fonts/Signifier-Thin.otf",
+            "./assets/fonts/Signifier-ThinItalic.otf"
+          ]
+        }
+      ],[
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you upload pictures to your closet",
+          "cameraPermission": "The app accesses your camera to let you take photos and upload to generate images"
+        }
       ]
-      }
-    ]
+     
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "8384c697-b5ba-4039-953a-202f1cc55544"
+      }
+    },
+    "owner": "ben1110992"
   }
 }

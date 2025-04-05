@@ -11,6 +11,8 @@ export const config = {
     outfitCollection_CollectionId: process.env.EXPO_PUBLIC_APPWRITE_OUTFITCOLLECTION_COLLECTION_ID,
     outftiCollectionRelationshipId: process.env.EXPO_PUBLIC_APPWRITE_OUTFITCOLLECTION_RELATIONSHIP_COLLECTION_ID,
     previewStorageId: process.env.EXPO_PUBLIC_APPWRITE_PREVIEW_STORAGE_ID,
+    huggingFaceApiKey: process.env.EXPO_PUBLIC_HUGGINGFACE_API_KEY,
+    tryonEndpoint: process.env.EXPO_PUBLIC_IDMVTON_ENDPOINT,
 }
 
 export const localConfig = {
@@ -27,4 +29,8 @@ export const localConfig = {
 
     //outfti collection relationship
     localOutfitCollectionRelationshipJsonUri: `${FileSystem.documentDirectory}outfitData/outfitCollectionRelationship.json`,
+    //TryOn Directory
+    localTryOnDirectory :`${FileSystem.documentDirectory}tryonData/`,
+    localTryOnBodyImagesDirectory :`${FileSystem.documentDirectory}tryonData/BodyImages/`,
+    localTryOnResultImagesDirectory :`${FileSystem.documentDirectory}tryonData/ResultImages/`,
 }

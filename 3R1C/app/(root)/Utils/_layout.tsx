@@ -8,10 +8,5 @@ export default function Layout() {
   if (!isLoggedIn && !isOfflineMode) {
     return <Redirect href="/signIn" />;
   }
-  return (
-    <Stack
-      screenOptions={{ headerShown: false }}
-      initialRouteName="SpendingLimitHome"
-    />
-  );
+  return <Slot initialRouteName="ImageEditorSkia" />;
 }

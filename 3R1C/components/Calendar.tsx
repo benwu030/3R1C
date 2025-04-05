@@ -207,41 +207,45 @@ const Calendar = ({ currentDate = new Date() }: CalendarProps) => {
               />
             )}
             showsVerticalScrollIndicator={false}
+            ListFooterComponent={
+              <View className="flex-row justify-center items-center  gap-10">
+                <View className="flex-col justify-center items-center">
+                  <TouchableOpacity
+                    onPress={() => router.push("/OutfitPlanning/Collections")}
+                    className=""
+                  >
+                    <Image
+                      source={icons.folderAdd}
+                      className="size-16"
+                      tintColor={"#776E65"}
+                    />
+                  </TouchableOpacity>
+                  <Text className="font-S-Regular text-sm ">
+                    Browse your Collections
+                  </Text>
+                </View>
+
+                <View className="flex-col justify-center items-center">
+                  <TouchableOpacity
+                    onPress={() => router.push("/OutfitPlanning/Outfits")}
+                    className=""
+                  >
+                    <Image
+                      source={icons.collectionsAdd}
+                      className="size-16 "
+                      tintColor={"#776E65"}
+                    />
+                  </TouchableOpacity>
+                  <Text className="font-S-Regular text-sm ">
+                    Browse your Outfits
+                  </Text>
+                </View>
+              </View>
+            }
           />
         ) : (
           <CalendarItem date={selectedDate} />
         )}
-        <View className="flex-row justify-center items-center  gap-10">
-          <View className="flex-col justify-center items-center">
-            <TouchableOpacity
-              onPress={() => router.push("/OutfitPlanning/Collections")}
-              className=""
-            >
-              <Image
-                source={icons.folderAdd}
-                className="size-16"
-                tintColor={"#776E65"}
-              />
-            </TouchableOpacity>
-            <Text className="font-S-Regular text-sm ">
-              Browse your Collections
-            </Text>
-          </View>
-
-          <View className="flex-col justify-center items-center">
-            <TouchableOpacity
-              onPress={() => router.push("/OutfitPlanning/Outfits")}
-              className=""
-            >
-              <Image
-                source={icons.collectionsAdd}
-                className="size-16 "
-                tintColor={"#776E65"}
-              />
-            </TouchableOpacity>
-            <Text className="font-S-Regular text-sm ">Browse your Outfits</Text>
-          </View>
-        </View>
       </View>
     </View>
   );
