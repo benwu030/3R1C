@@ -8,5 +8,5 @@ export default function Layout() {
   if (!isLoggedIn && !isOfflineMode) {
     return <Redirect href="/signIn" />;
   }
-  return <Slot initialRouteName="ImageEditorSkia" />;
+  return <Slot />;
 }

@@ -22,9 +22,9 @@ import ViewShot from "react-native-view-shot";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const ImageEditor = () => {
-  const params = useLocalSearchParams<{ modelImageUri: string }>();
-  console.log("ImageEditor params:", params.modelImageUri);
-  const [imageUri, setimageUri] = useState(params.modelImageUri as string);
+  const params = useLocalSearchParams<{ imageUri: string }>();
+  console.log("ImageEditor params:", params.imageUri);
+  const [imageUri, setimageUri] = useState(params.imageUri as string);
   // State to store image dimensions
   const [imageDimensions, setImageDimensions] = useState({
     width: 0,

@@ -7,12 +7,16 @@ interface SkiaCanvaProps {
   canvaImage: SkImage;
   width?: number;
   height?: number;
+  imageWidth?: number;
+  imageHeight?: number;
 }
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SkiaCanva = ({
   canvaImage,
   width = SCREEN_WIDTH,
   height = SCREEN_HEIGHT,
+  imageWidth = SCREEN_WIDTH,
+  imageHeight = SCREEN_HEIGHT,
 }: SkiaCanvaProps) => {
   //pan gesture
   const panGesture = Gesture.Pan();
@@ -23,7 +27,7 @@ const SkiaCanva = ({
   return (
     <View className="flex-1">
       <GestureDetector gesture={combinedGestures}>
-        <Animated.View>
+        <Animated.View className="flex-1">
           <Canvas
             style={{
               flex: 1,
@@ -33,8 +37,8 @@ const SkiaCanva = ({
           >
             <Image
               image={canvaImage}
-              width={width}
-              height={height}
+              width={imageWidth}
+              height={imageHeight}
               fit="contain"
             />
           </Canvas>

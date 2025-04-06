@@ -229,13 +229,13 @@ const TryOnHome = () => {
               Select a Try-On Model
             </Text>
             <TouchableOpacity
-              className="py-2.5 px-4 bg-green-darker rounded"
+              className="py-2.5 px-4 bg-green-darker rounded my-2"
               onPress={() => navigateToGenerateImageSteps("IDMVTON")}
             >
               <Text className="text-white font-S-Medium">IDMVTON</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="py-2.5 px-4 bg-green-darker rounded"
+              className="py-2.5 px-4 bg-green-darker rounded my-2"
               onPress={() => navigateToGenerateImageSteps("GPT4o")}
             >
               <Text className="text-white font-S-Medium">GPT-4o</Text>

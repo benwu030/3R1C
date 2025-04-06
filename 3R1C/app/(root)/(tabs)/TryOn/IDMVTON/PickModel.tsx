@@ -22,31 +22,54 @@ import {
   launchCameraAsync,
 } from "expo-image-picker";
 
-import * as ImagePicker from "react-native-image-picker";
+import ImageCropper from "react-native-image-crop-picker";
+
 const PickModel = () => {
   const [modelImage, setModelImage] = useState<string | null>(null);
+  const [modelImageDimensions, setModelImageDimensions] = useState<{
+    width: number;
+    height: number;
+  }>({
+    width: 0,
+    height: 0,
+  });
   const [autoMask, setAutoMask] = useState(false);
   const [cameraPermissionStatus, requestPermission] = useCameraPermissions();
-  // const pickImageFromGallery = async () => {
-  //   let result = await launchImageLibraryAsync({
-  //     mediaTypes: ["images"],
-  //     allowsEditing: true,
-  //     quality: 1,
-  //   });
-
-  //   if (!result.canceled) {
-  //     setModelImage(result.assets[0].uri);
-  //   }
-  // };
   const pickImageFromGallery = async () => {
-    let result = await ImagePicker.launchImageLibrary({
-      mediaType: "photo",
+    let result = await launchImageLibraryAsync({
+      mediaTypes: ["images"],
       quality: 1,
     });
 
-    if (!result.didCancel) {
-      setModelImage(result.assets?.[0]?.uri ?? null);
+    if (!result.canceled) {
+      setModelImage(result.assets[0].uri);
+      setModelImageDimensions({
+        width: result.assets[0].width,
+        height: result.assets[0].height,
+      });
     }
+  };
+  const cleanupImages = () => {
+    ImageCropper.clean()
+      .then(() => {
+        console.log("removed tmp images from tmp directory");
+      })
+      .catch((e) => console.log(e));
+  };
+  const cropImage = async (imagePath: string) => {
+    ImageCropper.openCropper({
+      mediaType: "photo",
+      width: 768,
+      height: 1024,
+      path: imagePath,
+    }).then((image) => {
+      console.log(image);
+      setModelImage(image.path);
+      setModelImageDimensions({
+        width: image.width,
+        height: image.height,
+      });
+    });
   };
   const pickImageFromCamera = async () => {
     if (cameraPermissionStatus?.status !== PermissionStatus.GRANTED) {
@@ -85,9 +108,14 @@ const PickModel = () => {
 
   const navigateToImageEditor = () => {
     // Navigate to the image editor screen with the selected model image
+    console.log("Navigating to ImageEditorSkia with imageUri:", modelImage);
     router.push({
       pathname: "/(root)/Utils/ImageEditorSkia",
-      params: { imageUri: modelImage },
+      params: {
+        imageUri: modelImage,
+        imageWidth: modelImageDimensions.width,
+        imageHeight: modelImageDimensions.height,
+      },
     });
   };
   const ModelButtons = () => (
@@ -114,7 +142,7 @@ const PickModel = () => {
         </Text>
         {modelImage ? (
           <View>
-            <TouchableOpacity onPress={navigateToImageEditor}>
+            <TouchableOpacity onPress={() => cropImage(modelImage)}>
               <Image
                 source={modelImage}
                 className="aspect-[3/4] rounded-lg"
@@ -122,14 +150,20 @@ const PickModel = () => {
               />
             </TouchableOpacity>
             <ModelButtons />
-            <View className="flex-row justify-center items-center ">
-              <Checkbox
-                value={autoMask}
-                onValueChange={() => setAutoMask(!autoMask)}
-                color={autoMask ? "#4630EB" : undefined}
-              />
-              <Text className="font-S-Regular text-gray-700">Auto Mask?</Text>
-            </View>
+            <TouchableOpacity
+              className="py-2.5 px-4 bg-green-darker rounded my-2"
+              onPress={navigateToImageEditor}
+            >
+              <Text className="text-white font-S-Medium">
+                Create A Mask(Optional)
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="py-2.5 px-4 bg-green-darker rounded my-2"
+              onPress={cleanupImages}
+            >
+              <Text className="text-white font-S-Medium">Continue</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <ModelButtons />
