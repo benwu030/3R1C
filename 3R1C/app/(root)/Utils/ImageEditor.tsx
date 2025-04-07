@@ -137,7 +137,7 @@ const ImageEditor = () => {
   const resetDrawings = () => {
     setPaths([]);
     setCurrentPath("");
-    setimageUri(params.modelImageUri as string);
+    setimageUri(params.imageUri as string);
     scale.value = 1;
     translateX.value = 0;
     translateY.value = 0;

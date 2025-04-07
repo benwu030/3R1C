@@ -6,25 +6,35 @@ import {
   Alert,
   Platform,
   Linking,
+  ScrollView,
 } from "react-native";
-import { Image } from "expo-image";
+import { Image, useImage } from "expo-image";
 import Checkbox from "expo-checkbox";
 import TryOnCustomButton from "@/components/TryOnCustomButton";
 import icons from "@/constants/icons";
 import CustomHeader from "@/components/CustomHeader";
 
-import { useState } from "react";
-import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   launchImageLibraryAsync,
   useCameraPermissions,
   PermissionStatus,
   launchCameraAsync,
 } from "expo-image-picker";
-
+import {
+  FlipType,
+  ImageManipulator,
+  SaveFormat,
+  useImageManipulator,
+} from "expo-image-manipulator";
 import ImageCropper from "react-native-image-crop-picker";
-
+const tryonImageHeight = 1024;
+const tryonImageWidth = 768;
 const PickModel = () => {
+  const params = useLocalSearchParams<{
+    modelMaskImageUri: string;
+  }>();
   const [modelImage, setModelImage] = useState<string | null>(null);
   const [modelImageDimensions, setModelImageDimensions] = useState<{
     width: number;
@@ -34,6 +44,12 @@ const PickModel = () => {
     height: 0,
   });
   const [autoMask, setAutoMask] = useState(false);
+  const [modelMaskImage, setModelMaskImage] = useState<string | null>(null);
+  useEffect(() => {
+    if (params.modelMaskImageUri) {
+      setModelMaskImage(params.modelMaskImageUri);
+    }
+  }, [params.modelMaskImageUri]);
   const [cameraPermissionStatus, requestPermission] = useCameraPermissions();
   const pickImageFromGallery = async () => {
     let result = await launchImageLibraryAsync({
@@ -42,13 +58,21 @@ const PickModel = () => {
     });
 
     if (!result.canceled) {
-      setModelImage(result.assets[0].uri);
+      //resize the image to the VITON dataset size
+      const context = ImageManipulator.manipulate(result.assets[0].uri);
+      context.resize({ width: tryonImageWidth, height: tryonImageHeight });
+      const image = await context.renderAsync();
+      const resizedResult = await image.saveAsync({
+        format: SaveFormat.PNG,
+      });
+      setModelImage(resizedResult.uri);
       setModelImageDimensions({
-        width: result.assets[0].width,
-        height: result.assets[0].height,
+        width: image.width,
+        height: image.height,
       });
     }
   };
+
   const cleanupImages = () => {
     ImageCropper.clean()
       .then(() => {
@@ -56,14 +80,23 @@ const PickModel = () => {
       })
       .catch((e) => console.log(e));
   };
+  const navigateToGarmentPicker = () => {
+    //check if everything is set
+    router.push({
+      pathname: "/(root)/(tabs)/TryOn/IDMVTON/PickGarment",
+      params: {
+        modelImageUri: modelImage,
+        modelMaskImageUri: modelMaskImage,
+      },
+    });
+  };
   const cropImage = async (imagePath: string) => {
     ImageCropper.openCropper({
       mediaType: "photo",
-      width: 768,
-      height: 1024,
+      width: tryonImageWidth,
+      height: tryonImageHeight,
       path: imagePath,
     }).then((image) => {
-      console.log(image);
       setModelImage(image.path);
       setModelImageDimensions({
         width: image.width,
@@ -98,11 +131,20 @@ const PickModel = () => {
     let result = await launchCameraAsync({
       mediaTypes: ["images"],
       quality: 1,
-      allowsEditing: true,
     });
 
     if (!result.canceled) {
-      setModelImage(result.assets[0].uri);
+      const context = ImageManipulator.manipulate(result.assets[0].uri);
+      context.resize({ width: tryonImageWidth, height: tryonImageHeight });
+      const image = await context.renderAsync();
+      const resizedResult = await image.saveAsync({
+        format: SaveFormat.PNG,
+      });
+      setModelImage(resizedResult.uri);
+      setModelImageDimensions({
+        width: image.width,
+        height: image.height,
+      });
     }
   };
 
@@ -115,6 +157,8 @@ const PickModel = () => {
         imageUri: modelImage,
         imageWidth: modelImageDimensions.width,
         imageHeight: modelImageDimensions.height,
+        outputWidth: tryonImageWidth,
+        outputHeight: tryonImageHeight,
       },
     });
   };
@@ -136,39 +180,48 @@ const PickModel = () => {
   return (
     <SafeAreaView>
       <CustomHeader title="Model" />
-      <View className="px-5">
-        <Text className="font-S-Regular text-gray-700">
-          Choose a picture of yourself
-        </Text>
-        {modelImage ? (
-          <View>
-            <TouchableOpacity onPress={() => cropImage(modelImage)}>
-              <Image
-                source={modelImage}
-                className="aspect-[3/4] rounded-lg"
-                contentFit="cover"
-              />
-            </TouchableOpacity>
+      <ScrollView>
+        <View className="px-5">
+          <Text className="font-S-Regular text-gray-700">
+            Choose a picture of yourself
+          </Text>
+          {modelImage ? (
+            <View>
+              <TouchableOpacity onPress={() => cropImage(modelImage)}>
+                <Image
+                  source={modelImage}
+                  className="aspect-[3/4] rounded-lg"
+                  contentFit="contain"
+                />
+              </TouchableOpacity>
+              <ModelButtons />
+              <TouchableOpacity
+                className="py-2.5 px-4 bg-green-darker rounded my-2"
+                onPress={navigateToImageEditor}
+              >
+                <Text className="text-white font-S-Medium">
+                  Create A Mask(Optional)
+                </Text>
+              </TouchableOpacity>
+              {modelMaskImage && (
+                <Image
+                  source={modelMaskImage}
+                  className="aspect-[3/4] rounded-lg"
+                  contentFit="contain"
+                />
+              )}
+              <TouchableOpacity
+                className="py-2.5 px-4 bg-green-darker rounded my-2"
+                onPress={navigateToGarmentPicker}
+              >
+                <Text className="text-white font-S-Medium">Continue</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
             <ModelButtons />
-            <TouchableOpacity
-              className="py-2.5 px-4 bg-green-darker rounded my-2"
-              onPress={navigateToImageEditor}
-            >
-              <Text className="text-white font-S-Medium">
-                Create A Mask(Optional)
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="py-2.5 px-4 bg-green-darker rounded my-2"
-              onPress={cleanupImages}
-            >
-              <Text className="text-white font-S-Medium">Continue</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <ModelButtons />
-        )}
-      </View>
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

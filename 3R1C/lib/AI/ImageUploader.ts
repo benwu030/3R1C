@@ -86,16 +86,21 @@ export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:s
       
       try {
         console.log('Starting try-on process...');
+        console.log("Garment Image URL:", garmentImageURL);
         const garmentImage = await FileSystem.readAsStringAsync(garmentImageURL, {
           encoding: FileSystem.EncodingType.Base64,
         });
+        console.log("Garment Image Size (Base64):", garmentImage.length);
+
         const modelImage = await FileSystem.readAsStringAsync(modelImageURL, {
           encoding: FileSystem.EncodingType.Base64,
         });
-        
-        const modelMaskImage = maskImageUri? await FileSystem.readAsStringAsync(maskImageUri, {
+        console.log("Model Image Size (Base64):", modelImage.length);
+
+        const modelMaskImage = maskImageUri ? await FileSystem.readAsStringAsync(maskImageUri, {
           encoding: FileSystem.EncodingType.Base64,
-        }):"";
+        }) : "";
+        console.log("Model Mask Image Size (Base64):", modelMaskImage.length);
         // Prepare the input payload
     const payload: IdmVtonInput = {
       inputs: {

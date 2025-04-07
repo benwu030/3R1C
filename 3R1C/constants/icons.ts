@@ -23,6 +23,7 @@ import filter from '@/assets/icons/filter.svg'
 import sortAsc from '@/assets/icons/sortAsc.svg'
 import sortDesc from '@/assets/icons/sortDesc.svg'
 import folderAdd from '@/assets/icons/folderAdd.svg'
+import share from '@/assets/icons/share.svg'
 export default{
     plus,
     mirror,
@@ -48,6 +49,7 @@ export default{
     filter,
     sortAsc,
     sortDesc,
-    folderAdd  
+    folderAdd,
+    share  
 }
 

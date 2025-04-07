@@ -118,7 +118,23 @@ export async function getAllClothes(): Promise<CLOTHES> {
         config.clothesCollectionId!,
         [Query.orderAsc('$createdAt')]
     )
+    //download the image and save it locally
+    
     const clothes = mapDocumentsToClothes(result.documents);
+    clothes.forEach(async (clothe) => {
+        if(!clothe.$id) return;
+        const fileExtension = clothe.localImageURL.split('.').pop();
+        const localPath = `${localConfig.localClotheImagesDirectiry}${clothe.$id}.${fileExtension}`;
+        const result = await storage.getFileDownload(config.clothesImgStorageId!, clothe.$id);
+        const downloadResult = await FileSystem.downloadAsync(
+            result.href,
+            localPath
+        );
+        if (downloadResult.status !== 200) {
+            throw new Error(`Failed to download image: ${downloadResult.status}`);
+        }
+        clothe.localImageURL = localPath;
+            })
     //save to local
     await writeLocalData(localConfig.localClotheJsonUri, clothes);
     return clothes;
@@ -262,8 +278,22 @@ export async function getClothesWithFilter({searchText,mainCategoryfilter,sortBy
                 buildQuery
             )
             const clothes = mapDocumentsToClothes(result.documents);
+            clothes.forEach(async (clothe) => {
+                if(!clothe.$id) return;
+                const fileExtension = clothe.localImageURL.split('.').pop();
+                const localPath = `${localConfig.localClotheImagesDirectiry}${clothe.$id}.${fileExtension}`;
+                const result = await storage.getFileDownload(config.clothesImgStorageId!, clothe.$id);
+                const downloadResult = await FileSystem.downloadAsync(
+                    result.href,
+                    localPath
+                );
+                if (downloadResult.status !== 200) {
+                    throw new Error(`Failed to download image: ${downloadResult.status}`);
+                }
+                clothe.localImageURL = localPath;
+                    })
             //store the data in the local storage
-            await writeLocalData(localConfig.localClotheJsonUri, [...localClothes, ...clothes]);
+            await writeLocalData(localConfig.localClotheJsonUri, [...clothes]);
             return filterClothes(clothes, mainCategoryfilter, searchText,sortByText);
         } catch (error) {
             console.error('Error getClothesWithFilter', error);
