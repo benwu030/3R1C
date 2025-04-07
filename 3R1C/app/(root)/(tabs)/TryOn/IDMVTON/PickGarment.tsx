@@ -5,39 +5,121 @@ import {
   SafeAreaView,
   Alert,
   ScrollView,
+  TextInput,
+  Platform,
+  Linking,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import TryOnCustomButton from "@/components/TryOnCustomButton";
 import icons from "@/constants/icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { IdmVtonImageUploader } from "@/lib/AI/ImageUploader";
-
+import {
+  IdmVtonImageUploader,
+  OpenPoseCategoryType,
+} from "@/lib/AI/ImageUploader";
+import CustomHeader from "@/components/CustomHeader";
+import {
+  launchCameraAsync,
+  launchImageLibraryAsync,
+  useCameraPermissions,
+  PermissionStatus,
+} from "expo-image-picker";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
+const tryonImageHeight = 1024;
+const tryonImageWidth = 768;
 const PickGarment = ({}: any) => {
   const params = useLocalSearchParams<{
     garmentImageFromClosetUri?: string;
     garmentImageFromClosetTitle?: string;
     modelImageUri?: string;
     modelMaskImageUri?: string;
+    autoMask?: string;
+    openPose?: string;
   }>();
-
+  const [garmentDescription, setGarmentDescription] = useState<string | null>(
+    null
+  );
   const [garmentImage, setGarmentImage] = useState<string | null>(null);
   const [generatedImageUri, setGeneratedImageUri] = useState<string | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
-    if (params.garmentImageFromClosetUri) {
-      setGarmentImage(params.garmentImageFromClosetUri);
-    }
-  }, [params.garmentImageFromClosetUri]);
+    console.log(params);
+    setGarmentImage(params.garmentImageFromClosetUri ?? null);
+    setGarmentDescription(params.garmentImageFromClosetTitle ?? null);
+  }, [params.garmentImageFromClosetUri, params.garmentImageFromClosetTitle]);
   const selectFromCloset = () => {
     router.push({
       pathname: "../TryOnCloset",
     });
   };
+  const [cameraPermissionStatus, requestPermission] = useCameraPermissions();
+  const pickImageFromGallery = async () => {
+    let result = await launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      //resize the image to the VITON dataset size
+      const context = ImageManipulator.manipulate(result.assets[0].uri);
+      context.resize({ width: tryonImageWidth, height: tryonImageHeight });
+      const image = await context.renderAsync();
+      const resizedResult = await image.saveAsync({
+        format: SaveFormat.PNG,
+      });
+      setGarmentImage(resizedResult.uri);
+    }
+  };
+  const pickImageFromCamera = async () => {
+    if (cameraPermissionStatus?.status !== PermissionStatus.GRANTED) {
+      if (!cameraPermissionStatus?.canAskAgain) {
+        Alert.alert(
+          "Camera Permission Required",
+          "Please enable camera access in your device settings to use this feature.",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Open Settings",
+              onPress: () => {
+                if (Platform.OS === "ios") {
+                  Linking.openURL("app-settings:");
+                } else {
+                  Linking.openSettings();
+                }
+              },
+            },
+          ]
+        );
+      }
+      requestPermission();
+      return;
+    }
+    let result = await launchCameraAsync({
+      mediaTypes: ["images"],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const context = ImageManipulator.manipulate(result.assets[0].uri);
+      context.resize({ width: tryonImageWidth, height: tryonImageHeight });
+      const image = await context.renderAsync();
+      const resizedResult = await image.saveAsync({
+        format: SaveFormat.PNG,
+      });
+      setGarmentImage(resizedResult.uri);
+    }
+  };
   const GarmentButtons = () => (
     <View className="flex-row justify-center items-center gap-20 mt-5">
-      <TryOnCustomButton imageUri={icons.image} title="Image" />
+      <TryOnCustomButton
+        imageUri={icons.image}
+        title="Image"
+        onPress={pickImageFromGallery}
+      />
       <TryOnCustomButton imageUri={icons.camera} title="Camera" />
       <TryOnCustomButton
         imageUri={icons.closet}
@@ -47,31 +129,15 @@ const PickGarment = ({}: any) => {
     </View>
   );
   const generateImage = async () => {
-    // if (!state.modelImage || !state.garmentImage) {
-    //   Alert.alert("Please select both model and garment images");
-    //   return;
-    // }
-    // if (!state.autoMask && !state.modelMaskImage) {
-    //   Alert.alert("Please create a mask image by clicking the model image");
-    //   return;
-    // }
-    // dispatch({ type: "SET_IS_LOADING", payload: true });
-    // const generatedUri = await IdmVtonImageUploader(
-    //   state.garmentImage,
-    //   state.modelImage,
-    //   state.idmVtonPrompt,
-    //   state.idmVtonMaskArea,
-    //   state.modelMaskImage
-    // );
+    setIsLoading(true);
     const generatedUri = await IdmVtonImageUploader(
       garmentImage ?? "",
       params.modelImageUri ?? "",
-      "",
-      "upper_body",
-      params.modelMaskImageUri ?? ""
+      params.modelMaskImageUri ?? "",
+      garmentDescription ?? "",
+      (params.openPose as OpenPoseCategoryType) ?? "upper_body"
     );
-    console.log("Mask URI:", params.modelMaskImageUri);
-    // dispatch({ type: "SET_IS_LOADING", payload: false });
+    setIsLoading(false);
     if (generatedUri === null) {
       Alert.alert(
         "Error",
@@ -81,43 +147,90 @@ const PickGarment = ({}: any) => {
     }
     setGeneratedImageUri(generatedUri ?? "");
   };
-
+  const returnToHome = () => {
+    router.setParams({
+      garmentImageFromClosetUri: "",
+      garmentImageFromClosetTitle: "",
+      modelImageUri: "",
+      modelMaskImageUri: "",
+      autoMask: "",
+      openPose: "",
+    });
+    router.replace("/(root)/(tabs)/TryOn/TryOnHome");
+  };
+  const navigateToViewImagePage = (imageUri: string) => {
+    router.push({
+      pathname: "/(root)/Utils/[imageURL]",
+      params: { imageURL: imageUri },
+    });
+  };
   return (
     <SafeAreaView>
-      <ScrollView>
-        <View className="mt-2">
-          <Text className="font-S-Regular text-gray-700">Clothes</Text>
-          {garmentImage ? (
-            <View>
-              <Image
-                source={garmentImage}
-                className="aspect-[3/4] rounded-lg"
-                contentFit="contain"
-              />
-              <GarmentButtons />
+      <CustomHeader title="Garment" />
+      <ScrollView contentContainerClassName=" pb-32">
+        <View className="px-5">
+          {isLoading ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            <>
+              <Text className="font-S-Regular text-gray-700">
+                Select clothes you want to try
+              </Text>
+              {garmentImage ? (
+                <View>
+                  <Image
+                    source={garmentImage}
+                    className="aspect-[3/4] rounded-lg"
+                    contentFit="contain"
+                  />
+                  <GarmentButtons />
+                  <View className="my-3 mt-5">
+                    <Text className="font-S-Regular text-gray-700">
+                      Describe the garment* (e.g. color, pattern, style)
+                    </Text>
+                    <TextInput
+                      autoFocus
+                      placeholder={garmentDescription ?? ""}
+                      placeholderTextColor={"#776E65"}
+                      className="font-S-RegularItalic border-b border-gray-300 text-2xl "
+                      onChangeText={setGarmentDescription}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    className="py-2.5 px-4 bg-green-darker rounded my-2"
+                    onPress={generateImage}
+                  >
+                    <Text className="text-white font-S-Medium">Generate</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <GarmentButtons />
+              )}
+              {generatedImageUri && (
+                <TouchableOpacity
+                  onPress={() => navigateToViewImagePage(generatedImageUri)}
+                >
+                  <Text className="font-S-Regular text-gray-700">
+                    Generated Image
+                  </Text>
+                  <Image
+                    source={generatedImageUri}
+                    className="aspect-[3/4] rounded-lg"
+                    contentFit="contain"
+                  />
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 className="py-2.5 px-4 bg-green-darker rounded my-2"
-                onPress={generateImage}
+                onPress={returnToHome}
               >
-                <Text className="text-white font-S-Medium">Continue</Text>
+                <Text className="text-white font-S-Medium">
+                  Return to Try On Home Page
+                </Text>
               </TouchableOpacity>
-            </View>
-          ) : (
-            <GarmentButtons />
+            </>
           )}
         </View>
-        {generatedImageUri && (
-          <View>
-            <Text className="font-S-Regular text-gray-700">
-              Generated Image
-            </Text>
-            <Image
-              source={generatedImageUri}
-              className="aspect-[3/4] rounded-lg"
-              contentFit="contain"
-            />
-          </View>
-        )}
       </ScrollView>
     </SafeAreaView>
   );

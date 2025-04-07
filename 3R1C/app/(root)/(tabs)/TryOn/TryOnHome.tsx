@@ -258,28 +258,31 @@ const TryOnHome = () => {
   return (
     <SafeAreaView className="bg-sand-dark flex-1">
       <CustomHeader title="Try On" showBackButton={false} />
+      <View className=" flex-1 px-5">
+        <TryOnButtonComponent />
 
-      <FlatList
-        data={tryOnResults}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            className="px-2"
-            onPress={() => navigateToViewImagePage(item)}
-          >
-            <Image
-              source={item}
-              className="size-40 rounded-lg aspect-[3/4]"
-              contentFit="contain"
-            />
-          </TouchableOpacity>
-        )}
-        numColumns={3}
-        contentContainerClassName="flex-1 pb-20 px-5"
-        columnWrapperClassName="flex-row justify-between my-2 bg-black"
-        showsVerticalScrollIndicator={false}
-        horizontal={false}
-        ListHeaderComponent={TryOnButtonComponent}
-      />
+        <FlatList
+          data={tryOnResults}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              className=" mr-2"
+              onPress={() => navigateToViewImagePage(item)}
+            >
+              <Image
+                source={item}
+                className="w-full h-[35rem]  m-5 ml-0 rounded-lg aspect-[3/4]"
+                contentFit="contain"
+              />
+            </TouchableOpacity>
+          )}
+          className=""
+          // numColumns={1}
+          contentContainerClassName="h-full pb-20"
+          // columnWrapperClassName="flex-row justify-between my-2 bg-black"
+          showsVerticalScrollIndicator={false}
+          horizontal={true}
+        />
+      </View>
     </SafeAreaView>
   );
 };

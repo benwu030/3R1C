@@ -4,6 +4,7 @@ import * as FileSystem from 'expo-file-system';
 import { config, localConfig } from "../config";
 import { Account } from 'react-native-appwrite';
 import { client,account } from '../AppWrite'; 
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 
 //idmvton input type
 export interface IdmVtonInput {
@@ -77,8 +78,19 @@ export const GenericUploader = async <TInput, TResponse>(
     throw error;
   }
 };
+//helper functio to resize the image and convert to base64
+const resizeImage = async (uri: string, width: number, height: number,format?:SaveFormat): Promise<string> => {
+  const context = ImageManipulator.manipulate(uri);
+        context.resize({ width, height});
+        const image = await context.renderAsync();
+        const resizedResult = await image.saveAsync({
+          format: format??SaveFormat.JPEG,
+          base64: true,
+        });
+        return resizedResult.base64??"";
+};
 // Allocate pipeline
-export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:string,garmentDescription:string="A white T-shirt",OpenPoseCategory:OpenPoseCategoryType = "upper_body",maskImageUri:string): Promise<string | null> =>{
+export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:string,maskImageUri:string,garmentDescription:string="A white T-shirt",OpenPoseCategory:OpenPoseCategoryType = "upper_body"): Promise<string | null> =>{
     if (!garmentImageURL || !modelImageURL) {
         console.log("Invalid image URLs");
         return null;
@@ -86,21 +98,24 @@ export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:s
       
       try {
         console.log('Starting try-on process...');
-        console.log("Garment Image URL:", garmentImageURL);
-        const garmentImage = await FileSystem.readAsStringAsync(garmentImageURL, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        console.log("Garment Image Size (Base64):", garmentImage.length);
+        // Log debugging information for image dimensions
+        const garmentImageInfo = await FileSystem.getInfoAsync(garmentImageURL);
+        const modelImageInfo = await FileSystem.getInfoAsync(modelImageURL);
+        const maskImageInfo = maskImageUri ? await FileSystem.getInfoAsync(maskImageUri) : null;
+        
+        console.log("Garment Image Info:", garmentImageInfo);
+        console.log("Model Image Info:", modelImageInfo);
+        if (maskImageInfo) {
+          console.log("Mask Image Info:", maskImageInfo);
+        } else {
+          console.log("No mask image provided.");
+        }
 
-        const modelImage = await FileSystem.readAsStringAsync(modelImageURL, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        console.log("Model Image Size (Base64):", modelImage.length);
+        const garmentImage = await resizeImage(garmentImageURL, 768, 1024);
 
-        const modelMaskImage = maskImageUri ? await FileSystem.readAsStringAsync(maskImageUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        }) : "";
-        console.log("Model Mask Image Size (Base64):", modelMaskImage.length);
+        const modelImage = await resizeImage(modelImageURL, 768, 1024);
+
+        const modelMaskImage = maskImageUri ? await resizeImage(maskImageUri, 768, 1024,SaveFormat.PNG) : "";
         // Prepare the input payload
     const payload: IdmVtonInput = {
       inputs: {
@@ -109,10 +124,10 @@ export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:s
       garment_description: garmentDescription,
       OpenPoseCategory,
       mask_image: modelMaskImage,
-      auto_mask: true,
-      auto_crop: false,
-      denoise_steps: 20,
-      seed: 42,
+      auto_mask: !modelMaskImage,
+      auto_crop: !modelMaskImage,
+      denoise_steps: 15,
+      seed: 24,
       }
     };
         // Send the payload to your function

@@ -29,6 +29,8 @@ import {
   useImageManipulator,
 } from "expo-image-manipulator";
 import ImageCropper from "react-native-image-crop-picker";
+import { MenuView } from "@react-native-menu/menu";
+import { OpenPoseCategoryType } from "@/lib/AI/ImageUploader";
 const tryonImageHeight = 1024;
 const tryonImageWidth = 768;
 const PickModel = () => {
@@ -44,6 +46,12 @@ const PickModel = () => {
     height: 0,
   });
   const [autoMask, setAutoMask] = useState(false);
+  const [openPose, setOpenPose] = useState<OpenPoseCategoryType>();
+  const onAutoMaskChange = () => {
+    setAutoMask(!autoMask);
+    setModelMaskImage(null);
+    params.modelMaskImageUri = "";
+  };
   const [modelMaskImage, setModelMaskImage] = useState<string | null>(null);
   useEffect(() => {
     if (params.modelMaskImageUri) {
@@ -82,11 +90,27 @@ const PickModel = () => {
   };
   const navigateToGarmentPicker = () => {
     //check if everything is set
+    if (!modelImage) {
+      Alert.alert("Please select a model image");
+      return;
+    }
+    if (!modelMaskImage && !autoMask) {
+      Alert.alert(
+        "Please create a mask image or use auto mask before proceeding."
+      );
+      return;
+    }
+    if (autoMask && !openPose) {
+      Alert.alert("Please select a mask area");
+      return;
+    }
     router.push({
       pathname: "/(root)/(tabs)/TryOn/IDMVTON/PickGarment",
       params: {
         modelImageUri: modelImage,
         modelMaskImageUri: modelMaskImage,
+        autoMask: autoMask ? "true" : "false",
+        openPose: openPose,
       },
     });
   };
@@ -178,9 +202,9 @@ const PickModel = () => {
   );
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className="bg-sand-dark flex-1">
       <CustomHeader title="Model" />
-      <ScrollView>
+      <ScrollView contentContainerClassName=" pb-32">
         <View className="px-5">
           <Text className="font-S-Regular text-gray-700">
             Choose a picture of yourself
@@ -195,14 +219,58 @@ const PickModel = () => {
                 />
               </TouchableOpacity>
               <ModelButtons />
-              <TouchableOpacity
-                className="py-2.5 px-4 bg-green-darker rounded my-2"
-                onPress={navigateToImageEditor}
-              >
-                <Text className="text-white font-S-Medium">
-                  Create A Mask(Optional)
-                </Text>
-              </TouchableOpacity>
+              <View className="flex-row items-center justify-between my-2">
+                <View className="flex-row items-center py-3 px-4 bg-green-darker rounded my-2">
+                  <Text className="font-S-Medium text-white">Auto Mask ?</Text>
+                  <Checkbox
+                    className="ml-2"
+                    value={autoMask}
+                    onValueChange={onAutoMaskChange}
+                    color={autoMask ? "#C7D6C3" : undefined}
+                    style={{
+                      borderColor: "#C7D6C3",
+                      borderWidth: 2,
+                      width: 20,
+                      height: 20,
+                    }}
+                    disabled={false}
+                  />
+                </View>
+                {autoMask ? (
+                  <MenuView
+                    onPressAction={({ nativeEvent }) => {
+                      console.log("Selected category:", nativeEvent.event);
+                      setOpenPose(nativeEvent.event as OpenPoseCategoryType);
+                      // Handle the selected category here
+                    }}
+                    actions={[
+                      { id: "upper_body", title: "Upper Body" },
+                      { id: "lower_body", title: "Lower Body" },
+                      { id: "dress", title: "Dress" },
+                    ]}
+                  >
+                    <TouchableOpacity className="py-3 px-4 bg-green-darker rounded my-2">
+                      <Text className="text-white font-S-Medium">
+                        {openPose
+                          ? openPose
+                              .replace(/_/g, " ")
+                              .replace(/\b\w/g, (char) => char.toUpperCase())
+                          : "Select Mask Area"}
+                      </Text>
+                    </TouchableOpacity>
+                  </MenuView>
+                ) : (
+                  <TouchableOpacity
+                    className="py-3 px-4 bg-green-darker rounded my-2"
+                    onPress={navigateToImageEditor}
+                  >
+                    <Text className="text-white font-S-Medium">
+                      Create A Mask(Optional)
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
               {modelMaskImage && (
                 <Image
                   source={modelMaskImage}

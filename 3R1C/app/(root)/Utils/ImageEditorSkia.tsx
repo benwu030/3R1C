@@ -47,7 +47,7 @@ const ImageEditorSkia = () => {
     if (skiaCanvaRef.current) {
       //reset the view
       // skiaCanvaRef.current.resetCanvaView();
-      const snapshot = await skiaCanvaRef.current.captureSnapshot();
+      const snapshot = await skiaCanvaRef.current.capturePathsOnly();
       if (snapshot) {
         console.log("Canvas Snapshot captured:", snapshot.getImageInfo());
         const base64Image = snapshot.encodeToBase64();

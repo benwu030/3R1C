@@ -60,7 +60,6 @@ const TryOnCloset = () => {
     if (!selectedClothe) {
       return;
     }
-
     router.back();
     router.setParams({
       garmentImageFromClosetID: selectedClothe.$id,

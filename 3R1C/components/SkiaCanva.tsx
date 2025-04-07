@@ -16,6 +16,9 @@ import {
   Group,
   SkPath,
   useCanvasRef,
+  PaintStyle,
+  StrokeCap,
+  StrokeJoin,
 } from "@shopify/react-native-skia";
 import { useSharedValue } from "react-native-reanimated";
 import { SkiaGestureHandler } from "./SkiaGestureHandler";
@@ -32,6 +35,7 @@ export interface SkiaCanvaRef {
   captureSnapshot: () => Promise<SkImage | null>; // Method to capture the snapshot
   resetCanvaView: () => void; // Method to reset the canvas view
   resetEverything: () => void; // Method to reset everything
+  capturePathsOnly: () => Promise<SkImage | null>; // Method to capture paths only
 }
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SkiaCanva = forwardRef<SkiaCanvaRef, SkiaCanvaProps>(
@@ -63,14 +67,65 @@ const SkiaCanva = forwardRef<SkiaCanvaRef, SkiaCanvaProps>(
       });
     };
     // Expose the captureSnapshot method via the ref
+    // useImperativeHandle(ref, () => ({
+    //   captureSnapshot: async () => {
+    //     modelImageMatrix.value = Matrix4();
+    //     await new Promise((resolve) => setTimeout(resolve, 200));
+
+    //     if (canvasRef.current) {
+    //       return canvasRef.current.makeImageSnapshot();
+    //     }
+    //     return null;
+    //   },
+    //   resetCanvaView: () => {
+    //     modelImageMatrix.value = Matrix4();
+    //   },
+    //   resetEverything: () => {
+    //     modelImageMatrix.value = Matrix4();
+    //     setPath(Skia.Path.Make());
+    //   },
+    // }));
+    const aspectRatio = imageWidth / imageHeight;
+
     useImperativeHandle(ref, () => ({
       captureSnapshot: async () => {
         modelImageMatrix.value = Matrix4();
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         if (canvasRef.current) {
           return canvasRef.current.makeImageSnapshot();
         }
+        return null;
+      },
+      capturePathsOnly: async () => {
+        modelImageMatrix.value = Matrix4();
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        // Create a new Skia Canvas for paths only
+        const surface = Skia.Surface.Make(width, width / aspectRatio);
+        const canvas = surface?.getCanvas();
+
+        if (canvas) {
+          // Clear the canvas
+          canvas.clear(Skia.Color("#000000"));
+
+          // Draw the path
+          const paint = Skia.Paint();
+          paint.setColor(Skia.Color("#ffffff"));
+          paint.setStyle(PaintStyle.Stroke);
+          paint.setStrokeWidth(10);
+          paint.setStrokeCap(StrokeCap.Round);
+          paint.setStrokeJoin(StrokeJoin.Round);
+
+          canvas.drawPath(path, paint);
+
+          // Capture the snapshot
+          if (surface) {
+            const snapshot = surface.makeImageSnapshot();
+            return snapshot;
+          }
+          return null;
+        }
+
         return null;
       },
       resetCanvaView: () => {
@@ -81,7 +136,6 @@ const SkiaCanva = forwardRef<SkiaCanvaRef, SkiaCanvaProps>(
         setPath(Skia.Path.Make());
       },
     }));
-    const aspectRatio = imageWidth / imageHeight;
 
     return (
       <View className="flex-1 bg-black">
@@ -105,9 +159,9 @@ const SkiaCanva = forwardRef<SkiaCanvaRef, SkiaCanvaProps>(
             />
             <Path
               path={path}
-              color="rgba(255, 0, 0, 0.5)"
+              color="#000000"
               style="stroke"
-              strokeWidth={5}
+              strokeWidth={10}
               strokeCap="round"
               strokeJoin="round"
             />

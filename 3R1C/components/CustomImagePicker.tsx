@@ -10,7 +10,10 @@ import {
   launchImageLibraryAsync,
 } from "expo-image-picker";
 import icons from "@/constants/icons";
+import ImageCropper from "react-native-image-crop-picker";
 
+const tryonImageHeight = 1024;
+const tryonImageWidth = 768;
 export default function CustomImagePicker({
   imageFile,
   setImageFile,
@@ -22,12 +25,21 @@ export default function CustomImagePicker({
 }) {
   const [image, setImage] = useState<string | null>(null);
   const [cameraPermissionStatus, requestPermission] = useCameraPermissions();
+  const cropImage = async (imagePath: string) => {
+    ImageCropper.openCropper({
+      mediaType: "photo",
+      width: tryonImageWidth,
+      height: tryonImageHeight,
+      path: imagePath,
+    }).then((image) => {
+      setImage(image.path);
+    });
+  };
   const pickImageFromGallery = async () => {
     // No permissions request is necessary for launching the image library
     let result = await launchImageLibraryAsync({
       mediaTypes: ["images"],
       quality: 1,
-      allowsEditing: true,
     });
 
     if (!result.canceled) {
@@ -66,7 +78,6 @@ export default function CustomImagePicker({
     let result = await launchCameraAsync({
       mediaTypes: ["images"],
       quality: 1,
-      allowsEditing: true,
     });
 
     if (!result.canceled) {
@@ -75,9 +86,10 @@ export default function CustomImagePicker({
     }
   };
 
-  const removeBackground = async () => {
+  const removeBackgroundBtn = async () => {
     //called the trained ai model to remove the background
     // await ImageUploader(image ?? "");
+
     console.log("remove background");
   };
   return !image ? (
@@ -98,7 +110,7 @@ export default function CustomImagePicker({
     </View>
   ) : (
     <View className={`${imageSizeClassName} relative`}>
-      <TouchableOpacity onPress={() => pickImageFromGallery()}>
+      <TouchableOpacity onPress={() => cropImage(image)}>
         <Image source={image} className="w-full h-full" contentFit="contain" />
       </TouchableOpacity>
       <View className="absolute top-2 right-2 flex-row gap-2 ">
@@ -115,7 +127,7 @@ export default function CustomImagePicker({
         <TryOnCustomButton
           imageUri={icons.scissor}
           title=""
-          onPress={() => removeBackground()}
+          onPress={() => removeBackgroundBtn()}
         />
       </View>
     </View>

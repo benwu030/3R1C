@@ -12,7 +12,8 @@ export const fetchAllTryOnResults = async (): Promise<string[]> => {
           return localConfig.localTryOnResultImagesDirectory + image;
         })
     //   console.log("Fetched images:", images);
-      return images;
+    
+    return images.slice(-5);
     }
     else {
           console.log("No images found");
