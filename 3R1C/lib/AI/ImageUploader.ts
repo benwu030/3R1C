@@ -158,7 +158,7 @@ export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:s
         }
       } catch (error) {
         console.error("Error in TryOnImageUploader:", error);
-        throw error;
+        return null;
       }
 }
 // Allocate pipeline

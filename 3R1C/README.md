@@ -48,3 +48,48 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Database Schema
+
+```mermaid
+erd
+classDiagram
+    class Clothes {
+        +string userid
+        +string title
+        +double price
+        +string localImageURL
+        +string remark
+        +enum maincategory
+        +string maincolor
+        +string[] subcolors
+        +datetime purchasedate
+        +string[] subcategories
+        +string brand
+    }
+
+    class Outfit {
+        +string userid
+        +string title
+        +string previewImageURL
+        +string remark
+        +string items (JSON)
+    }
+
+    class OutfitCollection {
+        +string userid
+        +string title
+        +string description
+        +string previewImageURL
+        +datetime[] dayToWear
+    }
+
+    class OutfitCollectionRelation {
+        +string outfitId
+        +string outfitCollectionId
+        +string userId
+    }
+
+    OutfitCollectionRelation --> Outfit : outfitId
+    OutfitCollectionRelation --> OutfitCollection : outfitCollectionId
+```
