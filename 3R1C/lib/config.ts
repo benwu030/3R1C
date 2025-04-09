@@ -16,21 +16,21 @@ export const config = {
 }
 
 export const localConfig = {
-    localClotheJsonUri :`${FileSystem.documentDirectory}clotheData/clothe.json`,
-    localClotheDirectory :`${FileSystem.documentDirectory}clotheData/`,
-    localClotheImagesDirectiry :`${FileSystem.documentDirectory}clotheData/Images/`,
+    localClotheJsonUri :`clotheData/clothe.json`,
+    localClotheDirectory :`clotheData/`,
+    localClotheImagesDirectiry :`clotheData/Images/`,
     //outfit
-    localOutfitDirectory :`${FileSystem.documentDirectory}outfitData/`,
-    localOutfitJsonUri: `${FileSystem.documentDirectory}outfitData/outfit.json`,
-    localOutfitPreviewsDirectiry :`${FileSystem.documentDirectory}outfitData/OutfitPreviews/`,
+    localOutfitDirectory :`outfitData/`,
+    localOutfitJsonUri: `outfitData/outfit.json`,
+    localOutfitPreviewsDirectiry :`outfitData/OutfitPreviews/`,
     //outfit collection
-    localOutfitCollectionsJsonUri: `${FileSystem.documentDirectory}outfitData/outfitCollection.json`,
-    localOutfitCollectionPreviewsDirectiry :`${FileSystem.documentDirectory}outfitData/OutfitCollectionPreviews/`,
+    localOutfitCollectionsJsonUri: `outfitData/outfitCollection.json`,
+    localOutfitCollectionPreviewsDirectiry :`outfitData/OutfitCollectionPreviews/`,
 
     //outfti collection relationship
-    localOutfitCollectionRelationshipJsonUri: `${FileSystem.documentDirectory}outfitData/outfitCollectionRelationship.json`,
+    localOutfitCollectionRelationshipJsonUri: `outfitData/outfitCollectionRelationship.json`,
     //TryOn Directory
-    localTryOnDirectory :`${FileSystem.documentDirectory}tryonData/`,
-    localTryOnBodyImagesDirectory :`${FileSystem.documentDirectory}tryonData/BodyImages/`,
-    localTryOnResultImagesDirectory :`${FileSystem.documentDirectory}tryonData/ResultImages/`,
+    localTryOnDirectory :`tryonData/`,
+    localTryOnBodyImagesDirectory :`tryonData/BodyImages/`,
+    localTryOnResultImagesDirectory :`tryonData/ResultImages/`,
 }

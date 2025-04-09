@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ben1110992.3R1C",
+      "bundleIdentifier": "thebaselab.coller",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }

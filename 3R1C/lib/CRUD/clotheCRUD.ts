@@ -56,7 +56,7 @@ export async function refetchClotheImage(imageURL:string,id:string,onLocalSave?:
         const result = await storage.getFileDownload(config.clothesImgStorageId!, id);
         const downloadResult = await FileSystem.downloadAsync(
             result.href,
-            localPath
+            FileSystem.documentDirectory+localPath
         );
         if (downloadResult.status !== 200) {
             throw new Error(`Failed to download image: ${downloadResult.status}`);
@@ -128,7 +128,7 @@ export async function getAllClothes(): Promise<CLOTHES> {
         const result = await storage.getFileDownload(config.clothesImgStorageId!, clothe.$id);
         const downloadResult = await FileSystem.downloadAsync(
             result.href,
-            localPath
+            FileSystem.documentDirectory+localPath
         );
         if (downloadResult.status !== 200) {
             throw new Error(`Failed to download image: ${downloadResult.status}`);
@@ -285,7 +285,7 @@ export async function getClothesWithFilter({searchText,mainCategoryfilter,sortBy
                 const result = await storage.getFileDownload(config.clothesImgStorageId!, clothe.$id);
                 const downloadResult = await FileSystem.downloadAsync(
                     result.href,
-                    localPath
+                    FileSystem.documentDirectory+localPath
                 );
                 if (downloadResult.status !== 200) {
                     throw new Error(`Failed to download image: ${downloadResult.status}`);
@@ -334,8 +334,8 @@ const deleteLocalClothe = async (id: string): Promise<boolean> => {
 
         // delete image file locally
         if (clotheToDelete.localImageURL) {
-            if((await FileSystem.getInfoAsync(clotheToDelete.localImageURL)).exists)
-            await FileSystem.deleteAsync(clotheToDelete.localImageURL, { idempotent: true });
+            if((await FileSystem.getInfoAsync(FileSystem.documentDirectory+clotheToDelete.localImageURL)).exists)
+            await FileSystem.deleteAsync(FileSystem.documentDirectory+clotheToDelete.localImageURL, { idempotent: true });
         }
 
         //update local data

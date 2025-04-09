@@ -16,9 +16,10 @@ export const ensureDirectories = async () => {
     ];
 
     for (const dir of dirs) {
-        const dirInfo = await FileSystem.getInfoAsync(dir);
+        const localDir = FileSystem.documentDirectory + dir;
+        const dirInfo = await FileSystem.getInfoAsync(localDir);
         if (!dirInfo.exists) {
-            await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+            await FileSystem.makeDirectoryAsync(localDir, { intermediates: true });
         }
     }
 };
@@ -36,15 +37,17 @@ export const ensureFiles = async () => {
     ];
 
     for (const file of files) {
-        const fileInfo = await FileSystem.getInfoAsync(file);
+        const localFile = FileSystem.documentDirectory + file;
+        const fileInfo = await FileSystem.getInfoAsync(localFile);
         if (!fileInfo.exists) {
-            await writeLocalData(file, []);
+            await writeLocalData(localFile, []);
         }
     }
 };
+//read relative path
 export const readLocalData = async <T>(path: string): Promise<T[]> => {
     try {
-        const content = await FileSystem.readAsStringAsync(path);
+        const content = await FileSystem.readAsStringAsync(FileSystem.documentDirectory+path);
         //may add error handling here
         return JSON.parse(content);
     } catch (err){
@@ -52,10 +55,10 @@ export const readLocalData = async <T>(path: string): Promise<T[]> => {
         return [];
     }
 };
-
+//write relative path
 export const writeLocalData = async <T>(path: string, data: T[]) => {
     try {
-        await FileSystem.writeAsStringAsync(path, JSON.stringify(data));
+        await FileSystem.writeAsStringAsync(FileSystem.documentDirectory+path, JSON.stringify(data));
     } catch (err) {
         console.error('Error writing local data:', err);
         throw err;
@@ -89,7 +92,7 @@ export const saveImageLocally = async (path:string,imageUri: string, id: string,
      try {
             await FileSystem.copyAsync({
                 from: imageUri,
-                to: localImageUri
+                to: `${FileSystem.documentDirectory}${localImageUri}`
             });
             return localImageUri;
             } catch (error) {
@@ -98,11 +101,12 @@ export const saveImageLocally = async (path:string,imageUri: string, id: string,
 }
 export const deleteImageLocally = async (imageUri: string) => {
     try {
-         const fileInfo = await FileSystem.getInfoAsync(imageUri);
+        const localImageUri = `${FileSystem.documentDirectory}${imageUri}`;
+         const fileInfo = await FileSystem.getInfoAsync(localImageUri);
         if (!fileInfo.exists) {
             return;
         }
-        await FileSystem.deleteAsync(imageUri, { idempotent: true });
+        await FileSystem.deleteAsync(localImageUri, { idempotent: true });
     } catch (error) {
         console.error('Failed to delete image locally:', error);
     }
