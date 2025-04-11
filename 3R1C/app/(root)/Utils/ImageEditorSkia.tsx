@@ -32,12 +32,20 @@ const ImageEditorSkia = () => {
   };
   useEffect(() => {
     if (imageUri) {
+      if(imageUri.startsWith("file://")){
+
+      Skia.Data.fromURI(imageUri).then((data) => {
+        const skImage = Skia.Image.MakeImageFromEncoded(data);
+        setImage(skImage);
+      });
+    }
+    else{
       Skia.Data.fromURI("file://" + imageUri).then((data) => {
         const skImage = Skia.Image.MakeImageFromEncoded(data);
         setImage(skImage);
       });
     }
-    console.log("Image URI:", imageUri);
+    }
   }, [imageUri]);
 
   const skiaCanvaRef = useRef<SkiaCanvaRef>(null); // Ref for SkiaCanva

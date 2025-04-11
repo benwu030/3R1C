@@ -8,7 +8,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import CustomImagePicker from "./CustomImagePicker";
 import { MainCategoriesFilter, SubCategoriesFilter } from "./CategoriesFilter";
 import { CATEGORIES, SEASONS } from "@/constants/data";
-import { ImagePickerAsset } from "expo-image-picker";
 import CircularHue from "./CircularHue";
 
 const CreateClothesModal = ({ userID }: { userID: string }) => {
@@ -22,13 +21,13 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
   const [price, setPrice] = useState("");
   const [remark, setRemark] = useState("");
   const [brand, setBrand] = useState("");
-  const [imageFile, setImageFile] = useState<ImagePickerAsset | null>(null);
+  const [imageFileUri, setImageFileUri] = useState<string | null>(null);
 
   const [color, setColor] = useState("");
   const [purchaseDate, setPurchaseDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const handleSubmit = async () => {
-    if (!imageFile) {
+    if (!imageFileUri) {
       Alert.alert("Error", "Please select an image");
       return;
     }
@@ -50,11 +49,11 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
       subcategories: subCategoryfilter,
       maincolor: color,
       purchasedate: purchaseDate,
-      localImageURL: imageFile.uri,
+      localImageURL: imageFileUri,
     };
 
     try {
-      const result = await createClothe(newClothe, userID, imageFile, () => {
+      const result = await createClothe(newClothe, userID, imageFileUri, () => {
         Alert.alert("Success", "Clothe stored locally");
         router.back();
       });
@@ -78,7 +77,7 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
       showsHorizontalScrollIndicator={true}
     >
       <View className="p-5 flex-col">
-        <CustomImagePicker imageFile={imageFile} setImageFile={setImageFile} />
+        <CustomImagePicker imageFileUri={imageFileUri} setImageFileUri={setImageFileUri} />
         <Text className="font-S-RegularItalic text-sm ">Title*</Text>
         <TextInput
           placeholder="Enter a name"

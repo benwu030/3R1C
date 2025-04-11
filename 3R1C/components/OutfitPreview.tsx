@@ -90,11 +90,7 @@ const CalendarItem = ({ date, outfitCollection }: OutfitPreviewProps) => {
       router.push("/AddOutfitCollection");
     }
   };
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, [])
-  );
+
   const renderContent = () => {
     if (loading) {
       return (

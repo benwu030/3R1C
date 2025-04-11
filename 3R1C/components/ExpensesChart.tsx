@@ -94,7 +94,7 @@ const ExpensesChart = ({
                     day: "numeric",
                   })}
                 </Text>
-                <Text className="text-white font-S-Medium text-sm">
+                <Text className="text-white font-S-Medium text-xs">
                   HK${items[0].value}
                 </Text>
               </View>

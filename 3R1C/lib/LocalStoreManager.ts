@@ -37,8 +37,8 @@ export const ensureFiles = async () => {
     ];
 
     for (const file of files) {
-        const localFile = FileSystem.documentDirectory + file;
-        const fileInfo = await FileSystem.getInfoAsync(localFile);
+        const localFile = file;
+        const fileInfo = await FileSystem.getInfoAsync(FileSystem.documentDirectory + localFile);
         if (!fileInfo.exists) {
             await writeLocalData(localFile, []);
         }
@@ -89,6 +89,8 @@ export const writeLocalDataWithDuplicateCheck = async <T extends { $id?:string|n
 export const saveImageLocally = async (path:string,imageUri: string, id: string,prefix:string='') => {
     const fileExtension = imageUri.split('.').pop();
     const localImageUri = `${path}${prefix}${id}.${fileExtension}`;
+    console.log('Saving image locally:', localImageUri);
+
      try {
             await FileSystem.copyAsync({
                 from: imageUri,
@@ -121,3 +123,10 @@ export const saveOutfitCollectionLocally = async (collection: OutfitCollection) 
     await writeLocalData(localConfig.localOutfitCollectionsJsonUri, [...collections, collection]);
 };
 
+export const checkAbsoultePath =  (path: string) => {
+    if (!path.startsWith('file://')) {
+        return FileSystem.documentDirectory + path;
+    }
+
+    return path;
+}   

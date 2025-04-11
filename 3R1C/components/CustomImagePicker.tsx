@@ -11,18 +11,21 @@ import {
 } from "expo-image-picker";
 import icons from "@/constants/icons";
 import ImageCropper from "react-native-image-crop-picker";
+import { RemoveBackgroundImageUploader } from "@/lib/AI/ImageUploader";
+import { router, useLocalSearchParams } from "expo-router";
 
 const tryonImageHeight = 1024;
 const tryonImageWidth = 768;
 export default function CustomImagePicker({
-  imageFile,
-  setImageFile,
+  imageFileUri,
+  setImageFileUri,
   imageSizeClassName = "aspect-[4/5]",
 }: {
-  imageFile: ImagePickerAsset | null;
-  setImageFile: (image: ImagePickerAsset | null) => void;
+  imageFileUri: string | null;
+  setImageFileUri: (image: string | null) => void;
   imageSizeClassName?: string;
 }) {
+
   const [image, setImage] = useState<string | null>(null);
   const [cameraPermissionStatus, requestPermission] = useCameraPermissions();
   const cropImage = async (imagePath: string) => {
@@ -44,7 +47,7 @@ export default function CustomImagePicker({
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-      setImageFile(result.assets[0]);
+      setImageFileUri(result.assets[0].uri);
     }
   };
 
@@ -82,14 +85,30 @@ export default function CustomImagePicker({
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-      setImageFile(result.assets[0]);
+      setImageFileUri(result.assets[0].uri);
     }
   };
 
   const removeBackgroundBtn = async () => {
     //called the trained ai model to remove the background
     // await ImageUploader(image ?? "");
-
+    try{
+      const result = await RemoveBackgroundImageUploader(image ?? "");
+      if (result?.image) {
+        console.log("Image URI:", result.image);
+        setImage(result.image);
+        console.log("Image URI:", result.image);
+        setImageFileUri(result.image);
+        if(result.category){
+          router.setParams({ mainCategoryfilter: result.category });
+        }
+      } else {
+        console.log("Failed to remove background");
+      }
+    }catch(err){
+      console.log("Error in remove background",err);
+    }
+   
     console.log("remove background");
   };
   return !image ? (

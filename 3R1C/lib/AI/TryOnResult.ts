@@ -3,7 +3,7 @@ import { config, localConfig } from "../config";
 export const fetchAllTryOnResults = async (): Promise<string[]> => {
     // fetch all pictures from the directory
     const result = await FileSystem.readDirectoryAsync(
-      localConfig.localTryOnResultImagesDirectory
+      FileSystem.documentDirectory+localConfig.localTryOnResultImagesDirectory
     );
     // console.log("TryOn Results:", result);
     if (result.length > 0) {

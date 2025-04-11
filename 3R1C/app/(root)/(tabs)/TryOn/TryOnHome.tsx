@@ -32,185 +32,9 @@ import PickModel from "./IDMVTON/PickModel";
 import Result from "./IDMVTON/Result";
 import { useAppwrite } from "@/lib/useAppWrite";
 import { fetchAllTryOnResults } from "@/lib/AI/TryOnResult";
-// Define the initial state
-// const initialState = {
-//   modelImage: null as string | null,
-//   modelMaskImage: null as string | null,
-//   garmentImage: null as string | null,
-//   generatedImageUri: null as string | null,
-//   selectedTryOnModel: "",
-//   idmVtonPrompt: "",
-//   idmVtonMaskArea: "upper_body" as OpenPoseCategoryType,
-//   isLoading: false,
-//   autoMask: false,
-// };
-
-// Define the reducer function
-// const reducer = (
-//   state: typeof initialState,
-//   action: { type: string; payload?: any }
-// ) => {
-//   switch (action.type) {
-//     case "SET_MODEL_IMAGE":
-//       return { ...state, modelImage: action.payload };
-//     case "SET_GARMENT_IMAGE":
-//       return { ...state, garmentImage: action.payload };
-//     case "SET_GENERATED_IMAGE_URI":
-//       return { ...state, generatedImageUri: action.payload };
-//     case "SET_SELECTED_TRY_ON_MODEL":
-//       return { ...state, selectedTryOnModel: action.payload };
-//     case "SET_IDM_VTON_PROMPT":
-//       return { ...state, idmVtonPrompt: action.payload };
-//     case "SET_IDM_VTON_MASK_AREA":
-//       return { ...state, idmVtonMaskArea: action.payload };
-//     case "SET_IS_LOADING":
-//       return { ...state, isLoading: action.payload };
-//     case "SET_AUTO_MASK":
-//       return { ...state, autoMask: action.payload };
-//     case "SET_MODEL_MASK_IMAGE":
-//       return { ...state, modelMaskImage: action.payload };
-//     default:
-//       return state;
-//   }
-// };
+import { checkAbsoultePath } from "@/lib/LocalStoreManager";
 
 const TryOnHome = () => {
-  // const [state, dispatch] = useReducer(reducer, initialState);
-  // const [cameraPermissionStatus, requestPermission] = useCameraPermissions();
-  // const params = useLocalSearchParams<{
-  //   garmentImageFromClosetUri?: string;
-  //   garmentImageFromClosetTitle?: string;
-  //   modelImageUri?: string;
-  //   modelMaskUri?: string;
-  // }>();
-
-  // useEffect(() => {
-  //   if (params.garmentImageFromClosetUri) {
-  //     dispatch({
-  //       type: "SET_GARMENT_IMAGE",
-  //       payload: params.garmentImageFromClosetUri,
-  //     });
-  //   }
-  //   if (params.garmentImageFromClosetTitle) {
-  //     dispatch({
-  //       type: "SET_IDM_VTON_PROMPT",
-  //       payload: params.garmentImageFromClosetTitle,
-  //     });
-  //   }
-  //   if (params.modelImageUri) {
-  //     console.log("Model image URI:", params.modelImageUri);
-  //     dispatch({ type: "SET_MODEL_IMAGE", payload: params.modelImageUri });
-  //   }
-  //   if (params.modelMaskUri) {
-  //     console.log("Model mask URI:", params.modelMaskUri);
-  //     dispatch({ type: "SET_MODEL_MASK_IMAGE", payload: params.modelMaskUri });
-  //   }
-  // }, [
-  //   params.garmentImageFromClosetUri,
-  //   params.garmentImageFromClosetTitle,
-  //   params.modelImageUri,
-  //   params.modelMaskUri,
-  // ]);
-
-  // const pickImageFromGallery = async (type: "model" | "garment") => {
-  //   let result = await launchImageLibraryAsync({
-  //     mediaTypes: ["images"],
-  //     quality: 1,
-  //     // allowsEditing: true,
-  //   });
-
-  //   if (!result.canceled) {
-  //     if (type === "model") {
-  //       dispatch({ type: "SET_MODEL_IMAGE", payload: result.assets[0].uri });
-  //     } else {
-  //       dispatch({ type: "SET_GARMENT_IMAGE", payload: result.assets[0].uri });
-  //     }
-  //   }
-  // };
-
-  // const pickImageFromCamera = async (type: "model" | "garment") => {
-  //   if (cameraPermissionStatus?.status !== PermissionStatus.GRANTED) {
-  //     if (!cameraPermissionStatus?.canAskAgain) {
-  //       Alert.alert(
-  //         "Camera Permission Required",
-  //         "Please enable camera access in your device settings to use this feature.",
-  //         [
-  //           { text: "Cancel", style: "cancel" },
-  //           {
-  //             text: "Open Settings",
-  //             onPress: () => {
-  //               if (Platform.OS === "ios") {
-  //                 Linking.openURL("app-settings:");
-  //               } else {
-  //                 Linking.openSettings();
-  //               }
-  //             },
-  //           },
-  //         ]
-  //       );
-  //     }
-  //     requestPermission();
-  //     return;
-  //   }
-  //   let result = await launchCameraAsync({
-  //     mediaTypes: ["images"],
-  //     quality: 1,
-  //     allowsEditing: true,
-  //   });
-
-  //   if (!result.canceled) {
-  //     if (type === "model") {
-  //       dispatch({ type: "SET_MODEL_IMAGE", payload: result.assets[0].uri });
-  //     } else {
-  //       dispatch({ type: "SET_GARMENT_IMAGE", payload: result.assets[0].uri });
-  //     }
-  //   }
-  // };
-
-  // const selectFromCloset = () => {
-  //   router.push({
-  //     pathname: "./TryOnCloset",
-  //   });
-  // };
-
-  // const generateImage = async () => {
-  //   if (!state.modelImage || !state.garmentImage) {
-  //     Alert.alert("Please select both model and garment images");
-  //     return;
-  //   }
-  //   if (!state.autoMask && !state.modelMaskImage) {
-  //     Alert.alert("Please create a mask image by clicking the model image");
-  //     return;
-  //   }
-  //   dispatch({ type: "SET_IS_LOADING", payload: true });
-  //   const generatedUri = await IdmVtonImageUploader(
-  //     state.garmentImage,
-  //     state.modelImage,
-  //     state.idmVtonPrompt,
-  //     state.idmVtonMaskArea,
-  //     state.modelMaskImage
-  //   );
-  //   dispatch({ type: "SET_IS_LOADING", payload: false });
-  //   if (generatedUri === null) {
-  //     Alert.alert(
-  //       "Error",
-  //       "Failed to generate image.\n Please try again later."
-  //     );
-  //     return;
-  //   }
-  //   dispatch({ type: "SET_GENERATED_IMAGE_URI", payload: generatedUri ?? "" });
-  // };
-  // const handleImageEditorResult = (editedUri: string) => {
-  //   if (editedUri) {
-  //     dispatch({ type: "SET_MODEL_IMAGE", payload: editedUri });
-  //   }
-  // };
-  // const navigateToImageEditor = (imageUri: string) => {
-  //   router.push({
-  //     pathname: "/(root)/Utils/ImageEditor",
-  //     params: { modelImageUri: imageUri },
-  //   });
-  // };
 
   const navigateToGenerateImageSteps = (model: string) => {
     router.navigate({
@@ -252,7 +76,7 @@ const TryOnHome = () => {
   const navigateToViewImagePage = (imageUri: string) => {
     router.push({
       pathname: "/(root)/Utils/[imageURL]",
-      params: { imageURL: imageUri },
+      params: { imageURL: checkAbsoultePath(imageUri) },
     });
   };
   return (
@@ -266,10 +90,10 @@ const TryOnHome = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               className=" mr-2"
-              onPress={() => navigateToViewImagePage(item)}
+              onPress={() => navigateToViewImagePage(checkAbsoultePath(item))}
             >
               <Image
-                source={item}
+                source={checkAbsoultePath(item)}
                 className="w-full h-[35rem]  m-5 ml-0 rounded-lg aspect-[3/4]"
                 contentFit="contain"
               />

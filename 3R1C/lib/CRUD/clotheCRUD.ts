@@ -6,12 +6,12 @@ import { config, localConfig } from "../config";
 import { readLocalData, writeLocalData,saveImageLocally } from "../LocalStoreManager";
 import {storage,databases,uploadImage} from '../AppWrite'
 //create a clothes document
-export async function createClothe(clothe: Clothe,userID:string,imageFile:ImagePickerAsset,onLocalSave?: () => void){
+export async function createClothe(clothe: Clothe,userID:string,imageFileUri:string,onLocalSave?: () => void){
     try {
         const uid = ID.unique();
         //save the image to local
-        const fileExtension = imageFile.uri.split('.').pop();
-        const localImageUri = await saveImageLocally(localConfig.localClotheImagesDirectiry,imageFile.uri,uid)
+        const fileExtension = imageFileUri.split('.').pop();
+        const localImageUri = await saveImageLocally(localConfig.localClotheImagesDirectiry,imageFileUri,uid)
         //update file path
         clothe.localImageURL = localImageUri??'';
         clothe.$id = uid;
@@ -23,12 +23,15 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
         //upload to appwrite
         clothe.$id = null
         
-        const fileInfo = await FileSystem.getInfoAsync(localImageUri??'');
+        if (!localImageUri) {
+            throw new Error('localImageUri is undefined');
+        }
+        const fileInfo = await FileSystem.getInfoAsync(FileSystem.documentDirectory + localImageUri);
         if (!fileInfo.exists) {
             throw new Error('Local image file not found');
         }
         
-        const uploadImageResponse = await uploadImage(imageFile,uid,config.clothesImgStorageId!)    
+        const uploadImageResponse = await uploadImage(imageFileUri,uid,config.clothesImgStorageId!)    
         if(!uploadImageResponse) throw new Error('failed to upload image')
         const response = await databases.createDocument(
             config.databaseId!,
@@ -39,6 +42,8 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
             Permission.delete(Role.user(userID)), 
             Permission.update(Role.user(userID))]
         );
+        console.log('createClothe:',clothe)
+
         return response;
     } catch (error) {
         console.error('fail to create clothes',error);
@@ -48,7 +53,61 @@ export async function createClothe(clothe: Clothe,userID:string,imageFile:ImageP
     }
 }
 
+export async function updateClotheImage(id: string,userID:string,imageFileUri:string,onLocalSave?: () => void){
+    try {
+        let clothe = await getClotheById({ id });
+        if (!clothe) {
+            console.error('Clothe not found');
+            return null;
+        }
+        const localImageUri = await saveImageLocally(localConfig.localClotheImagesDirectiry, imageFileUri, id);
+        if (!localImageUri) {
+            throw new Error('localImageUri is undefined');
+        }
 
+        const fileInfo = await FileSystem.getInfoAsync(FileSystem.documentDirectory + localImageUri);
+        if (!fileInfo.exists) {
+            throw new Error('Local image file not found');
+        }
+
+        // Update the local image URL
+        clothe.localImageURL = localImageUri;
+
+        // Save updated clothe data locally
+        const existingData = await readLocalData<Clothe>(localConfig.localClotheJsonUri);
+        const updatedData = existingData.map(item => (item.$id === clothe.$id ? { ...item, localImageURL: localImageUri } : item));
+        await writeLocalData(localConfig.localClotheJsonUri, updatedData);
+
+        // Trigger local save callback
+        onLocalSave?.();
+
+        //delete the old image from Appwrite
+        if (clothe.localImageURL) {
+            const oldFileId = clothe.$id!;
+            await storage.deleteFile(config.clothesImgStorageId!, oldFileId);
+        }
+        // Upload the new image to Appwrite
+        const uploadImageResponse = await uploadImage(imageFileUri, clothe.$id!, config.clothesImgStorageId!);
+        if (!uploadImageResponse) throw new Error('Failed to upload image');
+
+        // Update the remote document with the new image URL
+        const response = await databases.updateDocument(
+            config.databaseId!,
+            config.clothesCollectionId!,
+            clothe.$id!,
+            { localImageURL: localImageUri },
+            [Permission.read(Role.user(userID)), 
+                Permission.delete(Role.user(userID)), 
+                Permission.update(Role.user(userID))]
+        );
+
+        console.log('updateClotheImage:', clothe);
+        return response;
+    } catch (error) {
+        console.error('Failed to update clothe image:', error);
+        return null;
+    }
+}
 export async function refetchClotheImage(imageURL:string,id:string,onLocalSave?: () => void){
     try {
         const fileExtension = imageURL.split('.').pop();

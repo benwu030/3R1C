@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView } from "react-native";
 
@@ -23,6 +23,12 @@ export const MainCategoriesFilter = ({
       router.setParams({ mainCategoryfilter: category });
     }
   };
+  useEffect(() => {
+    if(params.mainCategoryfilter){
+      setSelectedCategory(params.mainCategoryfilter)
+    }
+  }
+  , [params.mainCategoryfilter]);
   return (
     <ScrollView
       horizontal

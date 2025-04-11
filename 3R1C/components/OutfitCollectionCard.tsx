@@ -3,6 +3,7 @@ import React from "react";
 import { Image } from "expo-image";
 import icons from "@/constants/icons";
 import { OutfitCollection } from "@/constants/outfit";
+import { checkAbsoultePath } from "@/lib/LocalStoreManager";
 
 interface OutfitCollectionProps {
   item: OutfitCollection;
@@ -19,7 +20,7 @@ const OutfitCollectionCard = ({
 }: OutfitCollectionProps) => {
   // Find the date closest to today from the dayToWear array (if it exists)
   const today = new Date();
-
+  const absolutePath = checkAbsoultePath(previewImageURL??"");
   let minDiff = Infinity;
   let closestDate = null;
 
@@ -62,7 +63,7 @@ const OutfitCollectionCard = ({
       <View className="aspect-square bg-gray-100 rounded-xl overflow-hidden">
         {previewImageURL ? (
           <Image
-            source={{ uri: previewImageURL }}
+            source={{ uri: absolutePath }}
             className="w-full h-full"
             contentFit="cover"
           />

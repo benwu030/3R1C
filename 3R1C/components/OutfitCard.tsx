@@ -1,8 +1,9 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outfit } from "@/constants/outfit";
 import { Image } from "expo-image";
 import { cssInterop } from "nativewind";
+import { checkAbsoultePath } from "@/lib/LocalStoreManager";
 
 cssInterop(Image, { className: "style" });
 
@@ -18,6 +19,10 @@ const OutfitCard = ({
   isSelected,
   onPress,
 }: OutfitProps) => {
+useEffect(() => {
+    console.log("OutfitCard", previewImageURL);
+  },
+  [previewImageURL]);
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -33,7 +38,7 @@ const OutfitCard = ({
       <View className="aspect-square bg-gray-100 rounded-xl overflow-hidden">
         {previewImageURL ? (
           <Image
-            source={{ uri: previewImageURL }}
+            source={{ uri: checkAbsoultePath(previewImageURL) }}
             className="w-full h-full"
             contentFit="cover"
             cachePolicy={"none"}

@@ -113,11 +113,7 @@ const Calendar = ({ currentDate = new Date() }: CalendarProps) => {
   useEffect(() => {
     refetch();
   }, [selectedDate]);
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, [])
-  );
+  
   return (
     <View className="px-5  flex-col flex-1">
       <Text className="font-S-Bold text-3xl mb-4">

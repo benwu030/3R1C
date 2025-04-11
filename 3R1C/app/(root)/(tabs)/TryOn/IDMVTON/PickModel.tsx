@@ -104,7 +104,7 @@ const PickModel = () => {
       Alert.alert("Please select a mask area");
       return;
     }
-    router.push({
+    router.navigate({
       pathname: "/(root)/(tabs)/TryOn/IDMVTON/PickGarment",
       params: {
         modelImageUri: modelImage,

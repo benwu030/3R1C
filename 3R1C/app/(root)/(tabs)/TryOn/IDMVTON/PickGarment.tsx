@@ -27,6 +27,7 @@ import {
   PermissionStatus,
 } from "expo-image-picker";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
+import { checkAbsoultePath } from "@/lib/LocalStoreManager";
 const tryonImageHeight = 1024;
 const tryonImageWidth = 768;
 const PickGarment = ({}: any) => {
@@ -72,6 +73,7 @@ const PickGarment = ({}: any) => {
         format: SaveFormat.PNG,
       });
       setGarmentImage(resizedResult.uri);
+      router.setParams({garmentImageFromClosetUri:resizedResult.uri});
     }
   };
   const pickImageFromCamera = async () => {
@@ -111,6 +113,8 @@ const PickGarment = ({}: any) => {
         format: SaveFormat.PNG,
       });
       setGarmentImage(resizedResult.uri);
+      router.setParams({garmentImageFromClosetUri:resizedResult.uri});
+
     }
   };
   const GarmentButtons = () => (
@@ -120,7 +124,7 @@ const PickGarment = ({}: any) => {
         title="Image"
         onPress={pickImageFromGallery}
       />
-      <TryOnCustomButton imageUri={icons.camera} title="Camera" />
+      <TryOnCustomButton imageUri={icons.camera} title="Camera" onPress={pickImageFromCamera} />
       <TryOnCustomButton
         imageUri={icons.closet}
         title="Closet"
@@ -131,7 +135,7 @@ const PickGarment = ({}: any) => {
   const generateImage = async () => {
     setIsLoading(true);
     const generatedUri = await IdmVtonImageUploader(
-      garmentImage ?? "",
+      garmentImage ? checkAbsoultePath(garmentImage) : "",
       params.modelImageUri ?? "",
       params.modelMaskImageUri ?? "",
       garmentDescription ?? "",
@@ -167,11 +171,11 @@ const PickGarment = ({}: any) => {
   return (
     <SafeAreaView>
       <CustomHeader title="Garment" />
-      <ScrollView contentContainerClassName=" pb-32">
+      <ScrollView contentContainerClassName=" pb-[30em]">
         <View className="px-5">
           {isLoading ? (
-            <ActivityIndicator size="large" color="#0000ff" />
-          ) : (
+          <ActivityIndicator className="text-beige-darker" size="large" />
+        ) : (
             <>
               <Text className="font-S-Regular text-gray-700">
                 Select clothes you want to try
@@ -179,7 +183,7 @@ const PickGarment = ({}: any) => {
               {garmentImage ? (
                 <View>
                   <Image
-                    source={garmentImage}
+                    source={checkAbsoultePath(garmentImage)}
                     className="aspect-[3/4] rounded-lg"
                     contentFit="contain"
                   />
@@ -189,7 +193,7 @@ const PickGarment = ({}: any) => {
                       Describe the garment* (e.g. color, pattern, style)
                     </Text>
                     <TextInput
-                      autoFocus
+                      
                       placeholder={garmentDescription ?? ""}
                       placeholderTextColor={"#776E65"}
                       className="font-S-RegularItalic border-b border-gray-300 text-2xl "

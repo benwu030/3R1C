@@ -9,6 +9,7 @@ import {
 import { Image } from "expo-image";
 import { Clothe } from "@/constants/clothes";
 import { Category } from "@/constants/category";
+import { checkAbsoultePath } from "@/lib/LocalStoreManager";
 
 interface ItemBarProps {
   clothes: Clothe[];
@@ -104,7 +105,7 @@ const ClotheItemBar = ({
               >
                 <View className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden">
                   <Image
-                    source={{ uri: clothe.localImageURL }}
+                    source={{ uri: checkAbsoultePath(clothe.localImageURL) }}
                     className="w-full h-full"
                     contentFit="contain"
                   />

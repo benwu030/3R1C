@@ -13,6 +13,7 @@ export const config = {
     previewStorageId: process.env.EXPO_PUBLIC_APPWRITE_PREVIEW_STORAGE_ID,
     huggingFaceApiKey: process.env.EXPO_PUBLIC_HUGGINGFACE_API_KEY,
     tryonEndpoint: process.env.EXPO_PUBLIC_IDMVTON_ENDPOINT,
+    yoloEndpoint: process.env.EXPO_PUBLIC_YOLO_ENDPOINT,
 }
 
 export const localConfig = {

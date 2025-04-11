@@ -4,7 +4,7 @@ function isInCurrentWeek(date: Date, currentDate: Date, range: number): boolean 
     return date.getFullYear() === currentDate.getFullYear() && date.getMonth() === currentDate.getMonth() && date.getDate() >= currentDate.getDate() - currentDate.getDay() && date.getDate() <= currentDate.getDate() + range - currentDate.getDay();
 }
 function isInCurrentMonth(date: Date, currentDate: Date): boolean {
-    return date.getFullYear() === currentDate.getFullYear() && date.getMonth() === currentDate.getMonth();
+    return date.getFullYear() === currentDate.getFullYear();
 }
 function isInCurrentYear(date: Date, currentDate: Date): boolean {
     return date.getFullYear() === currentDate.getFullYear();
@@ -92,5 +92,6 @@ export function createLineChartData(clothes: CLOTHES, groupBy: 'week' | 'month' 
                 date: new Date(parseInt(year), 0, 1)
             }));
     }
+    console.log(result)
     return result;
 }

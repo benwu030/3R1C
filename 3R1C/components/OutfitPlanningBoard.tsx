@@ -4,6 +4,7 @@ import DraggableClothing from "@/components/DraggableClothing";
 import { Clothe } from "@/constants/clothes";
 import { OutfitItem } from "@/constants/outfit";
 import { CombinedOutfitItem } from "@/app/(root)/outfit/[outfitId]";
+import { checkAbsoultePath } from "@/lib/LocalStoreManager";
 
 interface OutfitPlanningBoardProps {
   outfitItems: CombinedOutfitItem[];
@@ -18,13 +19,15 @@ const OutfitPlanningBoard = ({
   onUpdatePosition,
   onRemoveItem,
 }: OutfitPlanningBoardProps) => {
+  console.log("OutfitPlanningBoard rendered");
+  console.log("outfitItems", outfitItems);
   return (
     <>
       {outfitItems.map((item) => (
         <DraggableClothing
           key={item.instanceId}
           instanceId={item.instanceId}
-          imageUri={item.clothe.localImageURL}
+          imageUri={checkAbsoultePath(item.clothe.localImageURL)}
           initialPosition={item.position}
           onPositionChange={(position) =>
             onUpdatePosition(item.instanceId, position)

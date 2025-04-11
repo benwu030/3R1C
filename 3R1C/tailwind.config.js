@@ -34,8 +34,9 @@ module.exports = {
         },
         'oat':{
           DEFAULT:'#e6e1db',
-          'dark':'#e8d9c6',
-          'darker':'#d8c6b8'
+          'dark':'#e8d9d6',
+          'darker':'#d8c6b8',
+          'light':'#ECEBDE',
         },
         'beige':{
           DEFAULT:'#d1bfb1',

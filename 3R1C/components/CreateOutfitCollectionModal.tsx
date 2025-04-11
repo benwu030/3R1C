@@ -9,11 +9,11 @@ import { createOutfitCollection } from "@/lib/CRUD/outfitCRUD";
 const CreateOutfitCollectionModal = ({ userID }: { userID: string }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [imageFile, setImageFile] = useState<ImagePickerAsset | null>(null);
+  const [imageFileUri, setImageFileUri] = useState<string | null>(null);
   const [dayToWear, setDayToWear] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const handleSubmit = async () => {
-    if (!imageFile) {
+    if (!imageFileUri) {
       Alert.alert("Error", "Please select an image");
       return;
     }
@@ -26,14 +26,14 @@ const CreateOutfitCollectionModal = ({ userID }: { userID: string }) => {
       userid: userID,
       title,
       description,
-      previewImageURL: imageFile.uri,
+      previewImageURL: imageFileUri,
       dayToWear: [dayToWear],
     };
 
     try {
       const result = await createOutfitCollection(
         newCollection,
-        imageFile,
+        imageFileUri,
         () => {
           Alert.alert("Success", "Clothe stored locally");
           router.back();
@@ -56,8 +56,8 @@ const CreateOutfitCollectionModal = ({ userID }: { userID: string }) => {
     >
       <View className="p-5 flex-col">
         <CustomImagePicker
-          imageFile={imageFile}
-          setImageFile={setImageFile}
+          imageFileUri={imageFileUri}
+          setImageFileUri={setImageFileUri}
           imageSizeClassName="h-[15rem]"
         />
 

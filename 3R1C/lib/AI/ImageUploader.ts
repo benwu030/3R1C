@@ -20,6 +20,18 @@ export interface IdmVtonInput {
     OpenPoseCategory: OpenPoseCategoryType;
   }
 }
+
+//yolo input type
+export interface YoloInput {
+  inputs: string;
+  org_img: string;
+}
+//yolo output type
+export interface YoloOutput{
+  image: string;
+  category:string;
+  error?:string;
+}
 // Define the allowed values for OpenPoseCategory
 export type OpenPoseCategoryType = "dress" | "upper_body" | "lower_body";
 
@@ -145,7 +157,7 @@ export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:s
           console.log("Received output image from IDM-VTON");
     
           // Save the base64 image to a file
-          const fileUri = localConfig.localTryOnResultImagesDirectory + `IdmVtonResult-${ID.unique()}.png`;
+          const fileUri = FileSystem.documentDirectory+localConfig.localTryOnResultImagesDirectory + `IdmVtonResult-${ID.unique()}.png`;
           await FileSystem.writeAsStringAsync(fileUri, response.output, {
             encoding: FileSystem.EncodingType.Base64,
           });
@@ -162,37 +174,59 @@ export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:s
       }
 }
 // Allocate pipeline
-export const RemoveBackgroundImageUploader = async(garmentImageURL:string)=>{
-    if(garmentImageURL==='') return;
+export const RemoveBackgroundImageUploader= async(garmentImageURL:string):Promise<YoloOutput> =>{
+    if(garmentImageURL==='') return {image: "", category: "", error: "gartment image not found"};
     try {
-        // const response = await FileSystem.uploadAsync(`https://huggingface.co/briaai/RMBG-1.4/remove_background`, imageURL, {
-        //   fieldName: 'file',
-        //   httpMethod: 'POST',
-        //   uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-        // });
-        // console.log(JSON.stringify(response, null, 4));
-       
-        // console.log(result.data);
-        // const response = await CallAppWriteFunction(
-        //   '67e8283b00122a08e389', 
-        //   payload, 
-        //   false, 
-        //   '/tryon', 
-        //   ExecutionMethod.POST
-        // );
+        console.log('Starting background removal process...');
+        const garmentImage = await resizeImage(garmentImageURL, 768, 1024);
+        const payload = {
+          inputs:"",
+          org_img: garmentImage,
+         }
 
-        // First get the JWT token for the current user
-        // const jwt = await account.createJWT();
-        //   console.log('JWT:', jwt);
-        // Now make the fetch request with the JWT
-        // const response = await fetch('http://192.168.68.106:3000/tryon/idmVTON', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: payload,
-        // });
+        // Send the payload to your function
+        console.log('Sending payload to function...');
+        const response = await GenericUploader<YoloInput,YoloOutput>(
+          {
+            endpoint: config.yoloEndpoint || '',
+            apiKey: config.huggingFaceApiKey || '',
+          },
+          payload
+        );
+        if(response?.image){
+          console.log("Received output image from YOLO");
+          // Save the base64 image to a file
+            const fileUri = FileSystem.cacheDirectory + `RemoveBackground-${ID.unique()}.png`;
+            await FileSystem.writeAsStringAsync(fileUri, response.image, {
+            encoding: FileSystem.EncodingType.Base64,
+            });
+            
+            console.log("Background removal result saved to temporary storage:", fileUri);
+            console.log("Category:", response.category);
+            if(response.category){
+                const category = response.category
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, char => char.toUpperCase())
+                .replace(/\bShirt\b/i, "Top")
+                .replace(/\bSleeved\b/i, "Sleeve")
+                .trim();
+              console.log("Category:", category);
+              return {image:fileUri,category:category};
+
+            }
+            return {image:fileUri,category:""}; // Return empty category if not found
+        }
+        if(response?.error){
+          console.error("Error in YOLO response:", response.error);
+          return {image: "", category: "", error: response.error ?? "failed"};
+        }
+        
+        // Prepare the input payload
       } catch (error) {
-        console.log(error);
+        console.error("Error in RemoveBackgroundImageUploader:", error);
+        return { image: "", category: "", error: "An unexpected error occurred" };
       }
+
+      // Default return in case no response or error occurs
+      return { image: "", category: "", error: "Unknown error" };
 }

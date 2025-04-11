@@ -22,8 +22,19 @@ export const storage = new Storage(client);
 export const databases = new Databases(client)
 export const account = new Account(client);
 //upload image to bucket
-export async function uploadImage(file:ImagePickerAsset,uid:string,bucketId:string){
+export async function uploadImage(fileUri:string,uid:string,bucketId:string){
    try{
+    const fileInfo = await FileSystem.getInfoAsync(fileUri);
+    if (!fileInfo.exists) {
+        throw new Error('File does not exist at the specified URI');
+    }
+
+    const file = {
+        uri: fileUri,
+        fileName: fileUri.split('/').pop(),
+        type: 'image/jpeg', // You can adjust this based on your use case
+        fileSize: fileInfo.size,
+    };
     const response = await storage.createFile(
         bucketId,
         uid, // Auto-generate ID
@@ -51,7 +62,7 @@ export async function deleteImage(bucketId:string, fileId:string){
         const response = await storage.deleteFile(bucketId,fileId)
         return response
     }catch(error){
-        console.error(error)
+        console.log("delete image failed"+error)
         return null
     }
 }

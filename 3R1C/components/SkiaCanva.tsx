@@ -138,7 +138,7 @@ const SkiaCanva = forwardRef<SkiaCanvaRef, SkiaCanvaProps>(
     }));
 
     return (
-      <View className="flex-1 bg-black">
+      <View className="bg-black">
         <Canvas
           onLayout={(event) => {
             const { width, height } = event.nativeEvent.layout;
@@ -174,7 +174,7 @@ const SkiaCanva = forwardRef<SkiaCanvaRef, SkiaCanvaProps>(
             x: 0,
             y: 0,
             width: width,
-            height: height,
+            height: width / aspectRatio,
           }}
           label="Model Image"
           isActive={true}

@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import { Clothe } from "@/constants/clothes";
 import { colorScheme, cssInterop } from "nativewind";
 import { refetchClotheImage } from "@/lib/CRUD/clotheCRUD";
-
+import * as FileSystem from 'expo-file-system';
 cssInterop(Image, { className: "style" });
 
 interface Props {
@@ -22,7 +22,7 @@ const ClothesCard = ({
   isSelected,
 }: Props) => {
   const [localImageURLState, setLocalImageURLState] = useState({
-    uri: localImageURL,
+    uri: FileSystem.documentDirectory+localImageURL,
   });
   const [isRefetching, setIsRefetching] = useState(false);
   const handleImageError = async () => {
@@ -32,7 +32,7 @@ const ClothesCard = ({
     const newPath = await refetchClotheImage(localImageURL, $id, () => {});
 
     if (newPath) {
-      setLocalImageURLState({ uri: `${newPath}?timestamp=${Date.now()}` });
+      setLocalImageURLState({ uri: `${FileSystem.documentDirectory}${newPath}?timestamp=${Date.now()}` });
     }
     setIsRefetching(false);
   };
@@ -67,7 +67,7 @@ const ClothesCard = ({
             <Image
               key={localImageURLState.uri}
               source={localImageURLState}
-              className={`w-full h-60 ${isSelected ? "opacity-60" : ""} rounded-xl`}
+              className={`w-full h-60 ${isSelected ? "opacity-60" : ""} rounded-xl bg-white-dark`}
               onError={handleImageError}
             />
 

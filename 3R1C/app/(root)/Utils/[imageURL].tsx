@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { GestureView } from "@/components/GestureView";
 import icons from "@/constants/icons";
+import { checkAbsoultePath } from "@/lib/LocalStoreManager";
 //TODO: replace sharing with expo-share-intent
 import * as Sharing from "expo-sharing";
 const ShareButtonComponent = ({ onPress }: { onPress: () => void }) => {
@@ -43,7 +44,7 @@ const ViewImagePage = () => {
       />
       <GestureView enabledGestures={["pan", "pinch"]} isActive>
         <Image
-          source={image}
+          source={checkAbsoultePath(image ?? "")}
           className="w-full h-full  4 left-0"
           contentFit="contain"
         />
