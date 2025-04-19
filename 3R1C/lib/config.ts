@@ -10,6 +10,7 @@ export const config = {
     outfitCollectionImgStorageId: process.env.EXPO_PUBLIC_APPWRITE_OUTFIT_STORAGE_ID,
     outfitCollection_CollectionId: process.env.EXPO_PUBLIC_APPWRITE_OUTFITCOLLECTION_COLLECTION_ID,
     outftiCollectionRelationshipId: process.env.EXPO_PUBLIC_APPWRITE_OUTFITCOLLECTION_RELATIONSHIP_COLLECTION_ID,
+    spendingLimitCollectionId: process.env.EXPO_PUBLIC_APPWRITE_SPENDINGLIMIT_COLLECTION_ID,
     previewStorageId: process.env.EXPO_PUBLIC_APPWRITE_PREVIEW_STORAGE_ID,
     huggingFaceApiKey: process.env.EXPO_PUBLIC_HUGGINGFACE_API_KEY,
     tryonEndpoint: process.env.EXPO_PUBLIC_IDMVTON_ENDPOINT,
@@ -34,4 +35,6 @@ export const localConfig = {
     localTryOnDirectory :`tryonData/`,
     localTryOnBodyImagesDirectory :`tryonData/BodyImages/`,
     localTryOnResultImagesDirectory :`tryonData/ResultImages/`,
+    //Spending limit
+    spendingLimitJsonUri: `spendingLimit.json`,
 }

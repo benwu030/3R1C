@@ -22,42 +22,29 @@ const signIn = () => {
   };
 
   return (
-    <SafeAreaView className="bg-white h-screen">
-      <ScrollView contentContainerClassName="h-screen">
-        <Image className="w-full h-4/6  mx-auto" source={images.jacket} />
-        <View className="px-10">
-          <Text className="text-4xl text-center uppercase font-S-Regular text-black-200">
-            3R1C
+    <SafeAreaView className="flex-1 bg-oat-light justify-center items-center">
+      <View className="w-11/12 max-w-md p-8 bg-white-almond rounded-2xl shadow-lg">
+        <View className="items-center ">
+          <Image source={images.icon} className="w-full h-48" contentFit="contain" />
+        </View>
+        <View className="absoulte bottom-8 items-center">
+          <Text className="text-xl text-center font-S-Bold text-brick ">
+            An App to Mitigate Clothing Waste
           </Text>
-          <Text className="text-2xl text-center  font-S-Bold ">
-            A Mobile App to Mitigate Clothing Waste{" "}
-          </Text>
-          <Text className="text-sm text-center  font-S-Bold text-black-300">
+          <Text className="text-sm text-center font-S-Regular text-green-darker">
             Ben Wu / Supervised by Xu Dong
           </Text>
-          <TouchableOpacity
-            className="mt-20 bg-white rounded-full w-full shadow-zinc-300 shadow-md py-4 mt-5"
-            onPress={handleLogin}
-          >
-            <View className="flex-row items-center justify-center">
-              <Image source={icons.google} className="w-5 h-5 mr-2" />
-              <Text className="text-lg font-S-Medium text-black-300">
-                Continue with Google
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="mt-5"
-            onPress={() => {
-              setIsOfflineMode(true);
-            }}
-          >
-            <Text className="text-lg font-S-Medium text-black-300">
-              Skip for now
-            </Text>
-          </TouchableOpacity>
         </View>
-      </ScrollView>
+        <TouchableOpacity
+          className="flex-row items-center justify-center bg-green rounded-full py-3"
+          onPress={handleLogin}
+        >
+          <Image source={icons.google} className="w-6 h-6 mr-3" contentFit="contain" />
+          <Text className="text-lg font-S-Bold text-white">
+            Continue with Google
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
