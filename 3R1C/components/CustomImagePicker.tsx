@@ -95,21 +95,16 @@ export default function CustomImagePicker({
     try{
       const result = await RemoveBackgroundImageUploader(image ?? "");
       if (result?.image) {
-        console.log("Image URI:", result.image);
         setImage(result.image);
-        console.log("Image URI:", result.image);
         setImageFileUri(result.image);
         if(result.category){
           router.setParams({ mainCategoryfilter: result.category });
         }
-      } else {
-        console.log("Failed to remove background");
-      }
+      } 
     }catch(err){
-      console.log("Error in remove background",err);
+      console.error("Error removing background", err);
     }
    
-    console.log("remove background");
   };
   return !image ? (
     <View

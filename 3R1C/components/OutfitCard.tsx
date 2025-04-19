@@ -19,10 +19,7 @@ const OutfitCard = ({
   isSelected,
   onPress,
 }: OutfitProps) => {
-useEffect(() => {
-    console.log("OutfitCard", previewImageURL);
-  },
-  [previewImageURL]);
+
   return (
     <TouchableOpacity
       onPress={onPress}

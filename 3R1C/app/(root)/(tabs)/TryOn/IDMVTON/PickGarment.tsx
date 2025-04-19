@@ -48,7 +48,6 @@ const PickGarment = ({}: any) => {
   );
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
-    console.log(params);
     setGarmentImage(params.garmentImageFromClosetUri ?? null);
     setGarmentDescription(params.garmentImageFromClosetTitle ?? null);
   }, [params.garmentImageFromClosetUri, params.garmentImageFromClosetTitle]);

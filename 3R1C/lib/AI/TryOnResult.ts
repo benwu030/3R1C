@@ -5,18 +5,16 @@ export const fetchAllTryOnResults = async (): Promise<string[]> => {
     const result = await FileSystem.readDirectoryAsync(
       FileSystem.documentDirectory+localConfig.localTryOnResultImagesDirectory
     );
-    // console.log("TryOn Results:", result);
     if (result.length > 0) {
       const images = 
         result.map((image) => {
           return localConfig.localTryOnResultImagesDirectory + image;
         })
-    //   console.log("Fetched images:", images);
     
     return images.slice(-5);
     }
     else {
-          console.log("No images found");
+          console.error("No images found");
           return [];
         }
     };

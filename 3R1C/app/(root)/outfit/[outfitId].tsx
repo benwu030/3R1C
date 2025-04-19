@@ -167,7 +167,6 @@ const OutfitPlanning = () => {
       setSaving(true);
       // Capture preview
       const previewImageURL = await capturePreview();
-      console.log("previewImageURL", previewImageURL);
       //turn combined outfit items into outfit items
       const saveOutfitItems = outfitItems.map((item) => {
         return {

@@ -92,6 +92,5 @@ export function createLineChartData(clothes: CLOTHES, groupBy: 'week' | 'month' 
                 date: new Date(parseInt(year), 0, 1)
             }));
     }
-    console.log(result)
     return result;
 }

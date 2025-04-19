@@ -23,7 +23,6 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const ImageEditor = () => {
   const params = useLocalSearchParams<{ imageUri: string }>();
-  console.log("ImageEditor params:", params.imageUri);
   const [imageUri, setimageUri] = useState(params.imageUri as string);
   // State to store image dimensions
   const [imageDimensions, setImageDimensions] = useState({
@@ -154,9 +153,7 @@ const ImageEditor = () => {
   // Handle save navigation
   const handleSave = async () => {
     const croppedImageUri = await cropImage();
-    console.log("Cropped image URI:", croppedImageUri);
     const svgImageUri = await captureSvg();
-    console.log("SVG image URI:", svgImageUri);
     // Save the cropped image
     router.back();
     router.setParams({

@@ -19,8 +19,7 @@ const OutfitPlanningBoard = ({
   onUpdatePosition,
   onRemoveItem,
 }: OutfitPlanningBoardProps) => {
-  console.log("OutfitPlanningBoard rendered");
-  console.log("outfitItems", outfitItems);
+  
   return (
     <>
       {outfitItems.map((item) => (

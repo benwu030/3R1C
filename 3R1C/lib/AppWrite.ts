@@ -62,7 +62,7 @@ export async function deleteImage(bucketId:string, fileId:string){
         const response = await storage.deleteFile(bucketId,fileId)
         return response
     }catch(error){
-        console.log("delete image failed"+error)
+        console.error("delete image failed"+error)
         return null
     }
 }
@@ -133,12 +133,11 @@ export async function getUser(){
                 avatar: userAvatar.toString(),
             }
         }
-        // console.log(response)
         return response
     }catch(err){
       
      
-       console.log(err);
+       console.error(err);
      return null;
     }
 }
@@ -148,7 +147,6 @@ export async function CallAppWriteFunction(functionId:string, body?:string, asyn
     const functionCLient = client.setPlatform('')
     const functions = new Functions(functionCLient);
     try{
-        console.log('Calling function:', functionId);
         const response = await functions.createExecution(
             functionId,
             body,

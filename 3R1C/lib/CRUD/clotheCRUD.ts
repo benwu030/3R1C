@@ -42,7 +42,6 @@ export async function createClothe(clothe: Clothe,userID:string,imageFileUri:str
             Permission.delete(Role.user(userID)), 
             Permission.update(Role.user(userID))]
         );
-        console.log('createClothe:',clothe)
 
         return response;
     } catch (error) {
@@ -101,7 +100,6 @@ export async function updateClotheImage(id: string,userID:string,imageFileUri:st
                 Permission.update(Role.user(userID))]
         );
 
-        console.log('updateClotheImage:', clothe);
         return response;
     } catch (error) {
         console.error('Failed to update clothe image:', error);

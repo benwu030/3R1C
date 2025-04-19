@@ -66,10 +66,7 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
       console.error("Failed to store clothe locally", error);
     }
   };
-  useEffect(() => {
-    console.log("mainCate:", params.mainCategoryfilter);
-    console.log("subCate:", params.subCategoryfilter);
-  }, [params.mainCategoryfilter, params.subCategoryfilter]);
+  
 
   return (
     <ScrollView

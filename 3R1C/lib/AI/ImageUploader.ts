@@ -54,7 +54,6 @@ export const GenericUploader = async <TInput, TResponse>(
   }
 
   try {
-    console.log("Starting API request...");
 
     // Prepare headers
     const headers: Record<string, string> = {
@@ -76,7 +75,6 @@ export const GenericUploader = async <TInput, TResponse>(
 
     // Handle the response
     if (response.ok) {
-      console.log("Received successful response from API");
       const responseData: TResponse = await response.json();
       return responseData;
     } else {
@@ -104,24 +102,11 @@ const resizeImage = async (uri: string, width: number, height: number,format?:Sa
 // Allocate pipeline
 export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:string,maskImageUri:string,garmentDescription:string="A white T-shirt",OpenPoseCategory:OpenPoseCategoryType = "upper_body"): Promise<string | null> =>{
     if (!garmentImageURL || !modelImageURL) {
-        console.log("Invalid image URLs");
         return null;
       }
       
       try {
-        console.log('Starting try-on process...');
-        // Log debugging information for image dimensions
-        const garmentImageInfo = await FileSystem.getInfoAsync(garmentImageURL);
-        const modelImageInfo = await FileSystem.getInfoAsync(modelImageURL);
-        const maskImageInfo = maskImageUri ? await FileSystem.getInfoAsync(maskImageUri) : null;
         
-        console.log("Garment Image Info:", garmentImageInfo);
-        console.log("Model Image Info:", modelImageInfo);
-        if (maskImageInfo) {
-          console.log("Mask Image Info:", maskImageInfo);
-        } else {
-          console.log("No mask image provided.");
-        }
 
         const garmentImage = await resizeImage(garmentImageURL, 768, 1024);
 
@@ -143,7 +128,6 @@ export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:s
       }
     };
         // Send the payload to your function
-        console.log('Sending payload to function...');
         
     const response = await GenericUploader<IdmVtonInput, { output: string }>(
       {
@@ -154,7 +138,6 @@ export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:s
     );
         // Handle the successful response
         if (response?.output) {
-          console.log("Received output image from IDM-VTON");
     
           // Save the base64 image to a file
           const fileUri = FileSystem.documentDirectory+localConfig.localTryOnResultImagesDirectory + `IdmVtonResult-${ID.unique()}.png`;
@@ -162,7 +145,6 @@ export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:s
             encoding: FileSystem.EncodingType.Base64,
           });
     
-          console.log("Try-on result saved to:", fileUri);
           return fileUri;
         } else {
           console.error("No output image found in response");
@@ -177,7 +159,6 @@ export const IdmVtonImageUploader = async(garmentImageURL:string,modelImageURL:s
 export const RemoveBackgroundImageUploader= async(garmentImageURL:string):Promise<YoloOutput> =>{
     if(garmentImageURL==='') return {image: "", category: "", error: "gartment image not found"};
     try {
-        console.log('Starting background removal process...');
         const garmentImage = await resizeImage(garmentImageURL, 768, 1024);
         const payload = {
           inputs:"",
@@ -185,7 +166,6 @@ export const RemoveBackgroundImageUploader= async(garmentImageURL:string):Promis
          }
 
         // Send the payload to your function
-        console.log('Sending payload to function...');
         const response = await GenericUploader<YoloInput,YoloOutput>(
           {
             endpoint: config.yoloEndpoint || '',
@@ -194,15 +174,13 @@ export const RemoveBackgroundImageUploader= async(garmentImageURL:string):Promis
           payload
         );
         if(response?.image){
-          console.log("Received output image from YOLO");
           // Save the base64 image to a file
             const fileUri = FileSystem.cacheDirectory + `RemoveBackground-${ID.unique()}.png`;
             await FileSystem.writeAsStringAsync(fileUri, response.image, {
             encoding: FileSystem.EncodingType.Base64,
             });
             
-            console.log("Background removal result saved to temporary storage:", fileUri);
-            console.log("Category:", response.category);
+            
             if(response.category){
                 const category = response.category
                 .replace(/_/g, " ")
@@ -210,7 +188,6 @@ export const RemoveBackgroundImageUploader= async(garmentImageURL:string):Promis
                 .replace(/\bShirt\b/i, "Top")
                 .replace(/\bSleeved\b/i, "Sleeve")
                 .trim();
-              console.log("Category:", category);
               return {image:fileUri,category:category};
 
             }

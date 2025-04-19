@@ -42,7 +42,6 @@ const ClotheDetailsScreen = () => {
       router.back();
       return;
     }
-    console.log(clothe);
     setAbsClotheImage(checkAbsoultePath(clothe?.localImageURL ?? ""));
   }, [clothe, loading]);
   const [isEdit,setIsEdit] = useState(false);
@@ -74,7 +73,6 @@ const ClotheDetailsScreen = () => {
       ]
     );
   };
-  useEffect(() => {console.log(absClotheImage)},[])
   const toggleEdit = () => {
     setIsEdit(!isEdit);
   };
@@ -93,7 +91,6 @@ const ClotheDetailsScreen = () => {
         }
     
     } catch (error) {
-      console.log("Error updating image:", error);
     }
   }
 
