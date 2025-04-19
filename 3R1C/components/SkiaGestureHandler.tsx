@@ -82,13 +82,10 @@ export const SkiaGestureHandler = ({
     .enabled(isDrawing)
     .onBegin((e) => {
       // Reverse the transformation to get the original coordinates
-      // TODO: support rotation
       const canvasX = (e.x - matrix.value[3]) / matrix.value[0];
       const canvasY = (e.y - matrix.value[7]) / matrix.value[5];
 
-      //debug message
-      // console.log("Start: Gesture Coordinates:", e.x, e.y);
-      // console.log("Start: Canvas Coordinates:", canvasX, canvasY);
+     
 
       if (onPathUpdate) {
         onPathUpdate((currentPath) => {
@@ -98,13 +95,10 @@ export const SkiaGestureHandler = ({
     })
     .onUpdate((e) => {
       // Reverse the transformation to get the original coordinates
-      // TODO: support rotation
       const canvasX = (e.x - matrix.value[3]) / matrix.value[0];
       const canvasY = (e.y - matrix.value[7]) / matrix.value[5];
 
-      //debug message
-      // console.log("Update: Gesture Coordinates:", e.x, e.y);
-      // console.log("Update: Canvas Coordinates:", canvasX, canvasY);
+      
 
       if (onPathUpdate) {
         onPathUpdate((currentPath) => {
