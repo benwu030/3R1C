@@ -49,7 +49,7 @@ export async function createOutfit(outfit: Outfit, outfitCollectionId?: string, 
 const { $id, ...outfitWithoutId } = outfit;
 const outfitForRemote = {
     ...outfitWithoutId,
-    previewImageURL: `https://cloud.appwrite.io/v1/storage/buckets/${config.previewStorageId}/files/${uid}/view?project=${config.projectid}`,
+    // previewImageURL: `https://fra.cloud.appwrite.io/v1/storage/buckets/${config.previewStorageId}/files/${uid}/preview?project=${config.projectid}`,
     items: JSON.stringify(outfitWithoutId.items) // Stringify the items array
 };
         const response = await databases.createDocument(
@@ -81,7 +81,44 @@ const outfitForRemote = {
     }
 }
 
-
+export async function refetchOutfitImage(imageURL:string,id:string){
+    try {
+        const fileExtension = imageURL.split('.').pop();
+        const localPath = `${localConfig.localOutfitPreviewsDirectiry}${id}.${fileExtension}`;
+        const result = await storage.getFileDownload(config.previewStorageId!, id);
+        const downloadResult = await FileSystem.downloadAsync(
+            result.href,
+            FileSystem.documentDirectory+localPath
+        );
+        if (downloadResult.status !== 200) {
+            throw new Error(`Failed to download image: ${downloadResult.status}`);
+        }
+        //update the local data 
+        const existingData = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
+        const updatedData = existingData.map(item => {
+            if(item.$id === id) {
+                item.previewImageURL = localPath;
+            }
+            
+            return item;
+        });
+        await writeLocalData(localConfig.localOutfitJsonUri, updatedData);
+        let outfit = existingData.find(item => item.$id === id);
+        if (outfit) {
+            delete outfit.createdAt;
+        }
+        //update remote data
+        const response = await databases.updateDocument(
+            config.databaseId!,
+            config.outfitCollectionId!,
+            id,
+            outfit
+        );
+        return localPath
+    } catch (error) {
+        console.error('Failed to fetch remote image:', error);
+    }
+}
 // Local operation
 async function addOutfitToCollectionLocal(relation: OutfitCollectionRelation) {
     const localRelations = await readLocalData<OutfitCollectionRelation>(
@@ -315,7 +352,7 @@ export async function updateOutfit(outfit: Outfit, onLocalUpdate?: () => void) {
         const { $id, ...outfitWithoutId } = outfit;
         const outfitForRemote = {
             ...outfitWithoutId,
-            previewImageURL: `https://cloud.appwrite.io/v1/storage/buckets/${config.previewStorageId}/files/${outfit.userid}/view?project=${config.projectid}`,
+            // previewImageURL: `https://fra.cloud.appwrite.io/v1/storage/buckets/${config.previewStorageId}/files/${outfit.$id}/preview?project=${config.projectid}`,
 
             items: JSON.stringify(outfitWithoutId.items) // Stringify the items array
             }
@@ -357,8 +394,10 @@ export async function getOutfitById(outfitId: string,isNewOutfit:boolean): Promi
         // Try local first
         const localOutfits = await readLocalData<Outfit>(localConfig.localOutfitJsonUri);
         const outfit = localOutfits.find(o => o.$id === outfitId);
-        console.log("outfit",outfit)
+        console.log("outfit",outfit?.items)
         if (outfit) {
+            const items = typeof outfit.items === "string" ? JSON.parse(outfit.items) : outfit.items;
+            outfit.items = items;
             return outfit;
         }
         

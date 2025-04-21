@@ -33,7 +33,9 @@ export const ensureFiles = async () => {
         localConfig.localOutfitCollectionsJsonUri,
         localConfig.localOutfitCollectionRelationshipJsonUri,
         //outfit relation
-        localConfig.localOutfitCollectionRelationshipJsonUri
+        localConfig.localOutfitCollectionRelationshipJsonUri,
+        //spending limit
+        localConfig.spendingLimitJsonUri,
     ];
 
     for (const file of files) {

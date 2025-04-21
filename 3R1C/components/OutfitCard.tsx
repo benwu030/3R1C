@@ -4,7 +4,8 @@ import { Outfit } from "@/constants/outfit";
 import { Image } from "expo-image";
 import { cssInterop } from "nativewind";
 import { checkAbsoultePath } from "@/lib/LocalStoreManager";
-
+import { refetchOutfitImage } from "@/lib/CRUD/outfitCRUD";
+import * as FileSystem from "expo-file-system";
 cssInterop(Image, { className: "style" });
 
 interface OutfitProps {
@@ -19,10 +20,23 @@ const OutfitCard = ({
   isSelected,
   onPress,
 }: OutfitProps) => {
-useEffect(() => {
+  const [localImageURLState, setLocalImageURLState] = useState({
+    uri: FileSystem.documentDirectory + (previewImageURL ?? ""),
+  });
+  const handleImageError = async () => {
+    if (!previewImageURL || !$id || previewImageURL === "") return;
+
+    const newPath = await refetchOutfitImage(previewImageURL, $id);
+
+    if (newPath) {
+      setLocalImageURLState({
+        uri: `${FileSystem.documentDirectory}${newPath}?timestamp=${Date.now()}`,
+      });
+    }
+  };
+  useEffect(() => {
     console.log("OutfitCard", previewImageURL);
-  },
-  [previewImageURL]);
+  }, [previewImageURL]);
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -38,7 +52,9 @@ useEffect(() => {
       <View className="aspect-square bg-gray-100 rounded-xl overflow-hidden">
         {previewImageURL ? (
           <Image
-            source={{ uri: checkAbsoultePath(previewImageURL) }}
+            key={localImageURLState.uri}
+            source={localImageURLState}
+            onError={handleImageError}
             className="w-full h-full"
             contentFit="cover"
             cachePolicy={"none"}

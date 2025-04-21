@@ -75,7 +75,10 @@ const CalendarItem = ({ date, outfitCollection }: OutfitPreviewProps) => {
     });
   };
   const handleAddOutfit = () => {
-    router.push("/AddOutfitCollection");
+    router.push({
+      pathname: "/AddOutfitCollection",
+      params: { selectedDate: date.toISOString() },
+    });
   };
   const handleCollectionPressed = (
     id: string,

@@ -85,8 +85,15 @@ const OutfitPlanning = () => {
     if (!isNewOutfit) {
       if (outfit) {
         setTitle(outfit.title);
+
         // Load clothes for each outfit item
-        const loadedOutfitItems: CombinedOutfitItem[] = [];
+        let loadedOutfitItems: CombinedOutfitItem[] = [];
+        console.log(
+          "outfit.items:",
+          outfit.items,
+          "Type:",
+          typeof outfit.items
+        );
         for (const item of outfit.items) {
           //find the clothe with the id and insert it into the outfit items
           const clothe = clothes?.find((c) => c.$id === item.clotheID);
@@ -98,6 +105,7 @@ const OutfitPlanning = () => {
             });
           //TODO: handle case where clothe is not found
         }
+        console.log("loadedOutfitItems", loadedOutfitItems);
         setOutfitItems(loadedOutfitItems);
       }
     }

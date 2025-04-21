@@ -6,11 +6,17 @@ import { router } from "expo-router";
 import CustomImagePicker from "./CustomImagePicker";
 import { ImagePickerAsset } from "expo-image-picker";
 import { createOutfitCollection } from "@/lib/CRUD/outfitCRUD";
-const CreateOutfitCollectionModal = ({ userID }: { userID: string }) => {
+const CreateOutfitCollectionModal = ({
+  userID,
+  selectedDate,
+}: {
+  userID: string;
+  selectedDate: Date;
+}) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageFileUri, setImageFileUri] = useState<string | null>(null);
-  const [dayToWear, setDayToWear] = useState(new Date());
+  const [dayToWear, setDayToWear] = useState(selectedDate);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const handleSubmit = async () => {
     if (!imageFileUri) {
