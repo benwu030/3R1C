@@ -1,95 +1,48 @@
-# Welcome to your Expo app 👋
-
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
 ## Get started
 
 1. Install dependencies
 
    ```bash
+   cd 3R1C
    npm install
    ```
 
-2. Start the app
+2. create a .env.local with following keys
+   ```
+   EXPO_PUBLIC_APPWRITE_ID =
+   EXPO_PUBLIC_APPWRITE_PLATFORM =
+   EXPO_PUBLIC_APPWRITE_ENDPOIINT =
+   EXPO_PUBLIC_APPWRITE_DATABASE_ID =
+   EXPO_PUBLIC_APPWRITE_CLOTHES_COLLECTION_ID =
+   EXPO_PUBLIC_APPWRITE_CLOTHES_STORAGE_ID =
+   EXPO_PUBLIC_APPWRITE_OUTFIT_STORAGE_ID =
+   EXPO_PUBLIC_APPWRITE_OUTFIT_COLLECTION_ID =
+   EXPO_PUBLIC_APPWRITE_OUTFITCOLLECTION_COLLECTION_ID =
+   EXPO_PUBLIC_APPWRITE_OUTFITCOLLECTION_RELATIONSHIP_COLLECTION_ID =
+   EXPO_PUBLIC_APPWRITE_PREVIEW_STORAGE_ID =
+   EXPO_PUBLIC_APPWRITE_SPENDINGLIMIT_COLLECTION_ID =
+   EXPO_PUBLIC_HUGGINGFACE_API_KEY =
+   EXPO_PUBLIC_IDMVTON_ENDPOINT =
+   EXPO_PUBLIC_YOLO_ENDPOINT =
+   ```
+3. Start the app
 
    ```bash
     npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## Build with Xcode
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1.  Create a prebuild
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+    ```bash
+    npx expo prebuild --platform ios --clean
+    ```
 
-## Get a fresh project
+2.  Open the created ios folder with Xcode and run build.
 
-When you're ready, run:
+## Related Repo
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-
-## Database Schema
-
-```mermaid
-erd
-classDiagram
-    class Clothes {
-        +string userid
-        +string title
-        +double price
-        +string localImageURL
-        +string remark
-        +enum maincategory
-        +string maincolor
-        +string[] subcolors
-        +datetime purchasedate
-        +string[] subcategories
-        +string brand
-    }
-
-    class Outfit {
-        +string userid
-        +string title
-        +string previewImageURL
-        +string remark
-        +string items (JSON)
-    }
-
-    class OutfitCollection {
-        +string userid
-        +string title
-        +string description
-        +string previewImageURL
-        +datetime[] dayToWear
-    }
-
-    class OutfitCollectionRelation {
-        +string outfitId
-        +string outfitCollectionId
-        +string userId
-    }
-
-    OutfitCollectionRelation --> Outfit : outfitId
-    OutfitCollectionRelation --> OutfitCollection : outfitCollectionId
-```
+1. YOLO Training Notebook - https://github.com/benwu030/3R1C-Yolo
+2. IDM-VTON Hugging Face Model - https://huggingface.co/benwu030/3R1C
+3. YOLO11 Hugging Face Model - https://huggingface.co/benwu030/yolov11-seg
