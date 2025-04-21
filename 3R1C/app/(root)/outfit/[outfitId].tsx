@@ -88,12 +88,7 @@ const OutfitPlanning = () => {
 
         // Load clothes for each outfit item
         let loadedOutfitItems: CombinedOutfitItem[] = [];
-        console.log(
-          "outfit.items:",
-          outfit.items,
-          "Type:",
-          typeof outfit.items
-        );
+
         for (const item of outfit.items) {
           //find the clothe with the id and insert it into the outfit items
           const clothe = clothes?.find((c) => c.$id === item.clotheID);
@@ -105,7 +100,6 @@ const OutfitPlanning = () => {
             });
           //TODO: handle case where clothe is not found
         }
-        console.log("loadedOutfitItems", loadedOutfitItems);
         setOutfitItems(loadedOutfitItems);
       }
     }
@@ -175,7 +169,6 @@ const OutfitPlanning = () => {
       setSaving(true);
       // Capture preview
       const previewImageURL = await capturePreview();
-      console.log("previewImageURL", previewImageURL);
       //turn combined outfit items into outfit items
       const saveOutfitItems = outfitItems.map((item) => {
         return {

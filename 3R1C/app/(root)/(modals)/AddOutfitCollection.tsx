@@ -6,7 +6,6 @@ import { useLocalSearchParams } from "expo-router";
 export default function AddClothes() {
   const { user } = useGlobalContext();
   const params = useLocalSearchParams<{ selectedDate: string }>();
-  console.log("AddClothes params", params);
   return (
     <View className="bg-sand-white flex-auto">
       <CreateOutfitCollectionModal

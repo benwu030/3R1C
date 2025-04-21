@@ -48,7 +48,6 @@ const PickGarment = ({}: any) => {
   );
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
-    console.log(params);
     setGarmentImage(params.garmentImageFromClosetUri ?? null);
     setGarmentDescription(params.garmentImageFromClosetTitle ?? null);
   }, [params.garmentImageFromClosetUri, params.garmentImageFromClosetTitle]);
@@ -73,7 +72,7 @@ const PickGarment = ({}: any) => {
         format: SaveFormat.PNG,
       });
       setGarmentImage(resizedResult.uri);
-      router.setParams({garmentImageFromClosetUri:resizedResult.uri});
+      router.setParams({ garmentImageFromClosetUri: resizedResult.uri });
     }
   };
   const pickImageFromCamera = async () => {
@@ -113,8 +112,7 @@ const PickGarment = ({}: any) => {
         format: SaveFormat.PNG,
       });
       setGarmentImage(resizedResult.uri);
-      router.setParams({garmentImageFromClosetUri:resizedResult.uri});
-
+      router.setParams({ garmentImageFromClosetUri: resizedResult.uri });
     }
   };
   const GarmentButtons = () => (
@@ -124,7 +122,11 @@ const PickGarment = ({}: any) => {
         title="Image"
         onPress={pickImageFromGallery}
       />
-      <TryOnCustomButton imageUri={icons.camera} title="Camera" onPress={pickImageFromCamera} />
+      <TryOnCustomButton
+        imageUri={icons.camera}
+        title="Camera"
+        onPress={pickImageFromCamera}
+      />
       <TryOnCustomButton
         imageUri={icons.closet}
         title="Closet"
@@ -174,8 +176,8 @@ const PickGarment = ({}: any) => {
       <ScrollView contentContainerClassName=" pb-[30em]">
         <View className="px-5">
           {isLoading ? (
-          <ActivityIndicator className="text-beige-darker" size="large" />
-        ) : (
+            <ActivityIndicator className="text-beige-darker" size="large" />
+          ) : (
             <>
               <Text className="font-S-Regular text-gray-700">
                 Select clothes you want to try
@@ -193,7 +195,6 @@ const PickGarment = ({}: any) => {
                       Describe the garment* (e.g. color, pattern, style)
                     </Text>
                     <TextInput
-                      
                       placeholder={garmentDescription ?? ""}
                       placeholderTextColor={"#776E65"}
                       className="font-S-RegularItalic border-b border-gray-300 text-2xl "

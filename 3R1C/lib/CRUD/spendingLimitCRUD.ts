@@ -69,7 +69,6 @@ export const createSpendingLimit = async (spendingLimit: number) => {
         );
         // Save the spending limit locally
         await writeSpendingLimitLocally(spendingLimit);
-        console.log('Spending limit created successfully:', response);
         return response;
     } catch (error) {
         console.error('Error creating spending limit:', error);

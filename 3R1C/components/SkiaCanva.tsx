@@ -53,11 +53,7 @@ const SkiaCanva = forwardRef<SkiaCanvaRef, SkiaCanvaProps>(
     const modelImageMatrix = useSharedValue(Matrix4());
     const [path, setPath] = useState(() => Skia.Path.Make());
     const canvasRef = useCanvasRef(); // Create a ref for the Canvas
-    useEffect(() => {
-      console.log("Canvas width:", width, height);
-      console.log("Canvas imageWidth:", imageWidth, imageHeight);
-      console.log("Canvas path:", canvaImage.getImageInfo());
-    });
+
     const handlePathUpdate = (updateFn: (currentPath: SkPath) => void) => {
       setPath((prevPath) => {
         const newPath = Skia.Path.Make();
@@ -140,10 +136,6 @@ const SkiaCanva = forwardRef<SkiaCanvaRef, SkiaCanvaProps>(
     return (
       <View className="bg-black">
         <Canvas
-          onLayout={(event) => {
-            const { width, height } = event.nativeEvent.layout;
-            console.log("SKIA Canvas Layout:", width, height);
-          }}
           style={{
             width: width,
             height: width / aspectRatio,

@@ -23,7 +23,6 @@ const ViewImagePage = () => {
   }>();
   const [image, setImage] = useState<string | null>(null);
   useEffect(() => {
-    console.log("Image URL:", localParams.imageURL);
     if (localParams.imageURL) {
       setImage(localParams.imageURL);
     }

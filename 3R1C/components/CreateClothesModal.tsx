@@ -66,10 +66,6 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
       console.error("Failed to store clothe locally", error);
     }
   };
-  useEffect(() => {
-    console.log("mainCate:", params.mainCategoryfilter);
-    console.log("subCate:", params.subCategoryfilter);
-  }, [params.mainCategoryfilter, params.subCategoryfilter]);
 
   return (
     <ScrollView
@@ -77,7 +73,10 @@ const CreateClothesModal = ({ userID }: { userID: string }) => {
       showsHorizontalScrollIndicator={true}
     >
       <View className="p-5 flex-col">
-        <CustomImagePicker imageFileUri={imageFileUri} setImageFileUri={setImageFileUri} />
+        <CustomImagePicker
+          imageFileUri={imageFileUri}
+          setImageFileUri={setImageFileUri}
+        />
         <Text className="font-S-RegularItalic text-sm ">Title*</Text>
         <TextInput
           placeholder="Enter a name"

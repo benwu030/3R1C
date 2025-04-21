@@ -91,7 +91,6 @@ export const writeLocalDataWithDuplicateCheck = async <T extends { $id?:string|n
 export const saveImageLocally = async (path:string,imageUri: string, id: string,prefix:string='') => {
     const fileExtension = imageUri.split('.').pop();
     const localImageUri = `${path}${prefix}${id}.${fileExtension}`;
-    console.log('Saving image locally:', localImageUri);
 
      try {
             await FileSystem.copyAsync({

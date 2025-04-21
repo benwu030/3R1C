@@ -81,13 +81,6 @@ const PickModel = () => {
     }
   };
 
-  const cleanupImages = () => {
-    ImageCropper.clean()
-      .then(() => {
-        console.log("removed tmp images from tmp directory");
-      })
-      .catch((e) => console.log(e));
-  };
   const navigateToGarmentPicker = () => {
     //check if everything is set
     if (!modelImage) {
@@ -174,7 +167,6 @@ const PickModel = () => {
 
   const navigateToImageEditor = () => {
     // Navigate to the image editor screen with the selected model image
-    console.log("Navigating to ImageEditorSkia with imageUri:", modelImage);
     router.push({
       pathname: "/(root)/Utils/ImageEditorSkia",
       params: {
@@ -239,7 +231,6 @@ const PickModel = () => {
                 {autoMask ? (
                   <MenuView
                     onPressAction={({ nativeEvent }) => {
-                      console.log("Selected category:", nativeEvent.event);
                       setOpenPose(nativeEvent.event as OpenPoseCategoryType);
                       // Handle the selected category here
                     }}

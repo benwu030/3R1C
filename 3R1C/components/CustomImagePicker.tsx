@@ -25,7 +25,6 @@ export default function CustomImagePicker({
   setImageFileUri: (image: string | null) => void;
   imageSizeClassName?: string;
 }) {
-
   const [image, setImage] = useState<string | null>(null);
   const [cameraPermissionStatus, requestPermission] = useCameraPermissions();
   const cropImage = async (imagePath: string) => {
@@ -92,24 +91,18 @@ export default function CustomImagePicker({
   const removeBackgroundBtn = async () => {
     //called the trained ai model to remove the background
     // await ImageUploader(image ?? "");
-    try{
+    try {
       const result = await RemoveBackgroundImageUploader(image ?? "");
       if (result?.image) {
-        console.log("Image URI:", result.image);
         setImage(result.image);
-        console.log("Image URI:", result.image);
         setImageFileUri(result.image);
-        if(result.category){
+        if (result.category) {
           router.setParams({ mainCategoryfilter: result.category });
         }
-      } else {
-        console.log("Failed to remove background");
       }
-    }catch(err){
-      console.log("Error in remove background",err);
+    } catch (err) {
+      console.error("Error in remove background", err);
     }
-   
-    console.log("remove background");
   };
   return !image ? (
     <View

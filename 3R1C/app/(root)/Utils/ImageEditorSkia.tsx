@@ -32,32 +32,28 @@ const ImageEditorSkia = () => {
   };
   useEffect(() => {
     if (imageUri) {
-      if(imageUri.startsWith("file://")){
-
-      Skia.Data.fromURI(imageUri).then((data) => {
-        const skImage = Skia.Image.MakeImageFromEncoded(data);
-        setImage(skImage);
-      });
-    }
-    else{
-      Skia.Data.fromURI("file://" + imageUri).then((data) => {
-        const skImage = Skia.Image.MakeImageFromEncoded(data);
-        setImage(skImage);
-      });
-    }
+      if (imageUri.startsWith("file://")) {
+        Skia.Data.fromURI(imageUri).then((data) => {
+          const skImage = Skia.Image.MakeImageFromEncoded(data);
+          setImage(skImage);
+        });
+      } else {
+        Skia.Data.fromURI("file://" + imageUri).then((data) => {
+          const skImage = Skia.Image.MakeImageFromEncoded(data);
+          setImage(skImage);
+        });
+      }
     }
   }, [imageUri]);
 
   const skiaCanvaRef = useRef<SkiaCanvaRef>(null); // Ref for SkiaCanva
 
   const handleSave = async () => {
-    console.log("Saving image...");
     if (skiaCanvaRef.current) {
       //reset the view
       // skiaCanvaRef.current.resetCanvaView();
       const snapshot = await skiaCanvaRef.current.capturePathsOnly();
       if (snapshot) {
-        console.log("Canvas Snapshot captured:", snapshot.getImageInfo());
         const base64Image = snapshot.encodeToBase64();
         const manipulatedImage = ImageManipulator.manipulate(
           `data:image/png;base64,${base64Image}`
@@ -71,12 +67,10 @@ const ImageEditorSkia = () => {
           format: SaveFormat.PNG,
         });
 
-        console.log("Manipulated Image URI:", Result);
         router.back();
         router.setParams({ modelMaskImageUri: Result.uri });
         // Process or save the snapshot as needed
       } else {
-        console.log("No snapshot available");
       }
     }
   };

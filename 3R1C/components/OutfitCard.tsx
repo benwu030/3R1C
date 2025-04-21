@@ -34,9 +34,7 @@ const OutfitCard = ({
       });
     }
   };
-  useEffect(() => {
-    console.log("OutfitCard", previewImageURL);
-  }, [previewImageURL]);
+
   return (
     <TouchableOpacity
       onPress={onPress}
