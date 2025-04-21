@@ -18,6 +18,7 @@ export const config = {
 }
 
 export const localConfig = {
+    //clothe
     localClotheJsonUri :`clotheData/clothe.json`,
     localClotheDirectory :`clotheData/`,
     localClotheImagesDirectiry :`clotheData/Images/`,

@@ -206,16 +206,37 @@ export async function getOutfitCollectionsByDate(date: Date): Promise<OutfitColl
     try {
 
         const localCollections = await readLocalData<OutfitCollection>(localConfig.localOutfitCollectionsJsonUri);
-        const collections = localCollections.filter(collection => {
+        if (localCollections.length > 0) {
+            const collections = localCollections.filter(collection => {
+                return collection.dayToWear?.some(day => {
+                const dayDate = new Date(day);
+                return dayDate.getFullYear() === date.getFullYear() &&
+                       dayDate.getMonth() === date.getMonth() &&
+                       dayDate.getDate() === date.getDate();
+                });
+            });
+            console.log("localCollections",collections)
+        return collections;
+        }
+        // Fetch from remote
+        const response = await databases.listDocuments(
+            config.databaseId!,
+            config.outfitCollection_CollectionId!,
+            []
+        );
+
+        const collections = mapDocumentsToOutfitCollection(response.documents);
+        await writeLocalData(localConfig.localOutfitCollectionsJsonUri, collections);
+
+        return collections.filter(collection => {
             return collection.dayToWear?.some(day => {
-            const dayDate = new Date(day);
-            return dayDate.getFullYear() === date.getFullYear() &&
-                   dayDate.getMonth() === date.getMonth() &&
-                   dayDate.getDate() === date.getDate();
+                const dayDate = new Date(day);
+                return dayDate.getFullYear() === date.getFullYear() &&
+                       dayDate.getMonth() === date.getMonth() &&
+                       dayDate.getDate() === date.getDate();
             });
         });
-        console.log("localCollections",collections)
-        return collections;
+        
     } catch (error) {
         console.error('Failed to get collections by date:', error);
         return [];
