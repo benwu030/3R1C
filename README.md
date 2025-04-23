@@ -46,3 +46,16 @@
 1. YOLO Training Notebook - https://github.com/benwu030/3R1C-Yolo
 2. IDM-VTON Hugging Face Model - https://huggingface.co/benwu030/3R1C
 3. YOLO11 Hugging Face Model - https://huggingface.co/benwu030/yolov11-seg
+
+### Acknowledgement
+3R1C used the below model for virtual try-on.
+
+Gratitude is extended to the IDM-VTON team for developing an exceptional virtual try-on
+model and generously open-sourcing its official implementation.
+
+@article{choi2024improving,
+  title={Improving Diffusion Models for Authentic Virtual Try-on in the Wild},
+  author={Choi, Yisol and Kwak, Sangkyung and Lee, Kyungmin and Choi, Hyungwon and Shin, Jinwoo},
+  journal={arXiv preprint arXiv:2403.05139},
+  year={2024}
+}
