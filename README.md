@@ -1,3 +1,15 @@
+## About 3R1C
+
+3R1C is a digital cloest app developed using expo and react native. 
+
+It uses Appwrite for database management and Inference Endpoints for hosting API for AI models.
+
+## Main features:
+
+1. Closet Management
+2. Expense Tracking
+3. Outfit Planning
+4. Virtual Try-On
 ## Get started
 
 1. Install dependencies
